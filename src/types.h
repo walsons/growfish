@@ -127,6 +127,7 @@ enum class Piece : char
 
 inline PieceType TypeOfPiece(Piece p)
 {
+    assert(p < Piece::PIECE_NUM);
     if (p == Piece::NO_PIECE)
         return PieceType::NO_PIECE_TYPE;
     return static_cast<PieceType>(p < Piece::B_START ? NUM(p) : (NUM(p) - NUM(Piece::B_START)));
@@ -136,12 +137,15 @@ enum class Color : char
 {
     RED,
     BLACK,
+    // NO_COLOR,
     COLOR_NUM
 };
 
 inline Color ColorOfPiece(Piece p)
 {
-    assert((p < Piece::PIECE_NUM));
+    assert((p < Piece::PIECE_NUM && p != Piece::NO_PIECE));
+    // if (p == Piece::NO_PIECE)
+    //     return Color::NO_COLOR;
     return static_cast<Color>(p < Piece::B_START ? Color::RED : Color::BLACK);
 }
 

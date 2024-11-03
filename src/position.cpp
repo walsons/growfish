@@ -32,6 +32,9 @@ void Position::SetPosition(const std::string& fen)
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
         board_[s] = PieceFromChar(boardStr[s]);
+        by_type_bb_[NUM(TypeOfPiece(board_[s]))] = SquareBB[s];
+        if (board_[s] != Piece::NO_PIECE)
+            by_color_bb_[NUM(ColorOfPiece(board_[s]))] = SquareBB[s];
     }
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
@@ -102,8 +105,9 @@ void Position::MakeMove(Move move, UndoInfo& undoInfo)
     key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
 
     undoInfo = { move, board_[to] };
-    board_[to] = board_[from];
-    board_[from] = Piece::NO_PIECE;
+    move_piece(from, to);
+    // board_[to] = board_[from];
+    // board_[from] = Piece::NO_PIECE;
 
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
     key_ ^= Zobrist::BlackToMoveZobrist();
@@ -114,8 +118,10 @@ void Position::UndoMove(const UndoInfo& undoInfo)
     auto from = MoveFrom(undoInfo.move);
     auto to = MoveTo(undoInfo.move);
 
-    board_[from] = board_[to];
-    board_[to] = undoInfo.piece;
+    // board_[from] = board_[to];
+    // board_[to] = undoInfo.piece;
+    move_piece(to, from);
+    put_piece(undoInfo.piece, to);
 
     key_ ^= Zobrist::PieceSquareZobrist(board_[from], from);
     key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
@@ -385,29 +391,23 @@ char Position::CharFromPiece(Piece piece) const
 
 void Position::put_piece(Piece p, Square s)
 {
-    board_[s] = p;
-    by_type_bb_[NUM(PieceType::NO_PIECE_TYPE)] ^= SquareBB[s];
+    by_type_bb_[NUM(TypeOfPiece(board_[s]))] ^= SquareBB[s];
     by_type_bb_[NUM(TypeOfPiece(p))] |= SquareBB[s];
-    by_color_bb_[NUM(ColorOfPiece(p))] |= SquareBB[s];
+    if (p != Piece::NO_PIECE)
+        by_color_bb_[NUM(ColorOfPiece(p))] |= SquareBB[s];
+    --piece_count_[NUM(board_[s])];
     ++piece_count_[NUM(p)];
-    --piece_count_[NUM(Piece::NO_PIECE)];
+    board_[s] = p;
 }
 
 void Position::remove_piece(Square s)
 {
-    Piece p = board_[s];
-    board_[s] = Piece::NO_PIECE;
-    by_type_bb_[NUM(PieceType::NO_PIECE_TYPE)] |= SquareBB[s];
-    by_type_bb_[NUM(TypeOfPiece(p))] ^= SquareBB[s];
-    by_color_bb_[NUM(ColorOfPiece(p))] ^= SquareBB[s];
-    ++piece_count_[NUM(Piece::NO_PIECE)];
-    --piece_count_[NUM(p)];
+    put_piece(Piece::NO_PIECE, s);
 }
 
 void Position::move_piece(Square from, Square to)
 {
     Piece p = board_[from];
-    // TODO: it can be optimized
     remove_piece(from);
     put_piece(p, to);
 }

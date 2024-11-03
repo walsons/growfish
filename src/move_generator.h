@@ -3,10 +3,11 @@
 
 #include <vector>
 
+#include "bitboard.h"
 #include "position.h"
 #include "function.h"
 
-enum MoveType
+enum class MoveType : char
 {
     CAPTURE,
     QUIET,
@@ -40,10 +41,15 @@ public:
 
     // target is the bitboard of piece destination
     template <Color c, PieceType pt, MoveType mt>
-    std::vector<Move> GenerateMoves(const Position& pos, Bitboard target)
+    std::vector<Move> GenerateMoves(Bitboard target)
     {
         static_assert(pt != PieceType::KING, "This method doesn't support king");
 
+        Bitboard bb = position_.Pieces(c, pt);
+        while (bb)
+        {
+            Square from = PopLSB(bb);
+        }
         // TODO
         return std::vector<Move>();
     }
