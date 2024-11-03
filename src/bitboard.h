@@ -40,6 +40,42 @@ constexpr Bitboard Rank9BB = Rank0BB << (FILE_NB * 9);
 
 extern Bitboard SquareBB[SQ_NUM];
 
-void Bitboard_init();
+// call this in main() to initialize SquareBB[]
+void BitboardInit();
+
+// Return the least significant bit in a non-zero bitboard
+inline Square LSB(Bitboard b) {
+    assert(b);
+
+#if defined(_MSC_VER)  // MSVC
+
+    unsigned long idx;
+    if (b._Word[0])
+    {
+        _BitScanForward64(&idx, b._Word[0]);
+        return Square(idx);
+    }
+    else
+    {
+        _BitScanForward64(&idx, b._Word[1]);
+        return Square(idx + 64);
+    }
+
+#else  // Assumed gcc or compatible compiler
+
+    if (static_cast<unsigned long long>(b))
+        return Square(__builtin_ctzll(b));
+    return Square(__builtin_ctzll(b >> 64) + 64);
+
+#endif
+}
+
+inline Square PopLSB(Bitboard& b)
+{
+    assert(b);
+    const Square s = LSB(b);
+    b &= b - 1;
+    return s;
+}
 
 #endif

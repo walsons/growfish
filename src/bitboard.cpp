@@ -2,7 +2,7 @@
 
 Bitboard SquareBB[SQ_NUM];
 
-void Bitboard_init()
+void BitboardInit()
 {
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
     {

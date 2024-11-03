@@ -64,6 +64,21 @@ public:
     U64 key() const { return key_; }
     Color side_to_move() const { return side_to_move_; }
 
+    template <typename... PieceTypes>
+    Bitboard Pieces(PieceType pt, PieceTypes... pts) const
+    {
+        return (by_type_bb_[NUM(pt)] | ... | by_type_bb_[NUM(pts)]);
+    }
+    Bitboard Pieces(Color c) const
+    {
+        return by_color_bb_[NUM(c)];
+    }
+    template <typename... PieceTypes>
+    Bitboard Pieces(Color c, PieceTypes... pts) const
+    {
+        return by_color_bb_[NUM(c)] & Pieces(pts...);
+    }
+
 private:
     bool IsChecked(Color c);
     Piece PieceFromChar(char c) const;
