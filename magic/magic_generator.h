@@ -10,6 +10,7 @@ class MagicGenerator
 {
 public:
     using uint_64 = unsigned long long;
+
     template <PieceType pt>
     void PrintMagicArray()
     {
@@ -18,7 +19,10 @@ public:
         {
             magicName = "RookMagic";
         }
-        // TODO: else if (pt == PieceType::CANNON )
+        else if (pt == PieceType::CANNON)
+        {
+            magicName = "CannonMagic";
+        }
         else
         {
             std::cout << "Unknown piece type" << std::endl;
@@ -54,8 +58,10 @@ private:
         }
         return mask;
     }
+
     template <PieceType pt>
     Bitboard attack(Square s, Bitboard occupies) const;
+
     template <PieceType pt>
     Bitboard find_magic(Square s)
     {
@@ -74,8 +80,6 @@ private:
         {
             Bitboard magic = random_bitboard_few_bits();
             std::memset(used, 0, sizeof(used[0]) * (1 << ones));
-            // for (int i = 0; i < (1 << ones); ++i)
-            //     used[i] = 0; 
             bool fail = false;
             for (int i = 0; !fail && i < (1 << ones); ++i)
             {
@@ -94,37 +98,12 @@ private:
         return 0;
     }
 
-    size_t count_1s(Bitboard b) const
-    {
-        size_t i = 0;
-        for (i = 0; b; ++i, b &= b - 1) {}
-        return i;
-    }
-    Bitboard index_to_bitboard(size_t index, size_t bits, Bitboard mask) const
-    {
-        Bitboard result = 0;
-        for (size_t i = 0; i < bits; ++i)
-        {
-            size_t j = PopLSB(mask);
-            if (index & (1 << i))
-                result |= Bitboard(1) << j;
-        }
-        return result;
-    }
-    Bitboard random_bitboard()
-    {
-        // e() range from 0x1 to 0x7ffffffe
-        return e() | (Bitboard(e()) << 31) | (Bitboard(e()) << 62) 
-                   | (Bitboard(e()) << 93) | (Bitboard(e()) << 124);
-    }
-    Bitboard random_bitboard_few_bits()
-    {
-        return random_bitboard() & random_bitboard() & random_bitboard();
-    }
-    Bitboard transform(Bitboard b, Bitboard magic, int bits)
-    {
-        return (b * magic) >> (128 - bits);
-    }
+    size_t count_1s(Bitboard b) const;
+    Bitboard index_to_bitboard(size_t index, size_t bits, Bitboard mask) const;
+    Bitboard random_bitboard();
+    Bitboard random_bitboard_few_bits();
+
+    Bitboard transform(Bitboard b, Bitboard magic, int bits) const { return (b * magic) >> (128 - bits); }
     uint_64 bitboard_high_64bit(Bitboard b) const { return (b >> 64); }
     uint_64 bitboard_low_64bit(Bitboard b) const { return b & (0ULL - 1); }
 
@@ -137,25 +116,89 @@ inline Bitboard MagicGenerator::attack<PieceType::ROOK>(Square s, Bitboard occup
 {
     Bitboard result = 0;
     int rk = RankOf(s), fl = FileOf(s);
-    for (int r = rk + 1; r <= RANK_NB - 1; r++) {
+    for (int r = rk + 1; r <= RANK_NB - 1; r++) 
+    {
         result |= Bitboard(1) << (r * FILE_NB + fl);
         if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
             break;
     }
-    for (int r = rk - 1; r >= RANK_0 + 1; r--) {
+    for (int r = rk - 1; r >= RANK_0 + 1; r--) 
+    {
         result |= Bitboard(1) << (r * FILE_NB + fl);
         if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
             break;
     }
-    for (int f = fl + 1; f <= FILE_NB - 1; f++) {
+    for (int f = fl + 1; f <= FILE_NB - 1; f++) 
+    {
         result |= Bitboard(1) << (rk * FILE_NB + f);
         if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
             break;
     }
-    for (int f = fl - 1; f >= FILE_A + 1; f--) {
+    for (int f = fl - 1; f >= FILE_A + 1; f--) 
+    {
         result |= Bitboard(1) << (rk * FILE_NB + f);
         if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
             break;
+    }
+    return result;
+}
+
+template <>
+inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occupies) const
+{
+    Bitboard result = 0;
+    int rk = RankOf(s), fl = FileOf(s);
+    bool bridge = false;
+    for (int r = rk + 1; r <= RANK_NB - 1; r++) 
+    {
+        if (bridge)
+            result |= Bitboard(1) << (r * FILE_NB + fl);
+        if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
+        {
+            if (!bridge)
+                bridge = true;
+            else
+                break;
+        }
+    }
+    bridge = false;
+    for (int r = rk - 1; r >= RANK_0 + 1; r--) 
+    {
+        if (bridge)
+            result |= Bitboard(1) << (r * FILE_NB + fl);
+        if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
+        {
+            if (!bridge)
+                bridge = true;
+            else
+                break;
+        }
+    }
+    bridge = false;
+    for (int f = fl + 1; f <= FILE_NB - 1; f++) 
+    {
+        if (bridge)
+            result |= Bitboard(1) << (rk * FILE_NB + f);
+        if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
+        {
+            if (!bridge)
+                bridge = true;
+            else
+                break;
+        }
+    }
+    bridge = false;
+    for (int f = fl - 1; f >= FILE_A + 1; f--) 
+    {
+        if (bridge)
+            result |= Bitboard(1) << (rk * FILE_NB + f);
+        if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
+        {
+            if (!bridge)
+                bridge = true;
+            else
+                break;
+        }
     }
     return result;
 }
