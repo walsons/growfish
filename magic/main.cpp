@@ -1,9 +1,21 @@
 #include "magic_generator.h"
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 1)
+    {
+        std::cout << "Unkonw piece type to generate" << std::endl;
+        return 0;
+    }
     MagicGenerator mg;
-    mg.PrintMagicArray<PieceType::ROOK>();
+    std::string piece = argv[1];
+    if (piece == "r" || piece == "R")
+        mg.PrintMagicArray<PieceType::ROOK>();
+    else if (piece == "c" || piece == "C")
+        mg.PrintMagicArray<PieceType::CANNON>();
+    else
+        std::cout << "Unkonw piece type to generate" << std::endl;
+    return 0;
 }
 
 // Generated magic
