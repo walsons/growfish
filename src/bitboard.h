@@ -78,4 +78,11 @@ inline Square PopLSB(Bitboard& b)
     return s;
 }
 
+inline File FileOf(Square s) {
+    return static_cast<File>(s % FILE_NB);
+}
+inline Rank RankOf(Square s) {
+    return static_cast<Rank>(s / FILE_NB);
+}
+
 #endif

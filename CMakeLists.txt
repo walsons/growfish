@@ -12,3 +12,4 @@ list(REMOVE_ITEM src_files ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+add_subdirectory(${CMAKE_SOURCE_DIR}/magic)
