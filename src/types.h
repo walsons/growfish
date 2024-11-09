@@ -7,6 +7,7 @@ using __uint128_t = std::_Unsigned128;
 #endif
 
 #include <cassert>
+#include <algorithm>
 
 using Bitboard = __uint128_t;
 
@@ -54,6 +55,17 @@ enum Square : char
     SQ_NUM
 };
 
+inline Square NorthEnd(Square s) { return SQ_NUM; }
+inline Square SouthEnd(Square s) { return static_cast<Square>(SQ_A0 - 1); }
+inline Square EastEnd(Square s) { return static_cast<Square>(static_cast<char>(s) / 9 * 9 + 9); }
+inline Square WestEnd(Square s) { return static_cast<Square>(static_cast<char>(s) / 9 * 9 - 1); }
+
+inline bool IsNotNorthEnd(Square current, Square start) { return current < NorthEnd(start); }
+inline bool IsNotSouthEnd(Square current, Square start) { return current > SouthEnd(start); }
+inline bool IsNotEastEnd(Square current, Square start) { return current < EastEnd(start); }
+inline bool IsNotWestEnd(Square current, Square start) { return current > WestEnd(start); }
+
+
 enum Direction : char
 {
     SQ_NORTH = 9,
@@ -61,6 +73,11 @@ enum Direction : char
     SQ_EAST = 1,
     SQ_WEST = -SQ_EAST
 };
+
+inline constexpr Direction operator*(int x, Direction d)
+{
+    return static_cast<Direction>(x * static_cast<char>(d));
+}
 
 inline Square operator+(Square sq, Direction d)
 {
@@ -141,6 +158,11 @@ enum class Color : char
     COLOR_NUM
 };
 
+inline constexpr Color operator!(Color c)
+{
+    return c == Color::RED ? Color::BLACK : Color::RED;
+}
+
 inline Color ColorOfPiece(Piece p)
 {
     assert((p < Piece::PIECE_NUM && p != Piece::NO_PIECE));
@@ -150,5 +172,14 @@ inline Color ColorOfPiece(Piece p)
 }
 
 using U64 = unsigned long long;
+
+// Used to detemine relative position for Knight and Bishop
+inline char Distance(Square s1, Square s2) 
+{
+    int v = std::abs(s1 / 9 - s2 / 9);
+    int h = std::abs(s1 % 9 - s2 % 9);
+    return std::max(v, h);
+}
+
 
 #endif

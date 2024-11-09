@@ -5,32 +5,9 @@
 
 constexpr unsigned char PieceIndex(const Piece& piece) { return static_cast<unsigned char>(piece); }
 
-inline Square NorthEnd(Square s) { return SQ_NUM; }
-inline Square SouthEnd(Square s) { return static_cast<Square>(SQ_A0 - 1); }
-inline Square EastEnd(Square s) { return static_cast<Square>(static_cast<char>(s) / 9 * 9 + 9); }
-inline Square WestEnd(Square s) { return static_cast<Square>(static_cast<char>(s) / 9 * 9 - 1); }
-
-inline bool IsNotNorthEnd(Square current, Square start) { return current < NorthEnd(start); }
-inline bool IsNotSouthEnd(Square current, Square start) { return current > SouthEnd(start); }
-inline bool IsNotEastEnd(Square current, Square start) { return current < EastEnd(start); }
-inline bool IsNotWestEnd(Square current, Square start) { return current > WestEnd(start); }
-
-// Used to detemine relative position for Knight and Bishop
-inline char Distance(Square s1, Square s2) 
-{
-    int v = std::abs(s1 / 9 - s2 / 9);
-    int h = std::abs(s1 % 9 - s2 % 9);
-    return std::max(v, h);
-}
-
 inline Move ConstructMove(Square from, Square to)
 {
     return ((0x00FF & from) << 8) | to;
-}
-
-inline Direction operator*(int x, Direction d)
-{
-    return static_cast<Direction>(x * static_cast<char>(d));
 }
 
 inline Square MoveFrom(Move move)
@@ -41,11 +18,6 @@ inline Square MoveFrom(Move move)
 inline Square MoveTo(Move move)
 {
     return static_cast<Square>(move & 0x00FF);
-}
-
-inline constexpr Color operator!(Color c)
-{
-    return c == Color::RED ? Color::BLACK : Color::RED;
 }
 
 inline bool IsEmpty(Piece piece) { return piece == Piece::NO_PIECE; }
