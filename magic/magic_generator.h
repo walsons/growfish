@@ -16,13 +16,11 @@ public:
     {
         std::string magicName;
         if constexpr (pt == PieceType::ROOK)
-        {
             magicName = "RookMagic";
-        }
         else if (pt == PieceType::CANNON)
-        {
             magicName = "CannonMagic";
-        }
+        else if (pt == PieceType::KNIGHT)
+            magicName = "KnightMagic";
         else
         {
             std::cout << "Unknown piece type" << std::endl;
@@ -42,6 +40,9 @@ private:
     template <PieceType pt>
     Bitboard get_mask(Square s) const
     {
+        // Only works for rook and cannon, other piece need a specialization
+        static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON, "Unsupported piece type");
+
         Bitboard mask = 0;
         int rk = RankOf(s), fl = FileOf(s);
         for (int r = rk + 1; r < RANK_NB - 1; r++) {
@@ -112,29 +113,63 @@ private:
 };
 
 template <>
+inline Bitboard MagicGenerator::get_mask<PieceType::KNIGHT>(Square s) const
+{
+    Bitboard mask = 0;
+    int rk = RankOf(s), fl = FileOf(s);
+    Bitboard sBB = Bitboard(1) << s;
+    Bitboard border = FileABB | FileIBB | RANK_0 | RANK_9;
+    if (sBB & border)
+    {
+        int north = rk + 1, south = rk - 1, east = fl + 1, west = fl - 1;
+        if (north < RANK_NB)
+            mask |= Bitboard(1) << (north * FILE_NB + fl);
+        if (south >= RANK_0)
+            mask |= Bitboard(1) << (south * FILE_NB + fl);
+        if (east < FILE_NB)
+            mask |= Bitboard(1) << (rk * FILE_NB + east);
+        if (west >= FILE_A)
+            mask |= Bitboard(1) << (rk * FILE_NB + west);
+    }
+    else
+    {
+        int north = rk + 1, south = rk - 1, east = fl + 1, west = fl - 1;
+        if (north < RANK_NB - 1)
+            mask |= Bitboard(1) << (north * FILE_NB + fl);
+        if (south > RANK_0)
+            mask |= Bitboard(1) << (south * FILE_NB + fl);
+        if (east < FILE_NB - 1)
+            mask |= Bitboard(1) << (rk * FILE_NB + east);
+        if (west > FILE_A)
+            mask |= Bitboard(1) << (rk * FILE_NB + west);
+    }
+    return mask;
+}
+
+template <>
 inline Bitboard MagicGenerator::attack<PieceType::ROOK>(Square s, Bitboard occupies) const
 {
     Bitboard result = 0;
     int rk = RankOf(s), fl = FileOf(s);
-    for (int r = rk + 1; r <= RANK_NB - 1; r++) 
+    for (int r = rk + 1; r < RANK_NB; r++) 
     {
         result |= Bitboard(1) << (r * FILE_NB + fl);
         if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
             break;
     }
-    for (int r = rk - 1; r >= RANK_0 + 1; r--) 
+    for (int r = rk - 1; r >= RANK_0; r--) 
     {
         result |= Bitboard(1) << (r * FILE_NB + fl);
         if (occupies & (Bitboard(1) << (r * FILE_NB + fl)))
             break;
     }
-    for (int f = fl + 1; f <= FILE_NB - 1; f++) 
+    for (int f = fl + 1; f < FILE_NB; f++) 
     {
         result |= Bitboard(1) << (rk * FILE_NB + f);
         if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
             break;
     }
-    for (int f = fl - 1; f >= FILE_A + 1; f--) 
+    for (int f = fl - 1; f >= FILE_A; f--) 
     {
         result |= Bitboard(1) << (rk * FILE_NB + f);
         if (occupies & (Bitboard(1) << (rk * FILE_NB + f)))
@@ -149,7 +184,7 @@ inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occ
     Bitboard result = 0;
     int rk = RankOf(s), fl = FileOf(s);
     bool bridge = false;
-    for (int r = rk + 1; r <= RANK_NB - 1; r++) 
+    for (int r = rk + 1; r < RANK_NB; r++) 
     {
         if (bridge)
             result |= Bitboard(1) << (r * FILE_NB + fl);
@@ -162,7 +197,7 @@ inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occ
         }
     }
     bridge = false;
-    for (int r = rk - 1; r >= RANK_0 + 1; r--) 
+    for (int r = rk - 1; r >= RANK_0; r--) 
     {
         if (bridge)
             result |= Bitboard(1) << (r * FILE_NB + fl);
@@ -175,7 +210,7 @@ inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occ
         }
     }
     bridge = false;
-    for (int f = fl + 1; f <= FILE_NB - 1; f++) 
+    for (int f = fl + 1; f < FILE_NB; f++) 
     {
         if (bridge)
             result |= Bitboard(1) << (rk * FILE_NB + f);
@@ -188,7 +223,7 @@ inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occ
         }
     }
     bridge = false;
-    for (int f = fl - 1; f >= FILE_A + 1; f--) 
+    for (int f = fl - 1; f >= FILE_A; f--) 
     {
         if (bridge)
             result |= Bitboard(1) << (rk * FILE_NB + f);
@@ -198,6 +233,26 @@ inline Bitboard MagicGenerator::attack<PieceType::CANNON>(Square s, Bitboard occ
                 bridge = true;
             else
                 break;
+        }
+    }
+    return result;
+}
+
+template <>
+inline Bitboard MagicGenerator::attack<PieceType::KNIGHT>(Square s, Bitboard occupies) const
+{
+    Bitboard result = 0;
+    constexpr int forwards[8] = {2 * SQ_NORTH + SQ_WEST, 2 * SQ_NORTH + SQ_EAST, 
+                                 SQ_NORTH + 2 * SQ_EAST, SQ_SOUTH + 2 * SQ_EAST, 
+                                 2 * SQ_SOUTH + SQ_EAST, 2 * SQ_SOUTH + SQ_WEST, 
+                                 SQ_SOUTH + 2 * SQ_WEST, SQ_NORTH + 2 * SQ_WEST}; 
+    constexpr int blocks[4] = {SQ_NORTH, SQ_EAST, SQ_SOUTH, SQ_WEST};
+    for (int i = 0; i < 8; ++i)
+    {
+        if (Distance(s, static_cast<Square>(s + forwards[i])) <= 2 && (s + forwards[i]) >= SQ_A0 && (s + forwards[i]) < SQ_NUM)
+        {
+            if (!(occupies & (Bitboard(1) << (s + blocks[i / 2]))))
+                result |= (Bitboard(1) << (s + forwards[i]));
         }
     }
     return result;
