@@ -392,19 +392,35 @@ inline const Bitboard* MagicNumber<PieceType::BISHOP> = BishopMagicNumber;
 
 struct Magic
 {
-    Bitboard mask;
-    unsigned shift;
-    Bitboard magic_number;
-    // Can optimize size by moving it to heap memory
-    Bitboard attacks[1 << 15];
+    Magic() = default;
+    ~Magic() 
+    {
+        if (attacks)
+        {
+            delete[] attacks;
+            attacks = nullptr;
+        }
+    }
+    Bitboard mask = 0;
+    unsigned shift = 0;
+    Bitboard magic_number = 0;
+    Bitboard* attacks = nullptr;
 };
 
-extern Magic RookMagic[SQ_NUM];
-
-// #include <cstring>
-// #include <random>
-// #include <iostream>
-// #include "../src/bitboard.h"
+// extern Magic RookMagic[SQ_NUM];
+// extern Magic CannonMagic[SQ_NUM];
+// extern Magic KnightMagic[SQ_NUM];
+// extern Magic BishopMagic[SQ_NUM];
+template <PieceType pt>
+Magic PieceMagic[SQ_NUM];
+template <>
+inline Magic PieceMagic<PieceType::ROOK>[SQ_NUM];
+template <>
+inline Magic PieceMagic<PieceType::CANNON>[SQ_NUM];
+template <>
+inline Magic PieceMagic<PieceType::KNIGHT>[SQ_NUM];
+template <>
+inline Magic PieceMagic<PieceType::BISHOP>[SQ_NUM];
 
 class MagicInitializer
 {
@@ -462,10 +478,11 @@ private:
             indexs[i] = index_to_bitboard(i, ones, mask);
             attacks[i] = attack<pt>(s, indexs[i]);
         }
-        auto &m = RookMagic[s];
+        auto &m = PieceMagic<pt>[s];
         m.mask = mask;
         m.shift = 128 - ones;
         m.magic_number = MagicNumber<pt>[s];
+        m.attacks = new Bitboard[1 << ones];
         for (int i = 0; i < (1 << ones); ++i)
         {
             int j = transform(indexs[i], m.magic_number, m.shift);
