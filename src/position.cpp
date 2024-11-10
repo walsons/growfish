@@ -7,6 +7,10 @@
 
 void Position::SetPosition(const std::string& fen)
 {
+    std::memset(by_type_bb_, 0, sizeof(Bitboard) * NUM(PieceType::PIECE_TYPE_NUM));
+    std::memset(by_color_bb_, 0, sizeof(Bitboard) * NUM(Color::COLOR_NUM));
+    std::memset(piece_count_, 0, sizeof(int) * NUM(Piece::PIECE_NUM));
+
     std::istringstream ss(fen);
 
     std::string fenPos;
@@ -32,9 +36,9 @@ void Position::SetPosition(const std::string& fen)
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
         board_[s] = PieceFromChar(boardStr[s]);
-        by_type_bb_[NUM(TypeOfPiece(board_[s]))] = SquareBB(s);
+        by_type_bb_[NUM(TypeOfPiece(board_[s]))] |= SquareBB(s);
         if (board_[s] != Piece::NO_PIECE)
-            by_color_bb_[NUM(ColorOfPiece(board_[s]))] = SquareBB(s);
+            by_color_bb_[NUM(ColorOfPiece(board_[s]))] |= SquareBB(s);
     }
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {

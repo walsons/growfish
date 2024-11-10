@@ -6,6 +6,7 @@
 #include "bitboard.h"
 #include "position.h"
 #include "function.h"
+#include "magic.h"
 
 enum class MoveType : char
 {
@@ -21,6 +22,7 @@ class MoveGenerator
 {
 public:
     friend class MovePicker;
+    friend class MagicValidator;  // a class in test/magic_validator.h for test
     MoveGenerator(const Position& position) : position_(position)
     {
         // rook:17 cannon:17 knight:8 bishop:4 advisor:4 king:4 pawn:3
@@ -57,6 +59,21 @@ public:
 private:
     template <Color c>
     void RookMove(Square s)
+    {
+        Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+        Bitboard attack = Attack<PieceType::ROOK>(occupies, s);
+        attack = attack ^ (attack & position_.Pieces(c));
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            if (!IsEmpty(position_.piece_from_square(to)))
+                pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+            else
+                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldRookMove(Square s)
     {
         for (Square pos = s + SQ_NORTH; pos < NorthEnd(s); pos += SQ_NORTH)
         {
