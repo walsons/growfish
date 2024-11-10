@@ -21,6 +21,8 @@ public:
             magicName = "CannonMagic";
         else if (pt == PieceType::KNIGHT)
             magicName = "KnightMagic";
+        else if (pt == PieceType::BISHOP)
+            magicName = "BishopMagic";
         else
         {
             std::cout << "Unknown piece type" << std::endl;
@@ -147,6 +149,24 @@ inline Bitboard MagicGenerator::get_mask<PieceType::KNIGHT>(Square s) const
 }
 
 template <>
+inline Bitboard MagicGenerator::get_mask<PieceType::BISHOP>(Square s) const
+{
+    Bitboard mask = 0;
+    constexpr int blocks[4] = {SQ_NORTH + SQ_EAST, SQ_EAST + SQ_SOUTH, SQ_SOUTH + SQ_WEST, SQ_WEST + SQ_NORTH};
+    for (auto block : blocks)
+    {
+        if (Distance(s, static_cast<Square>(s + block)) <= 1 && (s + block) >= SQ_A0 && (s + block) < SQ_NUM)
+        {
+            if (s < SQ_A5 && (s + block) < SQ_A5)
+                mask |= (Bitboard(1) << (s + block));
+            else if (s >= SQ_A5 && (s + block) >= SQ_A5)
+                mask |= (Bitboard(1) << (s + block));
+        }
+    }
+    return mask;
+}
+
+template <>
 inline Bitboard MagicGenerator::attack<PieceType::ROOK>(Square s, Bitboard occupies) const
 {
     Bitboard result = 0;
@@ -253,6 +273,34 @@ inline Bitboard MagicGenerator::attack<PieceType::KNIGHT>(Square s, Bitboard occ
         {
             if (!(occupies & (Bitboard(1) << (s + blocks[i / 2]))))
                 result |= (Bitboard(1) << (s + forwards[i]));
+        }
+    }
+    return result;
+}
+
+template <>
+inline Bitboard MagicGenerator::attack<PieceType::BISHOP>(Square s, Bitboard occupies) const
+{
+    Bitboard result = 0;
+    constexpr int forwards[4] = {2 * SQ_NORTH + 2 * SQ_EAST,
+                                 2 * SQ_EAST + 2 * SQ_SOUTH,
+                                 2 * SQ_SOUTH + 2 * SQ_WEST,
+                                 2 * SQ_WEST + 2 * SQ_NORTH};
+    constexpr int blocks[4] = {SQ_NORTH + SQ_EAST, SQ_EAST + SQ_SOUTH, SQ_SOUTH + SQ_WEST, SQ_WEST + SQ_NORTH};
+    for (int i = 0; i < 4; ++i)
+    {
+        if (Distance(s, static_cast<Square>(s + forwards[i])) <= 2 && (s + forwards[i]) >= SQ_A0 && (s + forwards[i]) < SQ_NUM)
+        {
+            if (s < SQ_A5 && (s + forwards[i]) < SQ_A5)
+            {
+                if (!(occupies & (Bitboard(1) << (s + blocks[i]))))
+                    result |= (Bitboard(1) << (s + forwards[i]));
+            }
+            else if (s >= SQ_A5 && (s + forwards[i]) >= SQ_A5)
+            {
+                if (!(occupies & (Bitboard(1) << (s + blocks[i]))))
+                    result |= (Bitboard(1) << (s + forwards[i]));
+            }
         }
     }
     return result;
