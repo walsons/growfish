@@ -686,4 +686,13 @@ inline Bitboard MagicInitializer::attack<PieceType::BISHOP>(Square s, Bitboard o
     }
     return result;
 }
+
+template <PieceType pt>
+Bitboard Attack(Bitboard occupies, Square s) 
+{
+    const Magic &magic = PieceMagic<pt>[s];
+    occupies &= magic.mask;
+    auto index = (occupies * magic.magic_number) >> magic.shift;
+    return magic.attacks[index];
+}
 #endif

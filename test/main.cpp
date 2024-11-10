@@ -9,6 +9,7 @@
 #include "../src/move_generator.h"
 #include "../src/evaluate.h"
 #include "../src/magic.h"
+#include "magic_validator.h"
 
 constexpr int kSearchDepth = 4;
 
@@ -311,6 +312,11 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
 int main(int argc, char* argv[])
 {
     MagicInitializer::InitMagic();
+
+    MagicValidator magicValidator;
+    std::vector<std::string> files{"robot_battle.txt"};
+    magicValidator.Validate(files);
+    return 0;
 
     if (argc == 1)
     {

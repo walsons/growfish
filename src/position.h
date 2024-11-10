@@ -76,7 +76,7 @@ public:
     template <typename... PieceTypes>
     Bitboard Pieces(Color c, PieceTypes... pts) const
     {
-        return by_color_bb_[NUM(c)] & Pieces(pts...);
+        return Pieces(c) & Pieces(pts...);
     }
 
 private:
