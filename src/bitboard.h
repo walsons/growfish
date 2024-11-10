@@ -38,17 +38,13 @@ constexpr Bitboard Rank7BB = Rank0BB << (FILE_NB * 7);
 constexpr Bitboard Rank8BB = Rank0BB << (FILE_NB * 8);
 constexpr Bitboard Rank9BB = Rank0BB << (FILE_NB * 9);
 
-extern Bitboard SquareBB[SQ_NUM];
-
-// call this in main() to initialize SquareBB[]
-void BitboardInit();
+inline Bitboard FileBB(File f) { return FileABB << f; }
+inline Bitboard RankBB(Rank r) { return Rank0BB << (FILE_NB * r); }
 
 // Return the least significant bit in a non-zero bitboard
 inline Square LSB(Bitboard b) {
     assert(b);
-
 #if defined(_MSC_VER)  // MSVC
-
     unsigned long idx;
     if (b._Word[0])
     {
@@ -60,13 +56,10 @@ inline Square LSB(Bitboard b) {
         _BitScanForward64(&idx, b._Word[1]);
         return Square(idx + 64);
     }
-
 #else  // Assumed gcc or compatible compiler
-
     if (static_cast<unsigned long long>(b))
         return Square(__builtin_ctzll(b));
     return Square(__builtin_ctzll(b >> 64) + 64);
-
 #endif
 }
 
@@ -77,12 +70,10 @@ inline Square PopLSB(Bitboard& b)
     b &= b - 1;
     return s;
 }
+ 
+inline Bitboard SquareBB(Square s) { return Bitboard(1ULL) << s; }
 
-inline File FileOf(Square s) {
-    return static_cast<File>(s % FILE_NB);
-}
-inline Rank RankOf(Square s) {
-    return static_cast<Rank>(s / FILE_NB);
-}
+// Show bitboard in piece board format for test
+void ShowBitboard(Bitboard b);
 
 #endif

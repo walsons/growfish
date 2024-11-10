@@ -32,9 +32,9 @@ void Position::SetPosition(const std::string& fen)
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
         board_[s] = PieceFromChar(boardStr[s]);
-        by_type_bb_[NUM(TypeOfPiece(board_[s]))] = SquareBB[s];
+        by_type_bb_[NUM(TypeOfPiece(board_[s]))] = SquareBB(s);
         if (board_[s] != Piece::NO_PIECE)
-            by_color_bb_[NUM(ColorOfPiece(board_[s]))] = SquareBB[s];
+            by_color_bb_[NUM(ColorOfPiece(board_[s]))] = SquareBB(s);
     }
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
@@ -391,10 +391,10 @@ char Position::CharFromPiece(Piece piece) const
 
 void Position::put_piece(Piece p, Square s)
 {
-    by_type_bb_[NUM(TypeOfPiece(board_[s]))] ^= SquareBB[s];
-    by_type_bb_[NUM(TypeOfPiece(p))] |= SquareBB[s];
+    by_type_bb_[NUM(TypeOfPiece(board_[s]))] ^= SquareBB(s);
+    by_type_bb_[NUM(TypeOfPiece(p))] |= SquareBB(s);
     if (p != Piece::NO_PIECE)
-        by_color_bb_[NUM(ColorOfPiece(p))] |= SquareBB[s];
+        by_color_bb_[NUM(ColorOfPiece(p))] |= SquareBB(s);
     --piece_count_[NUM(board_[s])];
     ++piece_count_[NUM(p)];
     board_[s] = p;

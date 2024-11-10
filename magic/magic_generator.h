@@ -16,13 +16,13 @@ public:
     {
         std::string magicName;
         if constexpr (pt == PieceType::ROOK)
-            magicName = "RookMagic";
+            magicName = "RookMagicNumber";
         else if (pt == PieceType::CANNON)
-            magicName = "CannonMagic";
+            magicName = "CannonMagicNumber";
         else if (pt == PieceType::KNIGHT)
-            magicName = "KnightMagic";
+            magicName = "KnightMagicNumber";
         else if (pt == PieceType::BISHOP)
-            magicName = "BishopMagic";
+            magicName = "BishopMagicNumber";
         else
         {
             std::cout << "Unknown piece type" << std::endl;
@@ -72,7 +72,7 @@ private:
         size_t ones = count_1s(mask);
         Bitboard* indexs = new Bitboard[(1 << ones)];
         Bitboard* attacks = new Bitboard[(1 << ones)];
-        for (size_t i = 0; i < (1Ull << ones); ++i)
+        for (size_t i = 0; i < (1ULL << ones); ++i)
         {
             indexs[i] = index_to_bitboard(i, ones, mask);
             attacks[i] = attack<pt>(s, indexs[i]);
