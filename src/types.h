@@ -65,6 +65,13 @@ inline bool IsNotSouthEnd(Square current, Square start) { return current > South
 inline bool IsNotEastEnd(Square current, Square start) { return current < EastEnd(start); }
 inline bool IsNotWestEnd(Square current, Square start) { return current > WestEnd(start); }
 
+inline File FileOf(Square s) {
+    return static_cast<File>(s % FILE_NB);
+}
+inline Rank RankOf(Square s) {
+    return static_cast<Rank>(s / FILE_NB);
+}
+
 
 enum Direction : char
 {
