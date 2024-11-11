@@ -11,6 +11,7 @@ void ShowBitboard(Bitboard b)
         }
         std::cout << std::endl;
     }
+    std::cout << "------------" << std::endl;
 }
 
 // unsigned countTwoByteOnes[1 << 16];
