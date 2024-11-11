@@ -27,7 +27,7 @@ bool IsColor(Piece piece);
 template <>
 inline bool IsColor<Color::RED>(Piece piece) { return piece >= Piece::W_START && piece <= Piece::W_END; }
 template <>
-inline bool IsColor<Color::BLACK>(Piece piece) { return piece >= Piece::W_START && piece <= Piece::B_END; }
+inline bool IsColor<Color::BLACK>(Piece piece) { return piece >= Piece::B_START && piece <= Piece::B_END; }
 
 template <Color c>
 bool IsInPalace(Square s);

@@ -313,9 +313,8 @@ int main(int argc, char* argv[])
 {
     MagicInitializer::InitMagic();
 
-    MagicValidator magicValidator;
     std::vector<std::string> files{"robot_battle.txt"};
-    magicValidator.Validate(files);
+    MagicValidator::Validate(files);
     return 0;
 
     if (argc == 1)

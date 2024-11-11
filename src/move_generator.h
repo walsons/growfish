@@ -61,8 +61,11 @@ private:
     void RookMove(Square s)
     {
         Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+        // ShowBitboard(occupies);
         Bitboard attack = Attack<PieceType::ROOK>(occupies, s);
+        // ShowBitboard(attack);
         attack = attack ^ (attack & position_.Pieces(c));
+        // ShowBitboard(attack);
         while (attack)
         {
             Square to = PopLSB(attack);

@@ -397,6 +397,8 @@ void Position::put_piece(Piece p, Square s)
 {
     by_type_bb_[NUM(TypeOfPiece(board_[s]))] ^= SquareBB(s);
     by_type_bb_[NUM(TypeOfPiece(p))] |= SquareBB(s);
+    if (board_[s] != Piece::NO_PIECE)
+        by_color_bb_[NUM(ColorOfPiece(board_[s]))] ^= SquareBB(s);
     if (p != Piece::NO_PIECE)
         by_color_bb_[NUM(ColorOfPiece(p))] |= SquareBB(s);
     --piece_count_[NUM(board_[s])];
