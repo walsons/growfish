@@ -61,18 +61,19 @@ private:
     void RookMove(Square s)
     {
         Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
-        // ShowBitboard(occupies);
         Bitboard attack = Attack<PieceType::ROOK>(occupies, s);
-        // ShowBitboard(attack);
-        attack = attack ^ (attack & position_.Pieces(c));
-        // ShowBitboard(attack);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
         while (attack)
         {
             Square to = PopLSB(attack);
-            if (!IsEmpty(position_.piece_from_square(to)))
-                pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
-            else
-                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
         }
     }
     template <Color c>
@@ -131,6 +132,25 @@ private:
     template <Color c>
     void CannonMove(Square s)
     {
+        Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+        Bitboard attack = Attack<PieceType::CANNON>(occupies, s);
+        Bitboard attain = Attack<PieceType::ROOK>(occupies, s);
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldCannonMove(Square s)
+    {
         auto f = [&](Direction d, decltype(IsNotNorthEnd) f) {
             bool flag = false;
             for (Square pos = s + d; f(pos, s); pos += d)
@@ -170,6 +190,25 @@ private:
 
     template <Color c>
     void KnightMove(Square s)
+    {
+        Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+        Bitboard attack = Attack<PieceType::KNIGHT>(occupies, s);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldKnightMove(Square s)
     {
         auto f = [&](Square barrier, Square destination1, Square destination2) {
             if (SQ_A0 <= barrier && barrier < SQ_NUM && Distance(s, barrier) == 1 && position_.piece_from_square(barrier) == Piece::NO_PIECE)
@@ -211,6 +250,25 @@ private:
     template <Color c>
     void BishopMove(Square s)
     {
+        Bitboard occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+        Bitboard attack = Attack<PieceType::BISHOP>(occupies, s);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldBishopMove(Square s)
+    {
         auto f = [&](Square barrier, Square destination) {
             static constexpr Square SQ_BEG = (c == Color::RED ? SQ_A0 : SQ_A5);
             static constexpr Square SQ_END = (c == Color::RED ? SQ_A5 : SQ_NUM);
@@ -245,6 +303,24 @@ private:
 
     template <Color c>
     void AdvisorMove(Square s)
+    {
+        Bitboard attack = Attack<PieceType::ADVISOR>(s);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldAdvisorMove(Square s)
     {
         auto f = [&](Square destination) {
             if (IsEmpty(position_.piece_from_square(destination)))
@@ -296,6 +372,36 @@ private:
 
     template <Color c>
     void KingMove(Square s)
+    {
+        Bitboard attack = Attack<PieceType::KING>(s);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        // Special case: face enemy King
+        auto usKingBB = position_.Pieces(c, PieceType::KING);
+        auto enemyKingBB = position_.Pieces(!c, PieceType::KING);
+        File usKingFile = FileOf(PopLSB(usKingBB));
+        File enemyKingFile = FileOf(PopLSB(enemyKingBB));
+        usKingBB = position_.Pieces(c, PieceType::KING);
+        enemyKingBB = position_.Pieces(!c, PieceType::KING);
+        if (usKingFile == enemyKingFile && ((usKingBB | enemyKingBB) == (FileBB(usKingFile) & ~position_.Pieces(PieceType::NO_PIECE_TYPE))))
+        {
+            Square to = PopLSB(enemyKingBB);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldKingMove(Square s)
     {
         auto f = [&](Square destination) {
             if (IsInPalace<c>(destination))

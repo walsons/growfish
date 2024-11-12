@@ -687,12 +687,116 @@ inline Bitboard MagicInitializer::attack<PieceType::BISHOP>(Square s, Bitboard o
     return result;
 }
 
+
+class AttackInitializer
+{
+public:
+    static void InitAttack()
+    {
+        // Attack for rook, cannon, knight, bishop
+        MagicInitializer::InitMagic();
+
+        // Attack for pawn, advisor, king
+        AttackInitializer ai;
+        for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
+        {
+            ai.init_pawn_attack<Color::RED>(s);
+            ai.init_pawn_attack<Color::BLACK>(s);
+            ai.init_advisor_attack(s);
+            ai.init_king_attack(s);
+        }
+    }
+
+private:
+    template <Color c>
+    void init_pawn_attack(Square s) const
+    {
+        static constexpr Square SQ_BEG = (c == Color::RED ? SQ_A5 : SQ_A0);
+        static constexpr Square SQ_END = (c == Color::RED ? SQ_NUM : SQ_A5);
+        Square to[3] = { s + SQ_WEST, s + (c  == Color::RED ? SQ_NORTH : SQ_SOUTH), s + SQ_EAST };
+        Bitboard b = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            if (i == 1)  // forward
+            {
+                if (to[i] >= SQ_A0 && to[i] < SQ_NUM)
+                    b |= SquareBB(to[i]);
+            }
+            else  // west and east
+            {
+                if (Distance(s, to[i]) <= 1 && (to[i] >= SQ_BEG && to[i] < SQ_END))
+                    b |= SquareBB(to[i]);
+            }
+        }
+        PawnAttackBB<c>[s] = b;
+    }
+
+    void init_advisor_attack(Square s) const
+    {
+        Square to[4] = { s + SQ_NORTH + SQ_EAST, s + SQ_EAST + SQ_SOUTH, s + SQ_SOUTH + SQ_WEST, s + SQ_WEST + SQ_NORTH };
+        Bitboard b = 0;
+        for (auto t : to)
+        {
+            if (t >= SQ_A0 && t < SQ_NUM && (SquareBB(t) & Palace))
+            {
+                b |= SquareBB(t);
+            }
+        }
+        AdvisorAttackBB[s] = b;
+    }
+
+    void init_king_attack(Square s) const
+    {
+        Square to[4] = { s + SQ_NORTH, s + SQ_EAST, s + SQ_SOUTH, s + SQ_WEST };
+        Bitboard b = 0;
+        for (auto t : to)
+        {
+            if (t >= SQ_A0 && t < SQ_NUM && (SquareBB(t) & Palace))
+            {
+                b |= SquareBB(t);
+            }
+        }
+        KingAttackBB[s] = b;
+    }
+
+public:
+    template <Color c>
+    static Bitboard PawnAttackBB[SQ_NUM];
+    static Bitboard AdvisorAttackBB[SQ_NUM];
+    static Bitboard KingAttackBB[SQ_NUM];
+};
+
+
 template <PieceType pt>
 Bitboard Attack(Bitboard occupies, Square s) 
 {
+    static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON || pt == PieceType::KNIGHT || pt == PieceType::BISHOP,
+                  "Unknown piece type");
     const Magic &magic = PieceMagic<pt>[s];
     occupies &= magic.mask;
     auto index = (occupies * magic.magic_number) >> magic.shift;
     return magic.attacks[index];
 }
+
+template <PieceType pt, Color c>
+Bitboard Attack(Square s)
+{
+    static_assert(pt == PieceType::PAWN);
+    return AttackInitializer::PawnAttackBB<c>[s];
+}
+
+template <PieceType pt>
+Bitboard Attack(Square s);
+template <>
+inline Bitboard Attack<PieceType::ADVISOR>(Square s)
+{
+    return AttackInitializer::AdvisorAttackBB[s];
+}
+template <>
+inline Bitboard Attack<PieceType::KING>(Square s)
+{
+    return AttackInitializer::KingAttackBB[s];
+}
+
+
 #endif
