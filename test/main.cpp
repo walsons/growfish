@@ -311,11 +311,8 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
 
 int main(int argc, char* argv[])
 {
-    MagicInitializer::InitMagic();
-
-    std::vector<std::string> files{"robot_battle.txt"};
-    MagicValidator::Validate(files);
-    return 0;
+    AttackInitializer::InitAttack();
+    // MagicInitializer::InitMagic();
 
     if (argc == 1)
     {
@@ -360,7 +357,14 @@ int main(int argc, char* argv[])
     {
         // ============================= Ryzen 7 5800X (Debug) =============================
         /*
-        Waiting to test
+        robot_battle.txt  (depth 4: timecost 6.413s, search nodes 903721)
+        robot_battle_1729653504763.txt  (depth 4: timecost 6.907s, search nodes 947782)
+        robot_battle_1729666476581.txt  (depth 4: timecost 7.805s, search nodes 1289096)
+        robot_battle_1729759105954.txt  (depth 4: timecost 19.653s, search nodes 3234419)
+        robot_battle_1730124987011.txt  (depth 4: timecost 4.298s, search nodes 441327)
+        robot_battle_1730130702948.txt  (depth 4: timecost 7.337s, search nodes 752956)
+        robot_battle_1730422269049.txt  (depth 4: timecost 6.02s, search nodes 671227)
+        All files cost time is: 58.433s
         */
 
         // =============================   i5-1135G7 (Debug)   ============================= 
@@ -398,6 +402,19 @@ int main(int argc, char* argv[])
             }
             std::cout << "All files cost time is: " << totalTime << "s" << std::endl;
         }
+    }
+    else if (argv1 == "magic")
+    {
+        std::vector<std::string> files{
+            "robot_battle.txt",
+            "robot_battle_1729653504763.txt",
+            "robot_battle_1729666476581.txt",
+            "robot_battle_1729759105954.txt",
+            "robot_battle_1730124987011.txt",
+            "robot_battle_1730130702948.txt",
+            "robot_battle_1730422269049.txt"
+        };
+        MagicValidator::Validate(files);
     }
     else
     {

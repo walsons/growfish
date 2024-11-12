@@ -22,3 +22,10 @@ Bitboard MagicInitializer::index_to_bitboard(size_t index, size_t bits, Bitboard
     }
     return result;
 }
+
+template <>
+Bitboard AttackInitializer::PawnAttackBB<Color::RED>[SQ_NUM] = {};
+template <>
+Bitboard AttackInitializer::PawnAttackBB<Color::BLACK>[SQ_NUM] = {};
+Bitboard AttackInitializer::AdvisorAttackBB[SQ_NUM];
+Bitboard AttackInitializer::KingAttackBB[SQ_NUM];
