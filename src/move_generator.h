@@ -438,6 +438,24 @@ private:
     template <Color c>
     void PawnMove(Square s)
     {
+        Bitboard attack = Attack<PieceType::PAWN, c>(s);
+        Bitboard attain = attack;
+        attack &= position_.Pieces(!c);
+        while (attack)
+        {
+            Square to = PopLSB(attack);
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+        }
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        while (attain)
+        {
+            Square to = PopLSB(attain);
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+        }
+    }
+    template <Color c>
+    void OldPawnMove(Square s)
+    {
         // The range across the river
         static constexpr Square SQ_BEG = (c == Color::RED ? SQ_A5 : SQ_A0);
         static constexpr Square SQ_END = (c == Color::RED ? SQ_NUM : SQ_A5);
