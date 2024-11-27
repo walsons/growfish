@@ -65,6 +65,57 @@ public:
         }
     }
 
+    static void ValidateLegalMove(const std::vector<std::string> & files)
+    {
+        std::ifstream fin(files[0], std::ios::in);
+        std::string fen;
+        if (fin.is_open())
+        {
+            while (std::getline(fin, fen))
+            {
+                // fen = "rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1";
+                Position position(fen);
+                MoveGenerator moveGenerator(position, true);
+                std::set<short> moves;
+                auto captureMoves = moveGenerator.GenerateLegalMoves<MoveType::CAPTURE>();
+                for (auto move: captureMoves)
+                    moves.insert(move);
+                auto nonCaptureMoves = moveGenerator.GenerateLegalMoves<MoveType::QUIET>();
+                for (auto move: nonCaptureMoves)
+                    moves.insert(move);
+                
+                MagicValidator magicValidator(position);
+                magicValidator.GenerateLegalMoves(position);
+                std::set<short> movesOld;
+                for (auto move: magicValidator.check_moves_)
+                    movesOld.insert(move);
+                for (auto move: magicValidator.capture_moves_)
+                    movesOld.insert(move);
+                for (auto move: magicValidator.non_capture_moves_)
+                    movesOld.insert(move);
+                if (movesOld != moves)
+                {
+                    std::cout << "wrong: " << fen << std::endl;
+                    position.DisplayBoard();
+                    std::cout << "correct:" << std::endl;
+                    for (auto move: movesOld)
+                        std::cout << Move(move) << " ";
+                    std::cout << std::endl;
+                    std::cout << "magic:" << std::endl;
+                    for (auto move: moves)
+                        std::cout << Move(move) << " ";
+                    std::cout << std::endl;
+                    return;
+                }
+            }
+            std::cout << "All correct" << std::endl;
+        }
+        else
+        {
+            std::cout << "Open file failed" << std::endl;
+        }
+    }
+
 private:
     MagicValidator(const Position& position) : position_(position) {}
 
@@ -413,11 +464,115 @@ private:
         }
     }
 
+    void GenerateLegalMoves(Position position)
+    {
+        Color c = position_.side_to_move();
+        auto kPos = position_.KingSquare(c);
+        int kRow = kPos / 9;
+        int kCol = kPos % 9;
+
+        GeneratePseudoLegalMoves(position);
+
+        auto movesFilter = [&](std::vector<Move>& pseudoLegalMoves, std::vector<Move>& legalMoves) {
+            if (!position_.IsSelfChecked())
+            {
+                for (auto pMove : pseudoLegalMoves)
+                {
+                    auto from = MoveFrom(pMove);
+                    auto to = MoveTo(pMove);
+                    if (from != kPos)
+                    {
+                        if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
+                        {
+                            // TODO: optimize this funciton, due to this case will probably has check move
+                            legalMoves.push_back(pMove);
+                        }
+                        else
+                        {
+                            UndoInfo undoInfo;
+                            position_.SimpleMakeMove(pMove, undoInfo);
+                            if (!position_.IsSelfChecked())
+                            {
+                                if (position_.IsEnemyChecked())
+                                    check_moves_.push_back(pMove);
+                                else
+                                    legalMoves.push_back(pMove);
+                            }
+                            position_.SimpleUndoMove(undoInfo);
+                        }
+                    }
+                    else
+                    {
+                        UndoInfo undoInfo;
+                        position_.SimpleMakeMove(pMove, undoInfo);
+                        if (!position_.IsSelfChecked())
+                        {
+                            if (position_.IsEnemyChecked())
+                                check_moves_.push_back(pMove);
+                            else
+                                legalMoves.push_back(pMove);
+                        }
+                        position_.SimpleUndoMove(undoInfo);
+                    }
+                }
+            }
+            else
+            {
+                for (auto pMove : pseudoLegalMoves)
+                {
+                    auto from = MoveFrom(pMove);
+                    auto to = MoveTo(pMove);
+                    if (from != kPos)
+                    {
+                        if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            UndoInfo undoInfo;
+                            position_.SimpleMakeMove(pMove, undoInfo);
+                            if (!position_.IsSelfChecked())
+                            {
+                                if (position_.IsEnemyChecked())
+                                    check_moves_.push_back(pMove);
+                                else
+                                    legalMoves.push_back(pMove);
+                            }
+                            position_.SimpleUndoMove(undoInfo);
+                        }
+                    }
+                    else
+                    {
+                        UndoInfo undoInfo;
+                        position_.SimpleMakeMove(pMove, undoInfo);
+                        if (!position_.IsSelfChecked())
+                        {
+                            if (position_.IsEnemyChecked())
+                                check_moves_.push_back(pMove);
+                            else
+                                legalMoves.push_back(pMove);
+                        }
+                        position_.SimpleUndoMove(undoInfo);
+                    }
+                }
+            }
+        };
+        
+        movesFilter(pseudo_legal_capture_moves_, capture_moves_);
+        movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
+    }
+
 private:
     Position position_;
 
     std::vector<Move> pseudo_legal_capture_moves_;
     std::vector<Move> pseudo_legal_non_capture_moves_;
+
+    std::vector<Move> capture_moves_;
+    std::vector<Move> non_capture_moves_;
+    // Check moves are from both capture moves and non_capture moves
+    std::vector<Move> check_moves_;
 };
 
 #endif
