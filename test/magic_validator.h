@@ -26,7 +26,7 @@ public:
         {
             while (std::getline(fin, fen))
             {
-                fen = "r1bk1abnr/9/1c7/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABR1 b - - 0 1 moves a6a5 h2h6";
+                // fen = "r1bk1abR1/9/1c4n2/2p3p2/p3C3p/9/P1P1P1P1P/9/9/RNBAKAB2 b - - 0 1";
                 Position position(fen);
                 MoveGenerator moveGenerator(position);
                 std::set<short> moves;
@@ -176,9 +176,9 @@ private:
                 }
                 if (SQ_A0 <= destination2 && destination2 < SQ_NUM && Distance(s, destination2) == 2)
                 {
-                    if (IsEmpty(position_.piece_from_square(destination1)))
+                    if (IsEmpty(position_.piece_from_square(destination2)))
                         pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, destination2));
-                    else if (IsColor<!c>(position_.piece_from_square(destination1)))
+                    else if (IsColor<!c>(position_.piece_from_square(destination2)))
                         pseudo_legal_capture_moves_.push_back(ConstructMove(s, destination2));
                 }
             }
@@ -338,15 +338,20 @@ private:
 
         if (SQ_BEG <= s && s < SQ_END)
         {
-            if (IsEmpty(position_.piece_from_square(s + SQ_EAST)))
-                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
-            else if (IsColor<!c>(position_.piece_from_square(s + SQ_EAST)))
-                pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
-
-            if (IsEmpty(position_.piece_from_square(s + SQ_WEST)))
-                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_WEST));
-            else if (IsColor<!c>(position_.piece_from_square(s + SQ_WEST)))
-                pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_WEST));
+            if (Distance(s, s + SQ_EAST) <= 1)
+            {
+                if (IsEmpty(position_.piece_from_square(s + SQ_EAST)))
+                    pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
+                else if (IsColor<!c>(position_.piece_from_square(s + SQ_EAST)))
+                    pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
+            }
+            if (Distance(s, s + SQ_WEST) <= 1)
+            {
+                if (IsEmpty(position_.piece_from_square(s + SQ_WEST)))
+                    pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_WEST));
+                else if (IsColor<!c>(position_.piece_from_square(s + SQ_WEST)))
+                    pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_WEST));
+            }
         }
     }
 
