@@ -57,6 +57,64 @@ public:
     }
 
 private:
+    template <Color c, PieceType pt, MoveType mt>
+    void PieceMove(Square s)
+    {
+        static_assert( pt == PieceType::ROOK 
+            || pt == PieceType::CANNON
+            || pt == PieceType::KNIGHT
+            || pt == PieceType::BISHOP
+            || pt == PieceType::ADVISOR
+            || pt == PieceType::KING
+            || pt == PieceType::PAWN
+            , "Unsupported piece type"
+        );
+
+        Bitboard attack = 0;
+        Bitboard attain = 0;
+        Bitboard occupies = 0;
+
+        if constexpr (pt == PieceType::ADVISOR
+                        || pt == PieceType::KING)
+        {
+            attack = Attack<pt>(s);
+        }
+        else if constexpr (pt == PieceType::PAWN)
+        {
+            attack = Attack<PieceType::PAWN, c>(s);
+        }
+        else
+        {
+            occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
+            attack = Attack<pt>(occupies, s);
+        }
+
+        if constexpr (pt == PieceType::CANNON)
+            attain = Attack<PieceType::ROOK>(occupies, s);
+        else
+            attain = attack;
+
+        if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
+        {
+            attack &= position_.Pieces(!c);
+            while (attack)
+            {
+                Square to = PopLSB(attack);
+                pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
+            }
+        }
+        if constexpr (mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL)
+        {
+            attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+            while (attain)
+            {
+                Square to = PopLSB(attain);
+                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
+            }
+        }
+    }
+
+    /*
     template <Color c>
     void RookMove(Square s)
     {
@@ -205,6 +263,7 @@ private:
             pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
         }
     }
+    */
 
     // Moves that don't consider being checked
     void GeneratePseudoLegalMoves();

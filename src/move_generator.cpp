@@ -7,50 +7,64 @@ void MoveGenerator::GeneratePseudoLegalMoves()
     {
         if (position_.color_from_square(s) != c)
             continue;
-
+        
         switch (position_.piece_from_square(s))
         {
         case Piece::W_ROOK:
-            RookMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::ROOK, MoveType::PSEUDO_LEGAL>(s);
+            // RookMove<Color::RED>(s);
             break;
         case Piece::B_ROOK:
-            RookMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::ROOK, MoveType::PSEUDO_LEGAL>(s);
+            // RookMove<Color::BLACK>(s);
             break;
         case Piece::W_KNIGHT:
-            KnightMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::KNIGHT, MoveType::PSEUDO_LEGAL>(s);
+            // KnightMove<Color::RED>(s);
             break;
         case Piece::B_KNIGHT:
-            KnightMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::KNIGHT, MoveType::PSEUDO_LEGAL>(s);
+            // KnightMove<Color::BLACK>(s);
             break;
         case Piece::W_BISHOP:
-            BishopMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::BISHOP, MoveType::PSEUDO_LEGAL>(s);
+            // BishopMove<Color::RED>(s);
             break;
         case Piece::B_BISHOP:
-            BishopMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::BISHOP, MoveType::PSEUDO_LEGAL>(s);
+            // BishopMove<Color::BLACK>(s);
             break;
         case Piece::W_ADVISOR:
-            AdvisorMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::ADVISOR, MoveType::PSEUDO_LEGAL>(s);
+            // AdvisorMove<Color::RED>(s);
             break;
         case Piece::B_ADVISOR:
-            AdvisorMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::ADVISOR, MoveType::PSEUDO_LEGAL>(s);
+            // AdvisorMove<Color::BLACK>(s);
             break;
         case Piece::W_KING:
-            KingMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::KING, MoveType::PSEUDO_LEGAL>(s);
+            // KingMove<Color::RED>(s);
             break;
         case Piece::B_KING:
-            KingMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::KING, MoveType::PSEUDO_LEGAL>(s);
+            // KingMove<Color::BLACK>(s);
             break;
         case Piece::W_CANNON:
-            CannonMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::CANNON, MoveType::PSEUDO_LEGAL>(s);
+            // CannonMove<Color::RED>(s);
             break;
         case Piece::B_CANNON:
-            CannonMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::CANNON, MoveType::PSEUDO_LEGAL>(s);
+            // CannonMove<Color::BLACK>(s);
             break;
         case Piece::W_PAWN:
-            PawnMove<Color::RED>(s);
+            PieceMove<Color::RED, PieceType::PAWN, MoveType::PSEUDO_LEGAL>(s);
+            // PawnMove<Color::RED>(s);
             break;
         case Piece::B_PAWN:
-            PawnMove<Color::BLACK>(s);
+            PieceMove<Color::BLACK, PieceType::PAWN, MoveType::PSEUDO_LEGAL>(s);
+            // PawnMove<Color::BLACK>(s);
             break;
         default:
             break;
