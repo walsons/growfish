@@ -36,24 +36,161 @@ public:
 
         GenerateLegalMoves();
     }
+    // used to construct move generator without generate move in advance
+    MoveGenerator(const Position& position, bool placeholder) : position_(position)
+    {
+    }
     
     std::vector<Move> capture_moves() { return capture_moves_; }
     std::vector<Move> non_capture_moves() { return non_capture_moves_; }
     std::vector<Move> check_moves() { return check_moves_; }
 
-    // target is the bitboard of piece destination
-    template <Color c, PieceType pt, MoveType mt>
-    std::vector<Move> GenerateMoves(Bitboard target)
+    template <MoveType mt>
+    std::vector<Move> GenerateLegalMoves()
     {
-        static_assert(pt != PieceType::KING, "This method doesn't support king");
-
-        Bitboard bb = position_.Pieces(c, pt);
-        while (bb)
+        Color c = position_.side_to_move();
+        for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
         {
-            Square from = PopLSB(bb);
+            if (position_.color_from_square(s) != c)
+                continue;
+            
+            switch (position_.piece_from_square(s))
+            {
+            case Piece::W_ROOK:
+                PieceMove<Color::RED, PieceType::ROOK, mt>(s);
+                break;
+            case Piece::B_ROOK:
+                PieceMove<Color::BLACK, PieceType::ROOK, mt>(s);
+                break;
+            case Piece::W_KNIGHT:
+                PieceMove<Color::RED, PieceType::KNIGHT, mt>(s);
+                break;
+            case Piece::B_KNIGHT:
+                PieceMove<Color::BLACK, PieceType::KNIGHT, mt>(s);
+                break;
+            case Piece::W_BISHOP:
+                PieceMove<Color::RED, PieceType::BISHOP, mt>(s);
+                break;
+            case Piece::B_BISHOP:
+                PieceMove<Color::BLACK, PieceType::BISHOP, mt>(s);
+                break;
+            case Piece::W_ADVISOR:
+                PieceMove<Color::RED, PieceType::ADVISOR, mt>(s);
+                break;
+            case Piece::B_ADVISOR:
+                PieceMove<Color::BLACK, PieceType::ADVISOR, mt>(s);
+                break;
+            case Piece::W_KING:
+                PieceMove<Color::RED, PieceType::KING, mt>(s);
+                break;
+            case Piece::B_KING:
+                PieceMove<Color::BLACK, PieceType::KING, mt>(s);
+                break;
+            case Piece::W_CANNON:
+                PieceMove<Color::RED, PieceType::CANNON, mt>(s);
+                break;
+            case Piece::B_CANNON:
+                PieceMove<Color::BLACK, PieceType::CANNON, mt>(s);
+                break;
+            case Piece::W_PAWN:
+                PieceMove<Color::RED, PieceType::PAWN, mt>(s);
+                break;
+            case Piece::B_PAWN:
+                PieceMove<Color::BLACK, PieceType::PAWN, mt>(s);
+                break;
+            default:
+                break;
+            }
         }
-        // TODO
-        return std::vector<Move>();
+        std::vector<Move> moves;
+        for (Move move: pseudo_legal_capture_moves_)
+        {
+            if (IsLegalMove(move))
+                moves.push_back(move);
+        }
+        for (Move move: pseudo_legal_non_capture_moves_)
+        {
+            if (IsLegalMove(move))
+                moves.push_back(move);
+        }
+        return moves;
+    }
+
+    bool IsLegalMove(Move move)
+    {
+        Color c = position_.side_to_move();
+        auto kPos = position_.KingSquare(c);
+        int kRow = kPos / 9;
+        int kCol = kPos % 9;
+        if (!position_.IsSelfChecked())
+        {
+            auto from = MoveFrom(move);
+            auto to = MoveTo(move);
+            if (from != kPos)
+            {
+                if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    UndoInfo undoInfo;
+                    position_.SimpleMakeMove(move, undoInfo);
+                    if (!position_.IsSelfChecked())
+                    {
+                        position_.SimpleUndoMove(undoInfo);
+                        return true;
+                    }
+                    position_.SimpleUndoMove(undoInfo);
+                }
+            }
+            else
+            {
+                UndoInfo undoInfo;
+                position_.SimpleMakeMove(move, undoInfo);
+                if (!position_.IsSelfChecked())
+                {
+                    position_.SimpleUndoMove(undoInfo);
+                    return true;
+                }
+                position_.SimpleUndoMove(undoInfo);
+            }
+        }
+        else
+        {
+            auto from = MoveFrom(move);
+            auto to = MoveTo(move);
+            if (from != kPos)
+            {
+                if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
+                {
+                    return false;
+                }
+                else
+                {
+                    UndoInfo undoInfo;
+                    position_.SimpleMakeMove(move, undoInfo);
+                    if (!position_.IsSelfChecked())
+                    {
+                        position_.SimpleUndoMove(undoInfo);
+                        return true;
+                    }
+                    position_.SimpleUndoMove(undoInfo);
+                }
+            }
+            else
+            {
+                UndoInfo undoInfo;
+                position_.SimpleMakeMove(move, undoInfo);
+                if (!position_.IsSelfChecked())
+                {
+                    position_.SimpleUndoMove(undoInfo);
+                    return true;
+                }
+                position_.SimpleUndoMove(undoInfo);
+            }
+        }
+        return false;
     }
 
 private:
