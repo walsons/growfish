@@ -407,7 +407,7 @@ int main(int argc, char* argv[])
             "robot_battle_1730130702948.txt",
             "robot_battle_1730422269049.txt"
         };
-        // MagicValidator::Validate(files);
+        MagicValidator::ValidatePseudoLegalMove(files);
         MagicValidator::ValidateLegalMove(files);
     }
     else

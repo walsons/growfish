@@ -11,14 +11,14 @@
 #include "../src/move_generator.h"
 
 /* This class aims to validate if the generated magic is correct.
-*  It generate pseudo legal moves(rook, cannon, knight, bishop) for a specified position by move piece in
-*  board, and compare with generated pseudo legal moves by bitboard.
+*  It generate moves(rook, cannon, knight, bishop) for a specified position by move piece in
+*  board, and compare with generated moves by bitboard.
 */ 
 
 class MagicValidator
 {
 public:
-    static void Validate(const std::vector<std::string> & files)
+    static void ValidatePseudoLegalMove(const std::vector<std::string> & files)
     {
         std::ifstream fin(files[0], std::ios::in);
         std::string fen;
@@ -26,7 +26,7 @@ public:
         {
             while (std::getline(fin, fen))
             {
-                // fen = "r1bk1abR1/9/1c4n2/2p3p2/p3C3p/9/P1P1P1P1P/9/9/RNBAKAB2 b - - 0 1";
+                // fen = "";
                 Position position(fen);
                 MoveGenerator moveGenerator(position);
                 std::set<short> moves;
@@ -57,7 +57,7 @@ public:
                     return;
                 }
             }
-            std::cout << "All correct" << std::endl;
+            std::cout << "All generated pseudo move correct" << std::endl;
         }
         else
         {
@@ -73,7 +73,7 @@ public:
         {
             while (std::getline(fin, fen))
             {
-                // fen = "rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1";
+                // fen = "";
                 Position position(fen);
                 MoveGenerator moveGenerator(position, true);
                 std::set<short> moves;
@@ -108,7 +108,7 @@ public:
                     return;
                 }
             }
-            std::cout << "All correct" << std::endl;
+            std::cout << "All generated move correct" << std::endl;
         }
         else
         {
@@ -464,6 +464,32 @@ private:
         }
     }
 
+    // This function only used to validate, so no need to consider efficiency
+    void GenerateLegalMoves(Position position)
+    {
+        GeneratePseudoLegalMoves(position);
+
+        auto movesFilter = [&](std::vector<Move>& pseudoLegalMoves, std::vector<Move>& legalMoves) {
+            for (auto pMove : pseudoLegalMoves)
+            {
+                UndoInfo undoInfo;
+                position_.SimpleMakeMove(pMove, undoInfo);
+                if (!position_.IsSelfChecked())
+                {
+                    if (position_.IsEnemyChecked())
+                        check_moves_.push_back(pMove);
+                    else
+                        legalMoves.push_back(pMove);
+                }
+                position_.SimpleUndoMove(undoInfo);
+            }
+        };
+
+        movesFilter(pseudo_legal_capture_moves_, capture_moves_);
+        movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
+    }
+
+    /*
     void GenerateLegalMoves(Position position)
     {
         Color c = position_.side_to_move();
@@ -562,6 +588,7 @@ private:
         movesFilter(pseudo_legal_capture_moves_, capture_moves_);
         movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
     }
+    */
 
 private:
     Position position_;
