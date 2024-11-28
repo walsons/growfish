@@ -60,9 +60,9 @@ void PlayWithHuman(int searchDepth = kSearchDepth)
         {
             // Check if win
             MoveGenerator moveGenerator(position);
-            if (moveGenerator.check_moves().empty()
-                && moveGenerator.capture_moves().empty()
-                && moveGenerator.non_capture_moves().empty())
+            if (moveGenerator.CheckMoves().empty()
+                && moveGenerator.CaptureMoves().empty()
+                && moveGenerator.NonCaptureMoves().empty())
             {
                 std::cout << "robot win" << std::endl;
                 break;
@@ -106,9 +106,9 @@ void PlayWithHuman(int searchDepth = kSearchDepth)
         {
             // Check if win
             MoveGenerator moveGenerator(position);
-            if (moveGenerator.check_moves().empty()
-                && moveGenerator.capture_moves().empty()
-                && moveGenerator.non_capture_moves().empty())
+            if (moveGenerator.CheckMoves().empty()
+                && moveGenerator.CaptureMoves().empty()
+                && moveGenerator.NonCaptureMoves().empty())
             {
                 std::cout << "user win" << std::endl;
                 break;
@@ -209,9 +209,9 @@ void RobotBattle(bool recordFen, const std::string& fileName, int searchDepth = 
         {
             // Check if win
             MoveGenerator moveGenerator(position);
-            if (moveGenerator.check_moves().empty()
-                && moveGenerator.capture_moves().empty()
-                && moveGenerator.non_capture_moves().empty())
+            if (moveGenerator.CheckMoves().empty()
+                && moveGenerator.CaptureMoves().empty()
+                && moveGenerator.NonCaptureMoves().empty())
             {
                 std::cout << "robot_b win" << std::endl;
                 break;
@@ -246,9 +246,9 @@ void RobotBattle(bool recordFen, const std::string& fileName, int searchDepth = 
         {
             // Check if win
             MoveGenerator moveGenerator(position);
-            if (moveGenerator.check_moves().empty()
-                && moveGenerator.capture_moves().empty()
-                && moveGenerator.non_capture_moves().empty())
+            if (moveGenerator.CheckMoves().empty()
+                && moveGenerator.CaptureMoves().empty()
+                && moveGenerator.NonCaptureMoves().empty())
             {
                 std::cout << "robot_w win" << std::endl;
                 break;
@@ -362,14 +362,14 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 5.929s, search nodes 881735)
-        robot_battle_1729653504763.txt  (depth 4: timecost 5.976s, search nodes 894496)
-        robot_battle_1729666476581.txt  (depth 4: timecost 7.256s, search nodes 1279180)
-        robot_battle_1729759105954.txt  (depth 4: timecost 12.608s, search nodes 2335145)
-        robot_battle_1730124987011.txt  (depth 4: timecost 3.89s, search nodes 425009)
-        robot_battle_1730130702948.txt  (depth 4: timecost 7.215s, search nodes 767841)
-        robot_battle_1730422269049.txt  (depth 4: timecost 5.795s, search nodes 707047)
-        All files cost time is: 48.669s
+        robot_battle.txt  (depth 4: timecost 6.509s, search nodes 896449)
+        robot_battle_1729653504763.txt  (depth 4: timecost 8.601s, search nodes 909496)
+        robot_battle_1729666476581.txt  (depth 4: timecost 9.158s, search nodes 1279427)
+        robot_battle_1729759105954.txt  (depth 4: timecost 10.082s, search nodes 1595174)
+        robot_battle_1730124987011.txt  (depth 4: timecost 4.492s, search nodes 424818)
+        robot_battle_1730130702948.txt  (depth 4: timecost 10.396s, search nodes 704904)
+        robot_battle_1730422269049.txt  (depth 4: timecost 7.64s, search nodes 651479)
+        All files cost time is: 56.878s
         */
 
         if (argc == 4)

@@ -11,49 +11,42 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[])
     , move_generator_(position)
     , phase_(Phase::TT)
 {
-    bool tt_move_valid = false;
-    bool killer_move1_valid = false;
-    bool killer_move2_valid = false;
-    // ensure tt_move and killer_move is valid
-    auto validMove = [&](std::vector<Move> moves) {
-        for (auto iter = moves.begin(); iter != moves.end() && !(tt_move_valid && killer_move1_valid && killer_move2_valid); ++iter)
+    // ensure tt_move and killer_move is valid(existed and legal)
+    auto validMove = [&](Move move) {
+        auto from = move.MoveFrom(), to = move.MoveTo();
+        if (position_.color_from_square(from) == position_.side_to_move())
         {
-            if (tt_move_ == *iter)
-                tt_move_valid = true;
-            if (killer_move1_ == *iter)
-                killer_move1_valid = true;
-            if (killer_move2_ == *iter)
-                killer_move2_valid = true;
+            if (position_.piece_from_square(from) != Piece::NO_PIECE)
+            {
+                Bitboard b = move_generator_.PieceMove<MoveType::PSEUDO_LEGAL>(from);
+                if  (SquareBB(to) & b)
+                {
+                    return move_generator_.IsLegalMove(move);
+                }
+            }
         }
-
+        return false;
     };
-    validMove(move_generator_.check_moves_);
-    validMove(move_generator_.capture_moves_);
-    validMove(move_generator_.non_capture_moves_);
 
-    if (!tt_move_valid)
-        tt_move_valid = 0;
-    if (!killer_move1_valid)
+    if (!validMove(tt_move_))
+        tt_move_ = 0;
+    if (!validMove(killer_move1_))
         killer_move1_ = 0;
-    if (!killer_move2_valid)
+    if (!validMove(killer_move2_))
         killer_move2_ = 0;
 }
     
 std::list<ScoreMove> MovePicker::GenerateCheckMove()
 {
     std::list<ScoreMove> moves;
-    auto &checkMoves = move_generator_.check_moves_;
-    for (auto move : checkMoves)
-    {
-        moves.push_back({ move, 0 });
-    }
+    // TODO
     return moves;
 }
 
 std::list<ScoreMove> MovePicker::GenerateCaptureMove()
 {
     std::list<ScoreMove> moves;
-    auto &captureMoves = move_generator_.capture_moves_;
+    auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
     for (auto move : captureMoves)
     {
         int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
@@ -65,7 +58,7 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove()
 std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
 {
     std::list<ScoreMove> moves;
-    auto &nonCaptureMoves = move_generator_.non_capture_moves_;
+    auto nonCaptureMoves = move_generator_.GenerateLegalMoves<MoveType::QUIET>();
     for (auto move : nonCaptureMoves)
     {
         int score = HISTORY.HistoryValue(position_, move);
@@ -144,112 +137,11 @@ Move MovePicker::NextMove()
     }
 
     return selectedMove;
-
-
-
-    // switch (phase_)
-    // {
-    // case Phase::TT:
-    // {
-    //     phase_ = Phase::CHECK;
-    //     moves_ = GenerateCheckMove();
-    //     if (tt_move_ != 0)
-    //     {
-    //         selectedMove = tt_move_;
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         // continue to the next case, so there is not break here
-    //     }
-    // }
-    // case Phase::CHECK:
-    // {
-    //     if (!moves_.empty())
-    //     {
-    //         auto iter = moves_.begin();
-    //         selectedMove = iter->move;
-    //         moves_.erase(iter);
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         phase_ = Phase::CAPTURE;
-    //         moves_ = GenerateCaptureMove();
-    //         // continue to the next case, so there is not break here
-    //     }
-    // }
-    // case Phase::CAPTURE:
-    // {
-    //     if (!moves_.empty())
-    //     {
-    //         auto bestMoveIter = moves_.begin();
-    //         auto iter = moves_.begin();
-    //         ++iter;
-    //         for (; iter != moves_.end(); ++iter)
-    //         {
-    //             if (iter->score > bestMoveIter->score)
-    //             {
-    //                 bestMoveIter = iter;
-    //             }
-    //         }
-    //         selectedMove = bestMoveIter->move;
-    //         moves_.erase(bestMoveIter);
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         phase_ = Phase::KILLER;
-    //         // continue to the next case, so there is not break here
-    //     }
-    // }
-    // case Phase::KILLER:
-    // {
-    //     phase_ = Phase::NON_CAPTURE;
-    //     moves_ = GenerateNonCaptureMove();
-    //     if (killer_move_ != 0)
-    //     {
-    //         selectedMove = killer_move_;
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         // continue to the next case, so there is not break here
-    //     }
-    // }
-    // case Phase::NON_CAPTURE:
-    // {
-    //     if (!moves_.empty())
-    //     {
-    //         auto bestMoveIter = moves_.begin();
-    //         auto iter = moves_.begin();
-    //         ++iter;
-    //         for (; iter != moves_.end(); ++iter)
-    //         {
-    //             if (iter->score > bestMoveIter->score)
-    //             {
-    //                 bestMoveIter = iter;
-    //             }
-    //         }
-    //         selectedMove = bestMoveIter->move;
-    //         moves_.erase(bestMoveIter);
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         phase_ = Phase::END;
-    //         // continue to the next case, so there is not break here
-    //     }
-    // }
-    // default:
-    //     break;
-    // }
-    // return selectedMove;
 }
 
 bool MovePicker::NoLegalMove()
 {
-    return move_generator_.check_moves().empty() 
-        && move_generator_.capture_moves().empty() 
-        && move_generator_.non_capture_moves().empty();
+    return move_generator_.CheckMoves().empty() 
+        && move_generator_.CaptureMoves().empty() 
+        && move_generator_.NonCaptureMoves().empty();
 }

@@ -21,11 +21,11 @@ void Search::IterativeDeepeningLoop(int maxDepth)
 
     root_moves_.clear();
     MoveGenerator moveGenerator(root_position_);
-    auto checkMoves = moveGenerator.check_moves();
+    auto checkMoves = moveGenerator.CheckMoves();
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(checkMoves.begin()), std::make_move_iterator(checkMoves.end()));
-    auto captureMoves = moveGenerator.capture_moves();
+    auto captureMoves = moveGenerator.CaptureMoves();
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
-    auto nonCaptureMoves = moveGenerator.non_capture_moves();
+    auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
 
     for (int depth = 1; depth <= maxDepth; ++depth)
@@ -163,9 +163,9 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
         alpha = score;
     }
     MoveGenerator moveGenerator(position);
-    auto checkMoves = moveGenerator.check_moves();
-    auto captureMoves = moveGenerator.capture_moves();
-    auto nonCaptureMoves = moveGenerator.non_capture_moves();
+    auto checkMoves = moveGenerator.CheckMoves();
+    auto captureMoves = moveGenerator.CaptureMoves();
+    auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
     if (checkMoves.empty() && captureMoves.empty() && nonCaptureMoves.empty())
     {
         return -MateValue + ply;
