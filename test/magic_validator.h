@@ -30,9 +30,8 @@ public:
                 Position position(fen);
                 MoveGenerator moveGenerator(position);
                 std::set<short> moves;
-                for (auto move: moveGenerator.pseudo_legal_capture_moves_)
-                    moves.insert(move);
-                for (auto move: moveGenerator.pseudo_legal_non_capture_moves_)
+                auto pseudoLegalMoves = moveGenerator.GeneratePseudoLegalMoves<MoveType::PSEUDO_LEGAL>();
+                for (auto move : pseudoLegalMoves)
                     moves.insert(move);
                 
                 MagicValidator magicValidator(position);
@@ -75,13 +74,10 @@ public:
             {
                 // fen = "";
                 Position position(fen);
-                MoveGenerator moveGenerator(position, true);
+                MoveGenerator moveGenerator(position);
                 std::set<short> moves;
-                auto captureMoves = moveGenerator.GenerateLegalMoves<MoveType::CAPTURE>();
-                for (auto move: captureMoves)
-                    moves.insert(move);
-                auto nonCaptureMoves = moveGenerator.GenerateLegalMoves<MoveType::QUIET>();
-                for (auto move: nonCaptureMoves)
+                auto legalMoves = moveGenerator.GenerateLegalMoves<MoveType::LEGAL>();
+                for (auto move : legalMoves)
                     moves.insert(move);
                 
                 MagicValidator magicValidator(position);

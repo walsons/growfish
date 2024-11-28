@@ -1,3 +1,4 @@
+/*
 #include "move_generator.h"
 
 void MoveGenerator::GeneratePseudoLegalMoves()
@@ -170,3 +171,4 @@ void MoveGenerator::GenerateLegalMoves()
     movesFilter(pseudo_legal_capture_moves_, capture_moves_);
     movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
 }
+*/

@@ -25,95 +25,101 @@ public:
     friend class MagicValidator;  // a class in test/magic_validator.h for test
     MoveGenerator(const Position& position) : position_(position)
     {
-        // rook:17 cannon:17 knight:8 bishop:4 advisor:4 king:4 pawn:3
-        // 17 + 17 + 8 + 4 + 4 + 4 + 3 = 57
-        pseudo_legal_capture_moves_.reserve(57);
-        pseudo_legal_non_capture_moves_.reserve(57);
-
-        capture_moves_.reserve(57);
-        non_capture_moves_.reserve(57);
-        check_moves_.reserve(57);
-
-        GenerateLegalMoves();
-    }
-    // used to construct move generator without generate move in advance
-    MoveGenerator(const Position& position, bool placeholder) : position_(position)
-    {
     }
     
-    std::vector<Move> capture_moves() { return capture_moves_; }
-    std::vector<Move> non_capture_moves() { return non_capture_moves_; }
-    std::vector<Move> check_moves() { return check_moves_; }
+    std::vector<Move> CaptureMoves() 
+    {
+        return GenerateLegalMoves<MoveType::CAPTURE>();
+    }
+
+    std::vector<Move> NonCaptureMoves() 
+    {
+        return GenerateLegalMoves<MoveType::QUIET>();
+    }
+
+    std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
 
     template <MoveType mt>
-    std::vector<Move> GenerateLegalMoves()
+    std::vector<Move> GeneratePseudoLegalMoves()
     {
-        Color c = position_.side_to_move();
+        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
+
+        std::vector<Move> pseudoLegalMoves;
         for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
         {
-            if (position_.color_from_square(s) != c)
+            if (position_.color_from_square(s) != position_.side_to_move())
                 continue;
             
             switch (position_.piece_from_square(s))
             {
             case Piece::W_ROOK:
-                PieceMove<Color::RED, PieceType::ROOK, mt>(s);
+                PieceMove<Color::RED, PieceType::ROOK, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_ROOK:
-                PieceMove<Color::BLACK, PieceType::ROOK, mt>(s);
+                PieceMove<Color::BLACK, PieceType::ROOK, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_KNIGHT:
-                PieceMove<Color::RED, PieceType::KNIGHT, mt>(s);
+                PieceMove<Color::RED, PieceType::KNIGHT, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_KNIGHT:
-                PieceMove<Color::BLACK, PieceType::KNIGHT, mt>(s);
+                PieceMove<Color::BLACK, PieceType::KNIGHT, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_BISHOP:
-                PieceMove<Color::RED, PieceType::BISHOP, mt>(s);
+                PieceMove<Color::RED, PieceType::BISHOP, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_BISHOP:
-                PieceMove<Color::BLACK, PieceType::BISHOP, mt>(s);
+                PieceMove<Color::BLACK, PieceType::BISHOP, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_ADVISOR:
-                PieceMove<Color::RED, PieceType::ADVISOR, mt>(s);
+                PieceMove<Color::RED, PieceType::ADVISOR, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_ADVISOR:
-                PieceMove<Color::BLACK, PieceType::ADVISOR, mt>(s);
+                PieceMove<Color::BLACK, PieceType::ADVISOR, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_KING:
-                PieceMove<Color::RED, PieceType::KING, mt>(s);
+                PieceMove<Color::RED, PieceType::KING, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_KING:
-                PieceMove<Color::BLACK, PieceType::KING, mt>(s);
+                PieceMove<Color::BLACK, PieceType::KING, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_CANNON:
-                PieceMove<Color::RED, PieceType::CANNON, mt>(s);
+                PieceMove<Color::RED, PieceType::CANNON, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_CANNON:
-                PieceMove<Color::BLACK, PieceType::CANNON, mt>(s);
+                PieceMove<Color::BLACK, PieceType::CANNON, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::W_PAWN:
-                PieceMove<Color::RED, PieceType::PAWN, mt>(s);
+                PieceMove<Color::RED, PieceType::PAWN, mt>(s, pseudoLegalMoves);
                 break;
             case Piece::B_PAWN:
-                PieceMove<Color::BLACK, PieceType::PAWN, mt>(s);
+                PieceMove<Color::BLACK, PieceType::PAWN, mt>(s, pseudoLegalMoves);
                 break;
             default:
                 break;
             }
         }
-        std::vector<Move> moves;
-        for (Move move: pseudo_legal_capture_moves_)
+
+        return pseudoLegalMoves;
+    }
+
+    template <MoveType mt>
+    std::vector<Move> GenerateLegalMoves()
+    {
+        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::LEGAL);
+
+        std::vector<Move> pseudoLegalMoves;
+        if constexpr (mt == MoveType::LEGAL)
+            pseudoLegalMoves  = GeneratePseudoLegalMoves<MoveType::PSEUDO_LEGAL>();
+        else
+            pseudoLegalMoves = GeneratePseudoLegalMoves<mt>();
+
+        std::vector<Move> legalMoves;
+        for (Move move: pseudoLegalMoves)
         {
             if (IsLegalMove(move))
-                moves.push_back(move);
+                legalMoves.push_back(move);
         }
-        for (Move move: pseudo_legal_non_capture_moves_)
-        {
-            if (IsLegalMove(move))
-                moves.push_back(move);
-        }
-        return moves;
+        return legalMoves;
     }
 
     bool IsLegalMove(Move move)
@@ -193,9 +199,137 @@ public:
         return false;
     }
 
+    template <Color c, PieceType pt, MoveType mt>
+    Bitboard PieceMove(Square s)
+    {
+        Bitboard attack = 0, attain = 0;
+        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
+        attack &= position_.Pieces(!c);
+        attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+        return attack | attain;
+    }
+    // runtime version
+    template <MoveType mt>
+    Bitboard PieceMove(Square s)
+    {
+        switch (position_.piece_from_square(s))
+        {
+        case Piece::W_ROOK:
+            return PieceMove<Color::RED, PieceType::ROOK, mt>(s);
+        case Piece::B_ROOK:
+            return PieceMove<Color::BLACK, PieceType::ROOK, mt>(s);
+        case Piece::W_KNIGHT:
+            return PieceMove<Color::RED, PieceType::KNIGHT, mt>(s);
+        case Piece::B_KNIGHT:
+            return PieceMove<Color::BLACK, PieceType::KNIGHT, mt>(s);
+        case Piece::W_BISHOP:
+            return PieceMove<Color::RED, PieceType::BISHOP, mt>(s);
+        case Piece::B_BISHOP:
+            return PieceMove<Color::BLACK, PieceType::BISHOP, mt>(s);
+        case Piece::W_ADVISOR:
+            return PieceMove<Color::RED, PieceType::ADVISOR, mt>(s);
+        case Piece::B_ADVISOR:
+            return PieceMove<Color::BLACK, PieceType::ADVISOR, mt>(s);
+        case Piece::W_KING:
+            return PieceMove<Color::RED, PieceType::KING, mt>(s);
+        case Piece::B_KING:
+            return PieceMove<Color::BLACK, PieceType::KING, mt>(s);
+        case Piece::W_CANNON:
+            return PieceMove<Color::RED, PieceType::CANNON, mt>(s);
+        case Piece::B_CANNON:
+            return PieceMove<Color::BLACK, PieceType::CANNON, mt>(s);
+        case Piece::W_PAWN:
+            return PieceMove<Color::RED, PieceType::PAWN, mt>(s);
+        case Piece::B_PAWN:
+            return PieceMove<Color::BLACK, PieceType::PAWN, mt>(s);
+        default:
+            break;
+        }
+        return 0;
+    }
+
+
+    template <Color c, PieceType pt, MoveType mt>
+    void PieceMove(Square s, std::vector<Move> &moves)
+    {
+        Bitboard attack = 0, attain = 0;
+        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
+        if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
+        {
+            attack &= position_.Pieces(!c);
+            while (attack)
+            {
+                Square to = PopLSB(attack);
+                moves.push_back(ConstructMove(s, to));
+            }
+        }
+        if constexpr (mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL)
+        {
+            attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+            while (attain)
+            {
+                Square to = PopLSB(attain);
+                moves.push_back(ConstructMove(s, to));
+            }
+        }
+    }
+    // runtime version
+    template <MoveType mt>
+    void PieceMove(Square s, std::vector<Move> &moves)
+    {
+        std::vector<Move> pseudoLegalMoves;
+        switch (position_.piece_from_square(s))
+        {
+        case Piece::W_ROOK:
+            PieceMove<Color::RED, PieceType::ROOK, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_ROOK:
+            PieceMove<Color::BLACK, PieceType::ROOK, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_KNIGHT:
+            PieceMove<Color::RED, PieceType::KNIGHT, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_KNIGHT:
+            PieceMove<Color::BLACK, PieceType::KNIGHT, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_BISHOP:
+            PieceMove<Color::RED, PieceType::BISHOP, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_BISHOP:
+            PieceMove<Color::BLACK, PieceType::BISHOP, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_ADVISOR:
+            PieceMove<Color::RED, PieceType::ADVISOR, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_ADVISOR:
+            PieceMove<Color::BLACK, PieceType::ADVISOR, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_KING:
+            PieceMove<Color::RED, PieceType::KING, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_KING:
+            PieceMove<Color::BLACK, PieceType::KING, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_CANNON:
+            PieceMove<Color::RED, PieceType::CANNON, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_CANNON:
+            PieceMove<Color::BLACK, PieceType::CANNON, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::W_PAWN:
+            PieceMove<Color::RED, PieceType::PAWN, mt>(s, pseudoLegalMoves);
+            break;
+        case Piece::B_PAWN:
+            PieceMove<Color::BLACK, PieceType::PAWN, mt>(s, pseudoLegalMoves);
+            break;
+        default:
+            break;
+        }
+    }
+
 private:
     template <Color c, PieceType pt, MoveType mt>
-    void PieceMove(Square s)
+    void PieceMoveBitboard(Square s, Bitboard &attack, Bitboard &attain)
     {
         static_assert( pt == PieceType::ROOK 
             || pt == PieceType::CANNON
@@ -206,9 +340,10 @@ private:
             || pt == PieceType::PAWN
             , "Unsupported piece type"
         );
+        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
 
-        Bitboard attack = 0;
-        Bitboard attain = 0;
+        attack = 0;
+        attain = 0;
         Bitboard occupies = 0;
 
         if constexpr (pt == PieceType::ADVISOR
@@ -230,25 +365,6 @@ private:
             attain = Attack<PieceType::ROOK>(occupies, s);
         else
             attain = attack;
-
-        if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
-        {
-            attack &= position_.Pieces(!c);
-            while (attack)
-            {
-                Square to = PopLSB(attack);
-                pseudo_legal_capture_moves_.push_back(ConstructMove(s, to));
-            }
-        }
-        if constexpr (mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL)
-        {
-            attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
-            while (attain)
-            {
-                Square to = PopLSB(attain);
-                pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, to));
-            }
-        }
     }
 
     /*
@@ -409,14 +525,14 @@ private:
 
 private:
     Position position_;
-    
-    std::vector<Move> pseudo_legal_capture_moves_;
-    std::vector<Move> pseudo_legal_non_capture_moves_;
 
-    std::vector<Move> capture_moves_;
-    std::vector<Move> non_capture_moves_;
+    // std::vector<Move> pseudo_legal_capture_moves_;
+    // std::vector<Move> pseudo_legal_non_capture_moves_;
+
+    // std::vector<Move> capture_moves_;
+    // std::vector<Move> non_capture_moves_;
     // Check moves are from both capture moves and non_capture moves
-    std::vector<Move> check_moves_;
+    // std::vector<Move> check_moves_;
 };
 
 #endif
