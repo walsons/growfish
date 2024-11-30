@@ -362,14 +362,15 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 4.789s, search nodes 860299)
-        robot_battle_1729653504763.txt  (depth 4: timecost 5.004s, search nodes 872815)
-        robot_battle_1729666476581.txt  (depth 4: timecost 4.963s, search nodes 1268468)
-        robot_battle_1729759105954.txt  (depth 4: timecost 8.366s, search nodes 1531174)
-        robot_battle_1730124987011.txt  (depth 4: timecost 2.765s, search nodes 374128)
-        robot_battle_1730130702948.txt  (depth 4: timecost 5.151s, search nodes 553936)
-        robot_battle_1730422269049.txt  (depth 4: timecost 2.934s, search nodes 439921)
-        All files cost time is: 33.972s
+        robot_battle.txt  (depth 4: timecost 4.635s, search nodes 860299)
+        robot_battle_1729653504763.txt  (depth 4: timecost 4.666s, search nodes 872815)
+        robot_battle_1729666476581.txt  (depth 4: timecost 4.376s, search nodes 1268468)
+        robot_battle_1729759105954.txt  (depth 4: timecost 5.339s, search nodes 1531174)
+        robot_battle_1730124987011.txt  (depth 4: timecost 2.699s, search nodes 374128)
+        robot_battle_1730130702948.txt  (depth 4: timecost 4.548s, search nodes 553936)
+        robot_battle_1730422269049.txt  (depth 4: timecost 2.576s, search nodes 439921)
+        robot_battle_1732956559883.txt  (depth 4: timecost 6.405s, search nodes 980999)
+        All files cost time is: 35.244s
         */
 
         if (argc == 4)
@@ -386,7 +387,8 @@ int main(int argc, char* argv[])
                 "robot_battle_1729759105954.txt",
                 "robot_battle_1730124987011.txt",
                 "robot_battle_1730130702948.txt",
-                "robot_battle_1730422269049.txt"
+                "robot_battle_1730422269049.txt",
+                "robot_battle_1732956559883.txt"
             };
             double totalTime = 0;
             for (auto file : fileList)
@@ -405,7 +407,8 @@ int main(int argc, char* argv[])
             "robot_battle_1729759105954.txt",
             "robot_battle_1730124987011.txt",
             "robot_battle_1730130702948.txt",
-            "robot_battle_1730422269049.txt"
+            "robot_battle_1730422269049.txt",
+            "robot_battle_1732956559883.txt"
         };
         MagicValidator::ValidatePseudoLegalMove(files);
         MagicValidator::ValidateLegalMove(files);
