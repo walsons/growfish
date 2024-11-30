@@ -3,13 +3,13 @@
 
 extern History HISTORY;
 
-MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[])
+MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[], Phase phase)
     : position_(position)
     , tt_move_(ttMove)
     , killer_move1_(killerMove[0])
     , killer_move2_(killerMove[1])
     , move_generator_(position)
-    , phase_(Phase::TT)
+    , phase_(phase)
 {
     // ensure tt_move and killer_move is valid(existed and legal)
     auto validMove = [&](Move move) {
@@ -28,11 +28,11 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[])
         return false;
     };
 
-    if (!validMove(tt_move_))
+    if (tt_move_ != 0 && !validMove(tt_move_))
         tt_move_ = 0;
-    if (!validMove(killer_move1_))
+    if (killer_move1_ != 0 && !validMove(killer_move1_))
         killer_move1_ = 0;
-    if (!validMove(killer_move2_))
+    if (killer_move2_ != 0 && !validMove(killer_move2_))
         killer_move2_ = 0;
 }
     
@@ -127,6 +127,12 @@ Move MovePicker::NextMove()
                 phase_ = Phase::END;
             }
             break;
+            case Phase::QSEARCH_CAPTURE:
+            {
+                moves_ = GenerateCaptureMove();
+                phase_ = Phase::END;
+            }
+            break;
             case Phase::END:
             {
                 loop = false;
@@ -137,11 +143,4 @@ Move MovePicker::NextMove()
     }
 
     return selectedMove;
-}
-
-bool MovePicker::NoLegalMove()
-{
-    return move_generator_.CheckMoves().empty() 
-        && move_generator_.CaptureMoves().empty() 
-        && move_generator_.NonCaptureMoves().empty();
 }

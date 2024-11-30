@@ -51,9 +51,19 @@ struct ScoreMove
 class MovePicker
 {
 public:
-    MovePicker(const Position& position, Move ttMove, Move killerMove[]);
+    enum class Phase 
+    {
+        TT,
+        CHECK,
+        CAPTURE,
+        KILLER,
+        NON_CAPTURE,
+        QSEARCH_CAPTURE,
+        END,
+    };
+
+    MovePicker(const Position& position, Move ttMove, Move killerMove[], Phase phase = Phase::TT);
     Move NextMove();
-    bool NoLegalMove();
 
 private:
     std::list<ScoreMove> GenerateCheckMove();
@@ -66,15 +76,7 @@ private:
     Move killer_move1_;
     Move killer_move2_;
     MoveGenerator move_generator_;
-    enum class Phase 
-    {
-        TT,
-        CHECK,
-        CAPTURE,
-        KILLER,
-        NON_CAPTURE,
-        END,
-    } phase_;
+    Phase phase_;
     std::list<ScoreMove> moves_;
 };
 
