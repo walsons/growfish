@@ -53,7 +53,6 @@ class MovePicker
 public:
     MovePicker(const Position& position, Move ttMove, Move killerMove[]);
     Move NextMove();
-    bool NoLegalMove();
 
 private:
     std::list<ScoreMove> GenerateCheckMove();

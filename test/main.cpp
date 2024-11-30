@@ -362,14 +362,14 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 6.509s, search nodes 896449)
-        robot_battle_1729653504763.txt  (depth 4: timecost 8.601s, search nodes 909496)
-        robot_battle_1729666476581.txt  (depth 4: timecost 9.158s, search nodes 1279427)
-        robot_battle_1729759105954.txt  (depth 4: timecost 10.082s, search nodes 1595174)
-        robot_battle_1730124987011.txt  (depth 4: timecost 4.492s, search nodes 424818)
-        robot_battle_1730130702948.txt  (depth 4: timecost 10.396s, search nodes 704904)
-        robot_battle_1730422269049.txt  (depth 4: timecost 7.64s, search nodes 651479)
-        All files cost time is: 56.878s
+        robot_battle.txt  (depth 4: timecost 5.792s, search nodes 896449)
+        robot_battle_1729653504763.txt  (depth 4: timecost 5.842s, search nodes 909496)
+        robot_battle_1729666476581.txt  (depth 4: timecost 5.891s, search nodes 1279427)
+        robot_battle_1729759105954.txt  (depth 4: timecost 9.109s, search nodes 1595174)
+        robot_battle_1730124987011.txt  (depth 4: timecost 4.356s, search nodes 424818)
+        robot_battle_1730130702948.txt  (depth 4: timecost 8.3s, search nodes 704904)
+        robot_battle_1730422269049.txt  (depth 4: timecost 6.898s, search nodes 651479)
+        All files cost time is: 46.188s
         */
 
         if (argc == 4)
