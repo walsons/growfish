@@ -138,3 +138,10 @@ Move MovePicker::NextMove()
 
     return selectedMove;
 }
+
+bool MovePicker::NoLegalMove()
+{
+    return move_generator_.CheckMoves().empty() 
+        && move_generator_.CaptureMoves().empty() 
+        && move_generator_.NonCaptureMoves().empty();
+}
