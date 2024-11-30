@@ -99,7 +99,8 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     }
 
     MovePicker movePicker(position, ttEntry != nullptr ? ttEntry->move : Move(), ss[ply].killer_move);
-    if (movePicker.NoLegalMove()) 
+    Move move = movePicker.NextMove();
+    if (move == 0) 
     {
         auto score = -MateValue + ply;
         TT.Store(position.key(), score, depth, 0);
@@ -115,8 +116,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
         return score;
     }
 
-    Move move;
-    while ((move = movePicker.NextMove()))
+    while (move)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
@@ -146,6 +146,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
             ss[ply].pv.insert(ss[ply].pv.end(), ss[ply + 1].pv.begin(), ss[ply + 1].pv.end());
             TT.Store(position.key(), score, depth, move);
         }
+        move = movePicker.NextMove();
     }
     return alpha;
 }
@@ -162,15 +163,14 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
     {
         alpha = score;
     }
-    MoveGenerator moveGenerator(position);
-    auto checkMoves = moveGenerator.CheckMoves();
-    auto captureMoves = moveGenerator.CaptureMoves();
-    auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
-    if (checkMoves.empty() && captureMoves.empty() && nonCaptureMoves.empty())
+    Move killerMove[2] = {0, 0};
+    if (MovePicker(position, 0, killerMove).NextMove() == 0)
     {
         return -MateValue + ply;
     }
-    for (auto move: captureMoves)
+    MovePicker movePicker(position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
+    Move move = movePicker.NextMove();
+    while (move)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
@@ -184,6 +184,7 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
         {
             alpha = score;
         }
+        move = movePicker.NextMove();
     }
     return alpha;
 }
