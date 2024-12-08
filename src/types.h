@@ -116,7 +116,10 @@ enum class PieceType : char
 
     NO_PIECE_TYPE,
     
-    PIECE_TYPE_NUM
+    PIECE_TYPE_NUM,
+
+    // A special case
+    KNIGHT_TO
 };
 
 enum class Piece : char
