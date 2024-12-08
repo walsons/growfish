@@ -21,6 +21,8 @@ public:
             magicName = "CannonMagicNumber";
         else if (pt == PieceType::KNIGHT)
             magicName = "KnightMagicNumber";
+        else if (pt == PieceType::KNIGHT_TO)
+            magicName = "KnightToMagicNumber";
         else if (pt == PieceType::BISHOP)
             magicName = "BishopMagicNumber";
         else
@@ -149,6 +151,22 @@ inline Bitboard MagicGenerator::get_mask<PieceType::KNIGHT>(Square s) const
 }
 
 template <>
+inline Bitboard MagicGenerator::get_mask<PieceType::KNIGHT_TO>(Square s) const
+{
+    Bitboard mask = 0;
+    int rk = RankOf(s), fl = FileOf(s);
+    if (rk + 1 < RANK_NB && fl + 1 < FILE_NB)
+        mask |= Bitboard(1) << ((rk + 1) * FILE_NB + fl + 1);
+    if (rk + 1 < RANK_NB && fl - 1 >= FILE_A)
+        mask |= Bitboard(1) << ((rk + 1) * FILE_NB + fl - 1);
+    if (rk - 1 >= RANK_0 && fl + 1 < FILE_NB)
+        mask |= Bitboard(1) << ((rk - 1) * FILE_NB + fl + 1);
+    if (rk - 1 >= RANK_0 && fl - 1 >= FILE_A)
+        mask |= Bitboard(1) << ((rk - 1) * FILE_NB + fl - 1);
+    return mask;
+}
+
+template <>
 inline Bitboard MagicGenerator::get_mask<PieceType::BISHOP>(Square s) const
 {
     Bitboard mask = 0;
@@ -267,6 +285,26 @@ inline Bitboard MagicGenerator::attack<PieceType::KNIGHT>(Square s, Bitboard occ
                                  2 * SQ_SOUTH + SQ_EAST, 2 * SQ_SOUTH + SQ_WEST, 
                                  SQ_SOUTH + 2 * SQ_WEST, SQ_NORTH + 2 * SQ_WEST}; 
     constexpr int blocks[4] = {SQ_NORTH, SQ_EAST, SQ_SOUTH, SQ_WEST};
+    for (int i = 0; i < 8; ++i)
+    {
+        if (Distance(s, static_cast<Square>(s + forwards[i])) <= 2 && (s + forwards[i]) >= SQ_A0 && (s + forwards[i]) < SQ_NUM)
+        {
+            if (!(occupies & (Bitboard(1) << (s + blocks[i / 2]))))
+                result |= (Bitboard(1) << (s + forwards[i]));
+        }
+    }
+    return result;
+}
+
+template <>
+inline Bitboard MagicGenerator::attack<PieceType::KNIGHT_TO>(Square s, Bitboard occupies) const
+{
+    Bitboard result = 0;
+    constexpr int forwards[8] = {2 * SQ_NORTH + SQ_EAST, 2 * SQ_EAST + SQ_NORTH, 
+                                 2 * SQ_EAST + SQ_SOUTH, 2 * SQ_SOUTH + SQ_EAST, 
+                                 2 * SQ_SOUTH + SQ_WEST, 2 * SQ_WEST + SQ_SOUTH, 
+                                 2 * SQ_WEST + SQ_NORTH, 2 * SQ_NORTH + SQ_WEST}; 
+    constexpr int blocks[4] = {SQ_NORTH + SQ_EAST, SQ_EAST + SQ_SOUTH, SQ_SOUTH + SQ_WEST, SQ_WEST + SQ_NORTH};
     for (int i = 0; i < 8; ++i)
     {
         if (Distance(s, static_cast<Square>(s + forwards[i])) <= 2 && (s + forwards[i]) >= SQ_A0 && (s + forwards[i]) < SQ_NUM)
