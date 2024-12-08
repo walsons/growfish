@@ -362,15 +362,15 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 4.635s, search nodes 860299)
-        robot_battle_1729653504763.txt  (depth 4: timecost 4.666s, search nodes 872815)
-        robot_battle_1729666476581.txt  (depth 4: timecost 4.376s, search nodes 1268468)
-        robot_battle_1729759105954.txt  (depth 4: timecost 5.339s, search nodes 1531174)
-        robot_battle_1730124987011.txt  (depth 4: timecost 2.699s, search nodes 374128)
-        robot_battle_1730130702948.txt  (depth 4: timecost 4.548s, search nodes 553936)
-        robot_battle_1730422269049.txt  (depth 4: timecost 2.576s, search nodes 439921)
-        robot_battle_1732956559883.txt  (depth 4: timecost 6.405s, search nodes 980999)
-        All files cost time is: 35.244s
+        robot_battle.txt  (depth 4: timecost 4.08s, search nodes 828616)
+        robot_battle_1729653504763.txt  (depth 4: timecost 4.193s, search nodes 842547)
+        robot_battle_1729666476581.txt  (depth 4: timecost 3.923s, search nodes 1225922)
+        robot_battle_1729759105954.txt  (depth 4: timecost 5.94s, search nodes 1783293)
+        robot_battle_1730124987011.txt  (depth 4: timecost 2.119s, search nodes 365864)
+        robot_battle_1730130702948.txt  (depth 4: timecost 3.4s, search nodes 560178)
+        robot_battle_1730422269049.txt  (depth 4: timecost 2.144s, search nodes 471445)
+        robot_battle_1732956559883.txt  (depth 4: timecost 5.179s, search nodes 1006428)
+        All files cost time is: 30.978s
         */
 
         if (argc == 4)
