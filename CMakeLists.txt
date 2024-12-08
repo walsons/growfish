@@ -5,7 +5,7 @@ set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
 # set the project name
-project(minifish_and_test)
+project(growfish)
 
 file(GLOB src_files ${CMAKE_SOURCE_DIR}/src/*.cpp)
 list(REMOVE_ITEM src_files ${CMAKE_SOURCE_DIR}/src/main.cpp)

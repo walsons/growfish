@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(minifish)
+project(growfish)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -13,4 +13,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # add the executable
-add_executable(minifish ${src_files} main.cpp)
+add_executable(growfish ${src_files} main.cpp)
