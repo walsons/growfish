@@ -7,3 +7,6 @@ I will write or copy code from public resource what I mastered to improve this e
     - Chess Programming Wiki
     - Pikafish
     - Stockfish
+
+###### Currently ability
+    In JJ XiangQi, 棋士 < growfish < 大师
