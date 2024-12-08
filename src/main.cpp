@@ -2,13 +2,17 @@
 #include <sstream>
 #include "position.h"
 #include "search.h"
+#include "magic.h"
 
 void Engine()
 {
+    AttackInitializer::InitAttack();
+
     std::cout << "***** minifish *****" << std::endl;
 
     double duration;
     std::string line;
+    Position position;
     while (true)
     {
         bool flag = true;
@@ -17,7 +21,6 @@ void Engine()
         std::string token;
         while (ss >> token)
         {
-            Position position;
             if (token == "fen")
             {
                 // TODO: startpos and append moves
@@ -43,7 +46,7 @@ void Engine()
             {
                 std::string depth;
                 ss >> depth;
-                depth = "4"; // currently we fix depth to 4
+                depth = "7"; // currently we fix depth to 4
 
                 Search search(position);
 
