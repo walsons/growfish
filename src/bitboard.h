@@ -41,6 +41,9 @@ constexpr Bitboard Rank9BB = Rank0BB << (FILE_NB * 9);
 inline Bitboard FileBB(File f) { return FileABB << f; }
 inline Bitboard RankBB(Rank r) { return Rank0BB << (FILE_NB * r); }
 
+constexpr Bitboard RedRegion = Rank0BB | Rank1BB | Rank2BB | Rank3BB | Rank4BB;
+constexpr Bitboard BlackRegin = Rank5BB | Rank6BB | Rank7BB | Rank8BB | Rank9BB;
+
 // Return the least significant bit in a non-zero bitboard
 inline Square LSB(Bitboard b) {
     assert(b);
@@ -72,6 +75,17 @@ inline Square PopLSB(Bitboard& b)
 }
  
 inline Bitboard SquareBB(Square s) { return Bitboard(1ULL) << s; }
+
+inline int OneCount(Bitboard b)
+{
+    int count = 0;
+    while (b)
+    {
+        ++count;
+        PopLSB(b);
+    }
+    return count;
+}
 
 // Show bitboard in piece board format for test
 void ShowBitboard(Bitboard b);

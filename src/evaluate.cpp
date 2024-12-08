@@ -2,61 +2,18 @@
 
 int Evaluate::Eval(const Position& position)
 {
+    static_assert(NUM(PieceType::PAWN) == 0 && NUM(PieceType::KING) == 6, "piece type value changed");
+
     int score = 0;
-    for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
-    {
-        switch (position.piece_from_square(s))
-        {
-        case Piece::W_ROOK:
-            score += RookValue;
-            break;
-        case Piece::B_ROOK:
-            score += -RookValue;
-            break;
-        case Piece::W_KNIGHT:
-            score += KnightValue;
-            break;
-        case Piece::B_KNIGHT:
-            score += -KnightValue;
-            break;
-        case Piece::W_BISHOP:
-            score += BishopValue;
-            break;
-        case Piece::B_BISHOP:
-            score += -BishopValue;
-            break;
-        case Piece::W_ADVISOR:
-            score += AdvisorValue;
-            break;
-        case Piece::B_ADVISOR:
-            score += -AdvisorValue;
-            break;
-        case Piece::W_KING:
-            score += KingValue;
-            break;
-        case Piece::B_KING:
-            score += -KingValue;
-            break;
-        case Piece::W_CANNON:
-            score += CannonValue;
-            break;
-        case Piece::B_CANNON:
-            score += -CannonValue;
-            break;
-        case Piece::W_PAWN:
-            score += PawnValue;
-            break;
-        case Piece::B_PAWN:
-            score += -PawnValue;
-            break;
-        default:
-            break;
-        }
-        if (s >= SQ_A5 && IsColor<Color::RED>(position.piece_from_square(s)))
-            score += 10;
-        if (s < SQ_A5 && IsColor<Color::BLACK>(position.piece_from_square(s)))
-            score += 10;
-    }
+    score += ScoreCalculator<PieceType::PAWN>(position);
+    score += ScoreCalculator<PieceType::ADVISOR>(position);
+    score += ScoreCalculator<PieceType::BISHOP>(position);
+    score += ScoreCalculator<PieceType::KNIGHT>(position);
+    score += ScoreCalculator<PieceType::CANNON>(position);
+    score += ScoreCalculator<PieceType::ROOK>(position);
+    score += ScoreCalculator<PieceType::KING>(position);
+    score += OneCount(position.Pieces(Color::RED) & BlackRegin) * 10;
+    score -= OneCount(position.Pieces(Color::BLACK) & RedRegion) * 10;
 
     return position.side_to_move() == Color::RED ? score : -score;
 }
