@@ -78,6 +78,10 @@ public:
     {
         return Pieces(c) & Pieces(pts...);
     }
+    Bitboard AllPieces() const
+    {
+        return by_color_bb_[NUM(Color::RED)] | by_color_bb_[NUM(Color::BLACK)];
+    }
 
 private:
     bool IsChecked(Color c);

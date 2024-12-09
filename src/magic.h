@@ -907,7 +907,7 @@ public:
 template <PieceType pt>
 Bitboard Attack(Bitboard occupies, Square s) 
 {
-    static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON || pt == PieceType::KNIGHT || pt == PieceType::BISHOP,
+    static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON || pt == PieceType::KNIGHT || pt == PieceType::KNIGHT_TO || pt == PieceType::BISHOP,
                   "Unknown piece type");
     const Magic &magic = PieceMagic<pt>[s];
     occupies &= magic.mask;

@@ -142,8 +142,10 @@ void Position::SimpleMakeMove(Move move, UndoInfo& undoInfo)
     auto to = MoveTo(move);
 
     undoInfo = { move, board_[to] };
-    board_[to] = board_[from];
-    board_[from] = Piece::NO_PIECE;
+    move_piece(from, to);
+    // undoInfo = { move, board_[to] };
+    // board_[to] = board_[from];
+    // board_[from] = Piece::NO_PIECE;
 }
 
 void Position::SimpleUndoMove(const UndoInfo& undoInfo)
@@ -151,8 +153,10 @@ void Position::SimpleUndoMove(const UndoInfo& undoInfo)
     auto from = MoveFrom(undoInfo.move);
     auto to = MoveTo(undoInfo.move);
 
-    board_[from] = board_[to];
-    board_[to] = undoInfo.piece;
+    // board_[from] = board_[to];
+    // board_[to] = undoInfo.piece;
+    move_piece(to, from);
+    put_piece(undoInfo.piece, to);
 }
 
 void Position::DisplayBoard()
