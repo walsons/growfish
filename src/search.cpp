@@ -24,6 +24,11 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     auto checkMoves = moveGenerator.CheckMoves();
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(checkMoves.begin()), std::make_move_iterator(checkMoves.end()));
     auto captureMoves = moveGenerator.CaptureMoves();
+    // std::sort(captureMoves.begin(), captureMoves.end(), [&](Move m1, Move m2) {
+    //     int score1 = MVV_LVA[PieceIndex(root_position_.piece_from_square(m1.MoveFrom()))][PieceIndex(root_position_.piece_from_square(m1.MoveTo()))];
+    //     int score2 = MVV_LVA[PieceIndex(root_position_.piece_from_square(m2.MoveFrom()))][PieceIndex(root_position_.piece_from_square(m2.MoveTo()))];
+    //     return score1 > score2;
+    // });
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
     auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
     root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));

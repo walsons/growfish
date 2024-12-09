@@ -4,6 +4,7 @@
 #include <list>
 #include "move_generator.h"
 #include "history.h"
+#include "evaluate.h"
 
 // MVV-LVA
 /*
@@ -69,6 +70,83 @@ private:
     std::list<ScoreMove> GenerateCheckMove();
     std::list<ScoreMove> GenerateCaptureMove();
     std::list<ScoreMove> GenerateNonCaptureMove();
+
+    template <Color c>
+    int SEE(Square s, Position &position)
+    {
+        Piece p = position.piece_from_square(s);
+        if (p == Piece::NO_PIECE)
+            return 0;
+
+        bool stop = false;
+        auto makeCapture = [this, &stop, &position, s, p](Bitboard attack) {
+            if (attack)
+            {
+                stop = true;
+                Square t = PopLSB(attack);
+                UndoInfo undoInfo;
+                Move move = ConstructMove(t, s);
+                position.SimpleMakeMove(move, undoInfo);
+                int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(s, position);
+                position.SimpleUndoMove(undoInfo);
+                return value > 0 ? value : 0;
+            }
+            return 0;
+        };
+
+        Bitboard pAttack = Attack<PieceType::PAWN, !c>(s);
+        pAttack &= position.Pieces(c, PieceType::PAWN);
+        int value = makeCapture(pAttack);
+        if (stop)
+            return value;
+        
+        Bitboard aAttack = Attack<PieceType::ADVISOR>(s);
+        aAttack &= position.Pieces(c, PieceType::ADVISOR);
+        value = makeCapture(aAttack);
+        if (stop)
+            return value;
+
+        Bitboard occupies = position.AllPieces();
+
+        Bitboard bAttack = Attack<PieceType::BISHOP>(occupies, s);
+        bAttack &= position.Pieces(c, PieceType::BISHOP);
+        value = makeCapture(aAttack);
+        if (stop)
+            return value;
+
+        Bitboard nAttack = Attack<PieceType::KNIGHT_TO>(occupies, s);
+        nAttack &= position.Pieces(c, PieceType::KNIGHT);
+        value = makeCapture(nAttack);
+        if (stop)
+            return value;
+
+        Bitboard cAttack = Attack<PieceType::CANNON>(occupies, s);
+        cAttack &= position.Pieces(c, PieceType::CANNON);
+        value = makeCapture(cAttack);
+        if (stop)
+            return value;
+        
+        Bitboard rAttack = Attack<PieceType::ROOK>(occupies, s);
+        rAttack &= position.Pieces(c, PieceType::ROOK);
+        value = makeCapture(rAttack);
+        if (stop)
+            return value;
+
+        return 0;
+    }
+
+    template <Color c>
+    int SEECapture(Move captureMove)
+    {
+        Position position = position_;
+        Square s = captureMove.MoveTo();
+        Piece p = position.piece_from_square(s);
+        UndoInfo undoInfo;
+        position.SimpleMakeMove(captureMove, undoInfo);
+        int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(s, position);
+        position.SimpleUndoMove(undoInfo);
+        return value > 0 ? value : 0;
+    }
 
 private:
     Position position_;

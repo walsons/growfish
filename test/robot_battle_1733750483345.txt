@@ -1,0 +1,54 @@
+rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1
+rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1 moves b2b6
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/RcBAKABNR w - - 0 1
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1 moves h7a7
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1 moves h7a7 b0b3
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1 moves h7a7 b0b3 a7g7
+rnbakabnr/9/6c2/p1p1C1p1p/9/9/PRP1P1P1P/7C1/9/2BAKABNR b - - 0 1
+rnbakabnr/9/6c2/p1p1C1p1p/9/9/PRP1P1P1P/7C1/9/2BAKABNR b - - 0 1 moves b9c7
+rnbakabnr/9/6c2/p1p1C1p1p/9/9/PRP1P1P1P/7C1/9/2BAKABNR b - - 0 1 moves b9c7 e6e5
+r1bakabnr/9/2n6/p1p3p1p/4C4/9/PRP1P1c1P/7C1/9/2BAKABNR w - - 0 1
+r1bakabnr/9/2n6/p1p3p1p/4C4/9/PRP1P1c1P/7C1/9/2BAKABNR w - - 0 1 moves h2e2
+r1bakabnr/9/2n6/p1p3p1p/4C4/9/PRP1P1c1P/7C1/9/2BAKABNR w - - 0 1 moves h2e2 a9b9
+r1bakabnr/9/2n6/p1p3p1p/4C4/9/PRP1P1c1P/7C1/9/2BAKABNR w - - 0 1 moves h2e2 a9b9 e5i5
+r1bakabnr/9/2n6/p1p3p1p/4C4/9/PRP1P1c1P/7C1/9/2BAKABNR w - - 0 1 moves h2e2 a9b9 e5i5 c9e7
+1R1akabnr/9/2n1b4/p1p3p1p/8C/9/P1P1P1c1P/4C4/9/2BAKABNR b - - 0 1
+1R1akabnr/9/2n1b4/p1p3p2/8p/9/P1P1P1c1P/4C4/9/2BAKABNR w - - 0 1
+1R1akabnr/9/2n1b4/p1p3p2/8p/9/P1P1P1c1P/4C4/9/2BAKABNR w - - 0 1 moves b9b6
+1R1akabnr/9/2n1b4/p1p3p2/8p/9/P1P1P1c1P/4C4/9/2BAKABNR w - - 0 1 moves b9b6 a6a5
+3akabnr/9/2n1b4/2R3p2/p7p/9/P1P1P1c1P/4C4/9/2BAKABNR b - - 0 1
+3akabnr/9/2n1b4/2R3p2/p7p/9/P1P1P1c1P/4C4/9/2BAKABNR b - - 0 1 moves c7e8
+3akabnr/9/2n1b4/2R3p2/p7p/9/P1P1P1c1P/4C4/9/2BAKABNR b - - 0 1 moves c7e8 d0e1
+3akabnr/9/2n1b4/2R3p2/p7p/9/P1P1P1c1P/4C4/9/2BAKABNR b - - 0 1 moves c7e8 d0e1 g3g5
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2 c5d5
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2 c5d5 g6a6
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2 c5d5 g6a6 h9i7
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2 c5d5 g6a6 h9i7 e0d0
+3akabnr/4n4/4b4/6R2/p5c1p/9/P1P1P3P/4C4/4A4/2B1KABNR b - - 0 1 moves g5c5 c0a2 c5d5 g6a6 h9i7 e0d0 i7h5
+3akab1r/4n4/4b4/9/R2c3np/9/P1P1P3P/B3C4/4A4/3K1ABNR b - - 0 1
+3akab1r/4n4/4b4/9/R2c3np/9/P1P1P3P/B3C4/4A4/3K1ABNR b - - 0 1 moves h5f4
+3akab1r/4n4/4b4/9/R2c3np/9/P1P1P3P/B3C4/4A4/3K1ABNR b - - 0 1 moves h5f4 h0g2
+3akab1r/4n4/4b4/9/R2c4p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R w - - 0 1
+3akab1r/4n4/4b4/9/3R4p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1
+3akab1r/4n4/4b4/9/3R4p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e8c7
+3akab1r/4n4/4b4/9/3R4p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e8c7 d5d7
+3akab1r/4n4/4b4/9/3R4p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e8c7 d5d7 c7b5
+3Rkab1r/9/4b4/9/1n6p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1
+3Rkab1r/9/4b4/9/1n6p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e9e8
+3Rkab1r/9/4b4/9/1n6p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e9e8 i0i2
+3Rkab1r/9/4b4/9/1n6p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e9e8 i0i2 g2h4
+3Rkab1r/9/4b4/9/1n6p/9/P1P1P3P/B3C1n2/4A4/3K1AB1R b - - 0 1 moves e9e8 i0i2 g2h4 i2f2
+3R1ab1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3CR3/4A4/3K1AB2 w - - 0 1
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0 h4g2
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0 h4g2 d9e9
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0 h4g2 d9e9 e8d8
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0 h4g2 d9e9 e8d8 f9f8
+3R1Rb1r/4k4/4b4/9/8p/7n1/P1n1P3P/B3C4/4A4/3K1AB2 b - - 0 1 moves c3b1 d0e0 h4g2 d9e9 e8d8 f9f8 d8d7
+6b1r/5R3/3kR4/9/8p/9/P3P3P/B3C1n2/1n2A4/4KAB2 b - - 0 1

@@ -47,8 +47,10 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove()
 {
     std::list<ScoreMove> moves;
     auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
+    // Color c = position_.side_to_move();
     for (auto move : captureMoves)
     {
+        // int score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
         int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
         moves.push_back({ move, score });
     }
