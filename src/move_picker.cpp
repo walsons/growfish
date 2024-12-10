@@ -14,7 +14,7 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
     // ensure tt_move and killer_move is valid(existed and legal)
     auto validMove = [&](Move move) {
         auto from = move.MoveFrom(), to = move.MoveTo();
-        if (position_.color_from_square(from) == position_.side_to_move())
+        if (position_.piece_from_square(from) != Piece::NO_PIECE && position_.color_from_square(from) == position_.side_to_move())
         {
             if (position_.piece_from_square(from) != Piece::NO_PIECE)
             {
@@ -45,12 +45,30 @@ std::list<ScoreMove> MovePicker::GenerateCheckMove()
 
 std::list<ScoreMove> MovePicker::GenerateCaptureMove()
 {
+    bad_captures_.clear();
     std::list<ScoreMove> moves;
     auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
-    // Color c = position_.side_to_move();
+    Color c = position_.side_to_move();
     for (auto move : captureMoves)
     {
-        // int score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
+        int score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
+        if (score >= 0)
+        {
+            // int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+            moves.push_back({ move, score });
+        }
+        else
+            bad_captures_.push_back({ move, score });
+    }
+    return moves;
+}
+
+std::list<ScoreMove> MovePicker::GenerateQuiescenceCaptureMove()
+{
+    std::list<ScoreMove> moves;
+    auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
+    for (auto move : captureMoves)
+    {
         int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
         moves.push_back({ move, score });
     }
@@ -110,7 +128,9 @@ Move MovePicker::NextMove()
             break;
             case Phase::CAPTURE:
             {
-                moves_ = GenerateCaptureMove();
+                // currently GenerateQuiescenceCaptureMove() is faster
+                moves_ = GenerateQuiescenceCaptureMove();
+                // moves_ = GenerateCaptureMove();
                 phase_ = Phase::KILLER;
             }
             break;
@@ -126,12 +146,18 @@ Move MovePicker::NextMove()
             case Phase::NON_CAPTURE:
             {
                 moves_ = GenerateNonCaptureMove();
+                phase_ = Phase::BAD_CAPTURE;
+            }
+            break;
+            case Phase::BAD_CAPTURE:
+            {
+                moves_ = bad_captures_;
                 phase_ = Phase::END;
             }
             break;
             case Phase::QSEARCH_CAPTURE:
             {
-                moves_ = GenerateCaptureMove();
+                moves_ = GenerateQuiescenceCaptureMove();
                 phase_ = Phase::END;
             }
             break;

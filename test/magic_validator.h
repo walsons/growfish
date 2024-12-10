@@ -407,7 +407,7 @@ private:
         Color c = position.side_to_move();
         for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
         {
-            if (position.color_from_square(s) != c)
+            if (position_.piece_from_square(s) == Piece::NO_PIECE || position.color_from_square(s) != c)
                 continue;
 
             switch (position.piece_from_square(s))

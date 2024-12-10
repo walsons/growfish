@@ -60,7 +60,11 @@ public:
     bool IsSelfChecked();
 
     Piece piece_from_square(Square s) const { return board_[s]; }
-    Color color_from_square(Square s) const { return IsColor<Color::RED>(board_[s]) ? Color::RED : Color::BLACK; }
+    Color color_from_square(Square s) const 
+    { 
+        assert((IsColor<Color::RED>(board_[s]) || IsColor<Color::BLACK>(board_[s])));
+        return IsColor<Color::RED>(board_[s]) ? Color::RED : Color::BLACK; 
+    }
     U64 key() const { return key_; }
     Color side_to_move() const { return side_to_move_; }
 

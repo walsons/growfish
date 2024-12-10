@@ -5,7 +5,7 @@ void MagicValidator::GeneratePseudoLegalMoves()
     Color c = position_.side_to_move();
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST)
     {
-        if (position_.color_from_square(s) != c)
+        if (position_.piece_from_square(s) == Piece::NO_PIECE || position_.color_from_square(s) != c)
             continue;
 
         switch (position_.piece_from_square(s))

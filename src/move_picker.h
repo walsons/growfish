@@ -59,6 +59,7 @@ public:
         CAPTURE,
         KILLER,
         NON_CAPTURE,
+        BAD_CAPTURE,
         QSEARCH_CAPTURE,
         END,
     };
@@ -69,14 +70,13 @@ public:
 private:
     std::list<ScoreMove> GenerateCheckMove();
     std::list<ScoreMove> GenerateCaptureMove();
+    std::list<ScoreMove> GenerateQuiescenceCaptureMove();
     std::list<ScoreMove> GenerateNonCaptureMove();
 
     template <Color c>
     int SEE(Square s, Position &position)
     {
         Piece p = position.piece_from_square(s);
-        if (p == Piece::NO_PIECE)
-            return 0;
 
         bool stop = false;
         auto makeCapture = [this, &stop, &position, s, p](Bitboard attack) {
@@ -132,6 +132,12 @@ private:
         if (stop)
             return value;
 
+        Bitboard kAttack = Attack<PieceType::KING>(s);
+        kAttack &= position.Pieces(c, PieceType::KING);
+        value = makeCapture(kAttack);
+        if (stop)
+            return value;
+
         return 0;
     }
 
@@ -145,7 +151,7 @@ private:
         position.SimpleMakeMove(captureMove, undoInfo);
         int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(s, position);
         position.SimpleUndoMove(undoInfo);
-        return value > 0 ? value : 0;
+        return value;
     }
 
 private:
@@ -156,6 +162,7 @@ private:
     MoveGenerator move_generator_;
     Phase phase_;
     std::list<ScoreMove> moves_;
+    std::list<ScoreMove> bad_captures_;
 };
 
 #endif
