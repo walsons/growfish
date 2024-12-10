@@ -54,7 +54,7 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove()
         int score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
         if (score >= 0)
         {
-            // int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+            int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
             moves.push_back({ move, score });
         }
         else
