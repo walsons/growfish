@@ -36,7 +36,12 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     // auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
     // root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
 
-    for (int depth = 2; depth <= maxDepth; depth += 2)
+    int depth = 2;
+    if (maxDepth % 2)  // maxDepth is an odd number
+    {
+        depth = 1;
+    }
+    for (; depth <= maxDepth; depth += 2)
     {
         SearchStack ss[100];
         root_search(depth, ss);
