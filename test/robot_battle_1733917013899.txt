@@ -1,0 +1,38 @@
+rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1
+rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1 moves b2b6
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/RcBAKABNR w - - 0 1
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1 moves h7a7
+rnbakabnr/9/7c1/pCp1p1p1p/9/9/P1P1P1P1P/7C1/9/1RBAKABNR b - - 0 1 moves h7a7 b0b5
+rnbakabnr/9/9/pCp1p1p1p/1R7/9/c1P1P1P1P/7C1/9/2BAKABNR w - - 0 1
+rnbakabnr/9/9/pCp1p1p1p/1R7/9/c1P1P1P1P/7C1/9/2BAKABNR w - - 0 1 moves h2g2
+rnbakabnr/9/9/pCp1p1p1p/1R7/9/c1P1P1P1P/7C1/9/2BAKABNR w - - 0 1 moves h2g2 h9i7
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7 e9e8
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7 e9e8 b7b8
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7 e9e8 b7b8 e8e9
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7 e9e8 b7b8 e8e9 g2b2
+rnbakab1r/9/8n/p1p1C1p1p/1R7/9/c1P1P1P1P/6C2/9/2BAKABNR b - - 0 1 moves i9h9 b5b7 e9e8 b7b8 e8e9 g2b2 h9h5
+rCbakab2/1R7/8n/p1p1C1p1p/7r1/9/c1P1P1P1P/9/9/2BAKABNR b - - 0 1
+rCbakab2/1R7/8n/p1p1C1p1p/7r1/9/c1P1P1P1P/9/9/2BAKABNR b - - 0 1 moves h5e5
+rCbakab2/1R7/8n/p1p3p1C/4r4/9/c1P1P1P1P/9/9/2BAKABNR b - - 0 1
+rCbakab2/1R7/8n/p1p3p1C/9/9/c1P1r1P1P/9/9/2BAKABNR w - - 0 1
+rCbakab2/1R7/8n/p1p3p1C/9/9/c1P1r1P1P/9/9/2BAKABNR w - - 0 1 moves c0e2
+rCbakab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1
+r1bCkab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR b - - 0 1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1 moves h0i2
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1 moves h0i2 a3a0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1 moves h0i2 a3a0 d0e1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1 moves h0i2 a3a0 d0e1 c3c0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/c1r3P1P/4B4/9/3AKABNR w - - 0 1 moves h0i2 a3a0 d0e1 c3c0 e1d0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/9/c2rKAB1R w - - 0 1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/9/c2rKAB1R w - - 0 1 moves e0e1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1 moves i2h0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1 moves i2h0 d0d1
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1 moves i2h0 d0d1 e1e0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1 moves i2h0 d0d1 e1e0 d1d0
+r1bk1ab2/1R7/8n/p1p3p1C/9/9/6P1P/4B3N/4K4/3r1cB1R w - - 0 1 moves i2h0 d0d1 e1e0 d1d0 e0e1

@@ -364,17 +364,19 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 3.527s, search nodes 507662)
-        robot_battle_1729653504763.txt  (depth 4: timecost 3.628s, search nodes 541231)
-        robot_battle_1729666476581.txt  (depth 4: timecost 3.046s, search nodes 617630)
-        robot_battle_1729759105954.txt  (depth 4: timecost 3.048s, search nodes 478217)
-        robot_battle_1730124987011.txt  (depth 4: timecost 2.303s, search nodes 365825)
-        robot_battle_1730130702948.txt  (depth 4: timecost 3.681s, search nodes 560221)
-        robot_battle_1730422269049.txt  (depth 4: timecost 2.29s, search nodes 471385)
-        robot_battle_1732956559883.txt  (depth 4: timecost 5.331s, search nodes 970110)
-        robot_battle_1733750483345.txt  (depth 4: timecost 3.548s, search nodes 653135)
-        robot_battle_1733750496914.txt  (depth 4: timecost 4.316s, search nodes 905492)
-        All files cost time is: 34.718s
+        robot_battle.txt  (depth 4: timecost 2.899s, search nodes 388028)
+        robot_battle_1729653504763.txt  (depth 4: timecost 2.938s, search nodes 403666)
+        robot_battle_1729666476581.txt  (depth 4: timecost 2.812s, search nodes 527155)
+        robot_battle_1729759105954.txt  (depth 4: timecost 2.567s, search nodes 367930)
+        robot_battle_1730124987011.txt  (depth 4: timecost 1.866s, search nodes 294330)
+        robot_battle_1730130702948.txt  (depth 4: timecost 3.496s, search nodes 514876)
+        robot_battle_1730422269049.txt  (depth 4: timecost 2.122s, search nodes 433372)
+        robot_battle_1732956559883.txt  (depth 4: timecost 4.893s, search nodes 872369)
+        robot_battle_1733750483345.txt  (depth 4: timecost 3.036s, search nodes 533678)
+        robot_battle_1733750496914.txt  (depth 4: timecost 4.169s, search nodes 838602)
+        robot_battle_1733917013899.txt  (depth 4: timecost 3.526s, search nodes 811229)
+        robot_battle_1733917045094.txt  (depth 4: timecost 3.256s, search nodes 493377)
+        All files cost time is: 37.58s
         */
 
         if (argc == 4)
@@ -394,7 +396,9 @@ int main(int argc, char* argv[])
                 "robot_battle_1730422269049.txt",
                 "robot_battle_1732956559883.txt",
                 "robot_battle_1733750483345.txt",
-                "robot_battle_1733750496914.txt"
+                "robot_battle_1733750496914.txt",
+                "robot_battle_1733917013899.txt",
+                "robot_battle_1733917045094.txt"
             };
             double totalTime = 0;
             for (auto file : fileList)
