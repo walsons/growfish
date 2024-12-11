@@ -20,13 +20,21 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     HISTORY.Clear();
 
     root_moves_.clear();
-    MoveGenerator moveGenerator(root_position_);
-    auto checkMoves = moveGenerator.CheckMoves();
-    root_moves_.insert(root_moves_.end(), std::make_move_iterator(checkMoves.begin()), std::make_move_iterator(checkMoves.end()));
-    auto captureMoves = moveGenerator.CaptureMoves();
-    root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
-    auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
-    root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
+    Move emptyKillerMove[2] = {0, 0};
+    MovePicker rootMovePicker(root_position_, 0, emptyKillerMove);
+    Move move = rootMovePicker.NextMove();
+    while (move)
+    {
+        root_moves_.push_back(move);
+        move = rootMovePicker.NextMove();
+    }
+    // MoveGenerator moveGenerator(root_position_);
+    // auto checkMoves = moveGenerator.CheckMoves();
+    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(checkMoves.begin()), std::make_move_iterator(checkMoves.end()));
+    // auto captureMoves = moveGenerator.CaptureMoves();
+    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
+    // auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
+    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
 
     for (int depth = 2; depth <= maxDepth; depth += 2)
     {
