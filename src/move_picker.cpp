@@ -128,7 +128,8 @@ Move MovePicker::NextMove()
             break;
             case Phase::CAPTURE:
             {
-                // currently GenerateQuiescenceCaptureMove() is faster
+                // currently GenerateQuiescenceCaptureMove() is faster,
+                // however, GenerateCaptureMove() search less node
                 moves_ = GenerateQuiescenceCaptureMove();
                 // moves_ = GenerateCaptureMove();
                 phase_ = Phase::KILLER;
