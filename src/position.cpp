@@ -196,30 +196,9 @@ void Position::DisplayBoard()
 
 Square Position::KingSquare(Color c)
 {
-    Square kPos = SQ_NUM;
-    auto f = [&](Square beg, Square end, Piece k) {
-        for (Square s = beg; s <= end; s += SQ_EAST)
-        {
-            if (board_[s] == k)
-            {
-                kPos = s;
-                return true;
-            }
-        }
-        return false;
-    };
-    
-    if (c == Color::RED)
-    {
-        // Short-circuit when found
-        f(SQ_D0, SQ_F0, Piece::W_KING) || f(SQ_D1, SQ_F1, Piece::W_KING) || f(SQ_D2, SQ_F2, Piece::W_KING);
-    }
-    else
-    {
-        f(SQ_D7, SQ_F7, Piece::B_KING) || f(SQ_D8, SQ_F8, Piece::B_KING) || f(SQ_D9, SQ_F9, Piece::B_KING);
-    }
-    
-    return kPos;
+    Bitboard b = Pieces(c, PieceType::KING);
+    assert(b);
+    return PopLSB(b);
 }
 
 bool Position::IsEnemyChecked()
