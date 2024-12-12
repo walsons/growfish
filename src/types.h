@@ -119,7 +119,8 @@ enum class PieceType : char
     PIECE_TYPE_NUM,
 
     // A special case
-    KNIGHT_TO
+    KNIGHT_TO,
+    PAWN_TO
 };
 
 enum class Piece : char

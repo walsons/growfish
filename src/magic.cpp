@@ -27,5 +27,9 @@ template <>
 Bitboard AttackInitializer::PawnAttackBB<Color::RED>[SQ_NUM] = {};
 template <>
 Bitboard AttackInitializer::PawnAttackBB<Color::BLACK>[SQ_NUM] = {};
+template <>
+Bitboard AttackInitializer::PawnToAttackBB<Color::RED>[SQ_NUM] = {};
+template <>
+Bitboard AttackInitializer::PawnToAttackBB<Color::BLACK>[SQ_NUM] = {};
 Bitboard AttackInitializer::AdvisorAttackBB[SQ_NUM];
 Bitboard AttackInitializer::KingAttackBB[SQ_NUM];

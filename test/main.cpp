@@ -27,7 +27,8 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("rnbakabnr/9/7c1/p1p1C1p1p/9/9/P1P1P1P1P/1C4N2/9/1RBAKAB1R b - - 0 1 moves a6a5 b2b4");
     // position.SetPosition("r1ba1abnr/3k5/6c2/p3C1p1p/3RC4/9/P3P1P1P/6N2/9/1RBAKAB2 b - - 0 1 moves g7d7 e6d6 d8e8 e5e4");
     // position.SetPosition("r1b1kabnr/4a4/2C6/4C1pRp/p8/9/P1P1PnP1P/6n2/9/1RBAKAB2 b - - 0 1 moves e8f7 h6h5 a9a7 c7c4 g6g5 b0b1 f3e1 c4e4 e9d9 b1d1");
-    position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
+    // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
+    position.SetPosition("3akab2/3P5/4b4/9/3n1Np2/9/4P4/4B4/9/3AKAB2 b - - 0 1");
 
     position.DisplayBoard();
     // std::cout << position.GenerateFen() << std::endl;
@@ -367,21 +368,21 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 2.858s, search nodes 385516)
-        robot_battle_1729653504763.txt  (depth 4: timecost 2.843s, search nodes 398241)
-        robot_battle_1729666476581.txt  (depth 4: timecost 2.576s, search nodes 538923)
-        robot_battle_1729759105954.txt  (depth 4: timecost 2.331s, search nodes 339191)
-        robot_battle_1730124987011.txt  (depth 4: timecost 1.676s, search nodes 292825)
-        robot_battle_1730130702948.txt  (depth 4: timecost 3.074s, search nodes 487000)
-        robot_battle_1730422269049.txt  (depth 4: timecost 1.867s, search nodes 410612)
-        robot_battle_1732956559883.txt  (depth 4: timecost 4.341s, search nodes 838470)
-        robot_battle_1733750483345.txt  (depth 4: timecost 2.796s, search nodes 525010)
-        robot_battle_1733750496914.txt  (depth 4: timecost 3.648s, search nodes 804729)
-        robot_battle_1733917013899.txt  (depth 4: timecost 3.201s, search nodes 802870)
-        robot_battle_1733917045094.txt  (depth 4: timecost 3.038s, search nodes 501770)
-        robot_battle_1733922523712.txt  (depth 4: timecost 6.071s, search nodes 1072983)
-        robot_battle_1733924013886.txt  (depth 4: timecost 5.824s, search nodes 1068267)
-        All files cost time is: 46.144s
+        robot_battle.txt  (depth 4: timecost 2.572s, search nodes 385516)
+        robot_battle_1729653504763.txt  (depth 4: timecost 2.588s, search nodes 398241)
+        robot_battle_1729666476581.txt  (depth 4: timecost 2.362s, search nodes 538923)
+        robot_battle_1729759105954.txt  (depth 4: timecost 2.137s, search nodes 339191)
+        robot_battle_1730124987011.txt  (depth 4: timecost 1.537s, search nodes 292825)
+        robot_battle_1730130702948.txt  (depth 4: timecost 2.813s, search nodes 487000)
+        robot_battle_1730422269049.txt  (depth 4: timecost 1.725s, search nodes 410612)
+        robot_battle_1732956559883.txt  (depth 4: timecost 3.955s, search nodes 838470)
+        robot_battle_1733750483345.txt  (depth 4: timecost 2.602s, search nodes 525010)
+        robot_battle_1733750496914.txt  (depth 4: timecost 3.376s, search nodes 804729)
+        robot_battle_1733917013899.txt  (depth 4: timecost 2.963s, search nodes 802870)
+        robot_battle_1733917045094.txt  (depth 4: timecost 2.773s, search nodes 501770)
+        robot_battle_1733922523712.txt  (depth 4: timecost 5.579s, search nodes 1072983)
+        robot_battle_1733924013886.txt  (depth 4: timecost 5.383s, search nodes 1068267)
+        All files cost time is: 42.365s
         */
 
         if (argc == 4)
