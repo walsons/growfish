@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "bitboard.h"
+#include "magic.h"
 
 void Position::SetPosition(const std::string& fen)
 {
@@ -197,6 +198,8 @@ void Position::DisplayBoard()
 Square Position::KingSquare(Color c)
 {
     Bitboard b = Pieces(c, PieceType::KING);
+    if (b == 0)
+        DisplayBoard();
     assert(b);
     return PopLSB(b);
 }
@@ -214,88 +217,120 @@ bool Position::IsSelfChecked()
 bool Position::IsChecked(Color c)
 {
     Square kPos = KingSquare(c);
-
     /***** Pawn *****/
     if (c == Color::RED)
     {
-        if (board_[kPos + SQ_NORTH] == Piece::B_PAWN || board_[kPos + SQ_EAST] == Piece::B_PAWN || board_[kPos + SQ_WEST] == Piece::B_PAWN)
+        if (Attack<PieceType::PAWN_TO, Color::BLACK>(kPos) & Pieces(Color::BLACK, PieceType::PAWN))
             return true;
     }
     else
     {
-        if (board_[kPos + SQ_SOUTH] == Piece::W_PAWN || board_[kPos + SQ_EAST] == Piece::W_PAWN || board_[kPos + SQ_WEST] == Piece::W_PAWN)
+        if (Attack<PieceType::PAWN_TO, Color::RED>(kPos) & Pieces(Color::RED, PieceType::PAWN))
             return true;
     }
 
-    /***** Rook, Cannon, King *****/
-    auto f1 = [&](Direction d, decltype(IsNotNorthEnd) f) {
-        int flag = 0;  // How many pieces in the middle
-        for (Square pos = kPos + d; f(pos, kPos); pos += d)
-        {
-            if (board_[pos] != Piece::NO_PIECE)
-            {
-                if (flag == 0)
-                {
-                    // Rook
-                    if ((c == Color::RED && board_[pos] == Piece::B_ROOK) || (c == Color::BLACK && board_[pos] == Piece::W_ROOK))
-                        return true;
-                    // King
-                    if ((c == Color::RED && board_[pos] == Piece::B_KING) || (c == Color::BLACK && board_[pos] == Piece::W_KING))
-                        return true;
-                }
-                else if (flag == 1)
-                {
-                    // Cannon
-                    if ((c == Color::RED && board_[pos] == Piece::B_CANNON) || (c == Color::BLACK && board_[pos] == Piece::W_CANNON))
-                        return true;
-                }
-                ++flag;
-            }
-        }
-        return false;
-    };
-    if (f1(SQ_NORTH, IsNotNorthEnd)) { return true; }
-    if (f1(SQ_SOUTH, IsNotSouthEnd)) { return true; }
-    if (f1(SQ_EAST, IsNotEastEnd)) { return true; }
-    if (f1(SQ_WEST, IsNotWestEnd)) { return true; }
+    /***** Rook *****/
+    if (Attack<PieceType::ROOK>(AllPieces(), kPos) & Pieces(!c, PieceType::ROOK))
+        return true;
+
+    /**** King *****/
+    if (Attack<PieceType::ROOK>(AllPieces(), kPos) & Pieces(!c, PieceType::KING))
+        return true;
+
+    /***** Cannon *****/
+    if (Attack<PieceType::CANNON>(AllPieces(), kPos) & Pieces(!c, PieceType::CANNON))
+        return true;
 
     /***** Knight *****/
-    auto f2 = [&](Square barrier, Square destination1, Square destination2) {
-        if (SQ_A0 <= barrier && barrier < SQ_NUM && Distance(kPos, barrier) == 1 && board_[barrier] == Piece::NO_PIECE)
-        {
-            if (SQ_A0 <= destination1 && destination1 < SQ_NUM && Distance(kPos, destination1) == 2 && 
-                ((side_to_move() == Color::RED && board_[destination1] == Piece::B_KNIGHT) || (side_to_move() == Color::BLACK && board_[destination1] == Piece::W_KNIGHT)))
-            {
-                return true;
-            }
-            if (SQ_A0 <= destination2 && destination2 < SQ_NUM && Distance(kPos, destination2) == 2 && 
-                ((side_to_move() == Color::RED && board_[destination2] == Piece::B_KNIGHT) || (side_to_move() == Color::BLACK && board_[destination2] == Piece::W_KNIGHT)))
-            {
-                return true;
-            }
-        }
-        return false;
-    };
-    // North East
-    Square barrier = kPos + SQ_NORTH + SQ_EAST;
-    Square destination1 = kPos + static_cast<Square>(2) * SQ_NORTH + SQ_EAST;
-    Square destination2 = kPos + static_cast<Square>(2) * SQ_EAST + SQ_NORTH;
-    if (f2(barrier, destination1, destination2)) { return true; }
-    // South East
-    barrier = kPos + SQ_SOUTH + SQ_EAST;
-    destination1 = kPos + static_cast<Square>(2) * SQ_SOUTH + SQ_EAST;
-    destination2 = kPos + static_cast<Square>(2) * SQ_EAST + SQ_SOUTH;
-    if (f2(barrier, destination1, destination2)) { return true; }
-    // North West
-    barrier = kPos + SQ_NORTH + SQ_WEST;
-    destination1 = kPos + static_cast<Square>(2) * SQ_NORTH + SQ_WEST;
-    destination2 = kPos + static_cast<Square>(2) * SQ_WEST + SQ_NORTH;
-    if (f2(barrier, destination1, destination2)) { return true; }
-    // South West
-    barrier = kPos + SQ_SOUTH + SQ_WEST;
-    destination1 = kPos + static_cast<Square>(2) * SQ_SOUTH + SQ_WEST;
-    destination2 = kPos + static_cast<Square>(2) * SQ_WEST + SQ_SOUTH;
-    if (f2(barrier, destination1, destination2)) { return true; }
+    if (Attack<PieceType::KNIGHT_TO>(AllPieces(), kPos) & Pieces(!c, PieceType::KNIGHT))
+        return true;
+
+    
+
+
+    // Square kPos = KingSquare(c);
+
+    /***** Pawn *****/
+    // if (c == Color::RED)
+    // {
+    //     if (board_[kPos + SQ_NORTH] == Piece::B_PAWN || board_[kPos + SQ_EAST] == Piece::B_PAWN || board_[kPos + SQ_WEST] == Piece::B_PAWN)
+    //         return true;
+    // }
+    // else
+    // {
+    //     if (board_[kPos + SQ_SOUTH] == Piece::W_PAWN || board_[kPos + SQ_EAST] == Piece::W_PAWN || board_[kPos + SQ_WEST] == Piece::W_PAWN)
+    //         return true;
+    // }
+
+    /***** Rook, Cannon, King *****/
+    // auto f1 = [&](Direction d, decltype(IsNotNorthEnd) f) {
+    //     int flag = 0;  // How many pieces in the middle
+    //     for (Square pos = kPos + d; f(pos, kPos); pos += d)
+    //     {
+    //         if (board_[pos] != Piece::NO_PIECE)
+    //         {
+    //             if (flag == 0)
+    //             {
+    //                 // Rook
+    //                 if ((c == Color::RED && board_[pos] == Piece::B_ROOK) || (c == Color::BLACK && board_[pos] == Piece::W_ROOK))
+    //                     return true;
+    //                 // King
+    //                 if ((c == Color::RED && board_[pos] == Piece::B_KING) || (c == Color::BLACK && board_[pos] == Piece::W_KING))
+    //                     return true;
+    //             }
+    //             else if (flag == 1)
+    //             {
+    //                 // Cannon
+    //                 if ((c == Color::RED && board_[pos] == Piece::B_CANNON) || (c == Color::BLACK && board_[pos] == Piece::W_CANNON))
+    //                     return true;
+    //             }
+    //             ++flag;
+    //         }
+    //     }
+    //     return false;
+    // };
+    // if (f1(SQ_NORTH, IsNotNorthEnd)) { return true; }
+    // if (f1(SQ_SOUTH, IsNotSouthEnd)) { return true; }
+    // if (f1(SQ_EAST, IsNotEastEnd)) { return true; }
+    // if (f1(SQ_WEST, IsNotWestEnd)) { return true; }
+
+    /***** Knight *****/
+    // auto f2 = [&](Square barrier, Square destination1, Square destination2) {
+    //     if (SQ_A0 <= barrier && barrier < SQ_NUM && Distance(kPos, barrier) == 1 && board_[barrier] == Piece::NO_PIECE)
+    //     {
+    //         if (SQ_A0 <= destination1 && destination1 < SQ_NUM && Distance(kPos, destination1) == 2 && 
+    //             ((side_to_move() == Color::RED && board_[destination1] == Piece::B_KNIGHT) || (side_to_move() == Color::BLACK && board_[destination1] == Piece::W_KNIGHT)))
+    //         {
+    //             return true;
+    //         }
+    //         if (SQ_A0 <= destination2 && destination2 < SQ_NUM && Distance(kPos, destination2) == 2 && 
+    //             ((side_to_move() == Color::RED && board_[destination2] == Piece::B_KNIGHT) || (side_to_move() == Color::BLACK && board_[destination2] == Piece::W_KNIGHT)))
+    //         {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // };
+    // // North East
+    // Square barrier = kPos + SQ_NORTH + SQ_EAST;
+    // Square destination1 = kPos + static_cast<Square>(2) * SQ_NORTH + SQ_EAST;
+    // Square destination2 = kPos + static_cast<Square>(2) * SQ_EAST + SQ_NORTH;
+    // if (f2(barrier, destination1, destination2)) { return true; }
+    // // South East
+    // barrier = kPos + SQ_SOUTH + SQ_EAST;
+    // destination1 = kPos + static_cast<Square>(2) * SQ_SOUTH + SQ_EAST;
+    // destination2 = kPos + static_cast<Square>(2) * SQ_EAST + SQ_SOUTH;
+    // if (f2(barrier, destination1, destination2)) { return true; }
+    // // North West
+    // barrier = kPos + SQ_NORTH + SQ_WEST;
+    // destination1 = kPos + static_cast<Square>(2) * SQ_NORTH + SQ_WEST;
+    // destination2 = kPos + static_cast<Square>(2) * SQ_WEST + SQ_NORTH;
+    // if (f2(barrier, destination1, destination2)) { return true; }
+    // // South West
+    // barrier = kPos + SQ_SOUTH + SQ_WEST;
+    // destination1 = kPos + static_cast<Square>(2) * SQ_SOUTH + SQ_WEST;
+    // destination2 = kPos + static_cast<Square>(2) * SQ_WEST + SQ_SOUTH;
+    // if (f2(barrier, destination1, destination2)) { return true; }
 
     return false;
 }

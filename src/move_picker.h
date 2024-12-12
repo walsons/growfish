@@ -94,7 +94,7 @@ private:
             return 0;
         };
 
-        Bitboard pAttack = Attack<PieceType::PAWN, !c>(s);
+        Bitboard pAttack = Attack<PieceType::PAWN_TO, c>(s);
         pAttack &= position.Pieces(c, PieceType::PAWN);
         int value = makeCapture(pAttack);
         if (stop)

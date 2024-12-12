@@ -866,6 +866,23 @@ private:
             }
         }
         PawnAttackBB<c>[s] = b;
+
+        Square tto[3] = { s + SQ_WEST, s + (c  == Color::RED ? SQ_SOUTH: SQ_NORTH), s + SQ_EAST };
+        Bitboard tb = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            if (i == 1)  // forward
+            {
+                if (tto[i] >= SQ_A0 && tto[i] < SQ_NUM)
+                    tb |= SquareBB(tto[i]);
+            }
+            else  // west and east
+            {
+                if (Distance(s, tto[i]) <= 1 && (tto[i] >= SQ_BEG && tto[i] < SQ_END))
+                    tb |= SquareBB(tto[i]);
+            }
+        }
+        PawnToAttackBB<c>[s] = tb;
     }
 
     void init_advisor_attack(Square s) const
@@ -899,6 +916,8 @@ private:
 public:
     template <Color c>
     static Bitboard PawnAttackBB[SQ_NUM];
+    template <Color c>
+    static Bitboard PawnToAttackBB[SQ_NUM];
     static Bitboard AdvisorAttackBB[SQ_NUM];
     static Bitboard KingAttackBB[SQ_NUM];
 };
@@ -918,8 +937,11 @@ Bitboard Attack(Bitboard occupies, Square s)
 template <PieceType pt, Color c>
 Bitboard Attack(Square s)
 {
-    static_assert(pt == PieceType::PAWN);
-    return AttackInitializer::PawnAttackBB<c>[s];
+    static_assert(pt == PieceType::PAWN || pt == PieceType::PAWN_TO);
+    if (pt == PieceType::PAWN)
+        return AttackInitializer::PawnAttackBB<c>[s];
+    else
+        return AttackInitializer::PawnToAttackBB<c>[s];
 }
 
 template <PieceType pt>
