@@ -106,9 +106,9 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
 {
     ++Search::search_nodes;
     TTEntry* ttEntry = TT[position.key()];
-    if (ttEntry != nullptr && ttEntry->depth == depth)
+    if (ttEntry != nullptr && TT.CanUseTT(ttEntry, depth, ply, beta))
     {
-        return ttEntry->value;
+        return TT.AdjustGetValue(ttEntry->value, ply);
     }
 
     MovePicker movePicker(position, ttEntry != nullptr ? ttEntry->move : Move(), ss[ply].killer_move);
@@ -116,19 +116,24 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     if (move == 0) 
     {
         auto score = -MateValue + ply;
-        TT.Store(position.key(), score, depth, 0);
+        TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, 0, ValueType::EXACT);
         // We like choose fastest checkmate in search
         return score;
     }
 
     if (depth == 0)
     {
-        // auto score = Evaluate::Eval(position);
-        auto score = qsearch(position, alpha, beta, ss, ply);
-        TT.Store(position.key(), score, depth, 0);
+        auto score = qsearch(position, alpha, beta, ss, ply + 1);
         return score;
     }
 
+    // Mate distance pruning
+    alpha = std::max(alpha, -MateValue + ply);
+    beta = std::min(beta, MateValue - ply - 1);
+    if (alpha >= beta)
+        return alpha;
+
+    // int oldAlpha = alpha;
     while (move)
     {
         UndoInfo undoInfo;
@@ -137,7 +142,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
         position.UndoMove(undoInfo);
         if (score >= beta)
         {
-            TT.Store(position.key(), beta, depth, move);
+            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::LOWER_BOUND);
             // Only non capture move do history and as killer move 
             if (position.piece_from_square(move.MoveTo()) == Piece::NO_PIECE)
             {
@@ -148,7 +153,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
                     ss[ply].killer_move[0] = move;
                 }
             }
-            return beta;
+            return score;
         }
         else if (score > alpha)
         {
@@ -157,10 +162,14 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
             ss[ply].pv.clear();
             ss[ply].pv.push_back(ss[ply].current_move);
             ss[ply].pv.insert(ss[ply].pv.end(), ss[ply + 1].pv.begin(), ss[ply + 1].pv.end());
-            TT.Store(position.key(), score, depth, move);
+            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::EXACT);
         }
         move = movePicker.NextMove();
     }
+    // if alpha is not updated, it's a upperbound of this node
+    // if (oldAlpha == alpha)
+    //     TT.Store(position.key(), TT.AdjustSetValue(alpha, ply), depth, 0, ValueType::UPPER_BOUND);
+    
     return alpha;
 }
 
@@ -170,7 +179,7 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
     auto score = Evaluate::Eval(position);
     if (score >= beta)
     {
-        return beta;
+        return score;
     }
     else if (score > alpha)
     {
@@ -179,6 +188,8 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
     Move killerMove[2] = {0, 0};
     if (MovePicker(position, 0, killerMove).NextMove() == 0)
     {
+        auto score = -MateValue + ply;
+        TT.Store(position.key(), TT.AdjustSetValue(score, ply), 0, 0, ValueType::EXACT);
         return -MateValue + ply;
     }
     MovePicker movePicker(position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);

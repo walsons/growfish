@@ -2,13 +2,22 @@
 #define TRANSPOSITION_TABLE_H
 
 #include "structures.h"
+#include "evaluate.h"
+
+enum class ValueType : char
+{
+    UNKNOWN = 0b00,
+    LOWER_BOUND = 0b01,
+    UPPER_BOUND = 0b10,
+    EXACT = 0b11
+};
 
 class TTEntry
 {
 public:
-    TTEntry() : key(0), value(0), depth(0), generation(0), move(0) {}
-    TTEntry(U64 p_key, int p_value, int p_depth, int p_generation, Move p_move)
-        : key(p_key), value(p_value), depth(p_depth), generation(p_generation), move(p_move)
+    TTEntry() : key(0), value(0), depth(0), generation(0), move(0), type(ValueType::UNKNOWN) {}
+    TTEntry(U64 p_key, int p_value, int p_depth, int p_generation, Move p_move, ValueType p_type)
+        : key(p_key), value(p_value), depth(p_depth), generation(p_generation), move(p_move), type(p_type)
     {
     }
 
@@ -18,6 +27,7 @@ public:
     int depth;
     int generation;
     Move move;
+    ValueType type;
 };
 
 class TranspositionTable
@@ -26,8 +36,43 @@ public:
     TranspositionTable(size_t sizeOfMB);
     void NewSearch();
     void Clear();
-    void Store(U64 key, int value, int depth, Move move);
+    void Store(U64 key, int value, int depth, Move move, ValueType type);
     TTEntry* operator[](U64 key);
+
+    // EXACT is considered as both lower and upper bound
+    bool IsLowerBound(TTEntry* ttEntry) { return int(ttEntry->type) & int(ValueType::LOWER_BOUND); }
+    bool IsUpperBound(TTEntry* ttEntry) { return int(ttEntry->type) & int(ValueType::UPPER_BOUND); }
+
+    int AdjustSetValue(int value, int ply)
+    {
+        if (value > MateValue - 100)
+            return value + ply;
+        if (value < -MateValue + 100)
+            return value - ply;
+        return value;
+    }
+    int AdjustGetValue(int value, int ply)
+    {
+        if (value > MateValue - 100)
+            return value - ply;
+        if (value < -MateValue + 100)
+            return value + ply;
+        return value;
+    }
+    bool CanUseTT(TTEntry* ttEntry, int depth, int ply, int beta)
+    {
+        int v = AdjustGetValue(ttEntry->value, ply);
+        return (ttEntry->depth >= depth
+                || v > MateValue - 100
+                || v < -MateValue + 100
+                // || v >= std::max(MateValue - 100, beta)
+                // || v < std::min(-MateValue + 100, beta)
+               )
+               && 
+               ((IsLowerBound(ttEntry) && v >= beta)
+                || (IsUpperBound(ttEntry) && v < beta)
+               );
+    }
 
 private:
     size_t size_;

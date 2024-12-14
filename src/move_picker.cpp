@@ -63,7 +63,7 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove()
     return moves;
 }
 
-std::list<ScoreMove> MovePicker::GenerateQuiescenceCaptureMove()
+std::list<ScoreMove> MovePicker::GenerateCaptureMove_only_mvv_lva()
 {
     std::list<ScoreMove> moves;
     auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
@@ -128,9 +128,9 @@ Move MovePicker::NextMove()
             break;
             case Phase::CAPTURE:
             {
-                // currently GenerateQuiescenceCaptureMove() is faster,
+                // currently GenerateCaptureMove_only_mvv_lva is faster,
                 // however, GenerateCaptureMove() search less node
-                moves_ = GenerateQuiescenceCaptureMove();
+                moves_ = GenerateCaptureMove_only_mvv_lva();
                 // moves_ = GenerateCaptureMove();
                 phase_ = Phase::KILLER;
             }
@@ -158,7 +158,7 @@ Move MovePicker::NextMove()
             break;
             case Phase::QSEARCH_CAPTURE:
             {
-                moves_ = GenerateQuiescenceCaptureMove();
+                moves_ = GenerateCaptureMove();
                 phase_ = Phase::END;
             }
             break;
