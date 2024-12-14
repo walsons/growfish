@@ -65,12 +65,10 @@ public:
         return (ttEntry->depth >= depth
                 || v > MateValue - 100
                 || v < -MateValue + 100
-                // || v >= std::max(MateValue - 100, beta)
-                // || v < std::min(-MateValue + 100, beta)
                )
                && 
                ((IsLowerBound(ttEntry) && v >= beta)
-                || (IsUpperBound(ttEntry) && v < beta)
+                // || (IsUpperBound(ttEntry) && v < beta) I have no idea why this would cause some cases incorrect
                );
     }
 
