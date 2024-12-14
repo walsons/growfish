@@ -11,6 +11,7 @@ void Position::SetPosition(const std::string& fen)
     std::memset(by_type_bb_, 0, sizeof(Bitboard) * NUM(PieceType::PIECE_TYPE_NUM));
     std::memset(by_color_bb_, 0, sizeof(Bitboard) * NUM(Color::COLOR_NUM));
     std::memset(piece_count_, 0, sizeof(int) * NUM(Piece::PIECE_NUM));
+    key_ = 0;
 
     std::istringstream ss(fen);
 
