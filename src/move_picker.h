@@ -70,7 +70,7 @@ public:
 private:
     std::list<ScoreMove> GenerateCheckMove();
     std::list<ScoreMove> GenerateCaptureMove();
-    std::list<ScoreMove> GenerateQuiescenceCaptureMove();
+    std::list<ScoreMove> GenerateCaptureMove_only_mvv_lva();
     std::list<ScoreMove> GenerateNonCaptureMove();
 
     template <Color c>

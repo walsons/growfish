@@ -18,7 +18,7 @@ void TranspositionTable::NewSearch() { generation_++; }
 
 void TranspositionTable::Clear() { std::memset((void*)tt_entry_, 0, size_ * sizeof(TTEntry) * 4); }
 
-void TranspositionTable::Store(U64 key, int value, int depth, Move move)
+void TranspositionTable::Store(U64 key, int value, int depth, Move move, ValueType type)
 {
     int index = (key & (size_ - 1) * same_key_item_num);
     TTEntry* replace = &tt_entry_[index];
@@ -38,7 +38,7 @@ void TranspositionTable::Store(U64 key, int value, int depth, Move move)
             }
         }
     }
-    *replace = TTEntry{key, value, depth, generation_, move};
+    *replace = TTEntry{key, value, depth, generation_, move, type};
 }
 
 TTEntry* TranspositionTable::operator[](U64 key)
