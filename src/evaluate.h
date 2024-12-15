@@ -75,5 +75,14 @@ private:
         return OneCount(position.Pieces(Color::RED, pt)) * PieceValue<pt> - OneCount(position.Pieces(Color::BLACK, pt)) * PieceValue<pt>;
     }
 };
+// Pawn that across to river gain double score
+template <>
+inline int Evaluate::ScoreCalculator<PieceType::PAWN>(const Position& position)
+{
+    Bitboard redPawnBB = position.Pieces(Color::RED, PieceType::PAWN);
+    Bitboard blackPawnBB = position.Pieces(Color::BLACK, PieceType::PAWN);
+    return ((OneCount(redPawnBB & BlackRegion) * 2 + OneCount(redPawnBB & RedRegion)) - (OneCount(blackPawnBB & RedRegion) * 2 + OneCount(blackPawnBB & BlackRegion)))
+           * PieceValue<PieceType::PAWN>;
+}
 
 #endif

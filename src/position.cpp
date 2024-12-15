@@ -161,7 +161,7 @@ void Position::SimpleUndoMove(const UndoInfo& undoInfo)
     put_piece(undoInfo.piece, to);
 }
 
-void Position::DisplayBoard()
+void Position::DisplayBoard() const
 {
     std::string boardStr;
     std::string segStr;

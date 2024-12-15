@@ -42,7 +42,7 @@ inline Bitboard FileBB(File f) { return FileABB << f; }
 inline Bitboard RankBB(Rank r) { return Rank0BB << (FILE_NB * r); }
 
 constexpr Bitboard RedRegion = Rank0BB | Rank1BB | Rank2BB | Rank3BB | Rank4BB;
-constexpr Bitboard BlackRegin = Rank5BB | Rank6BB | Rank7BB | Rank8BB | Rank9BB;
+constexpr Bitboard BlackRegion = Rank5BB | Rank6BB | Rank7BB | Rank8BB | Rank9BB;
 
 // Return the least significant bit in a non-zero bitboard
 inline Square LSB(Bitboard b) {
