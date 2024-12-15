@@ -53,7 +53,7 @@ public:
     void SimpleMakeMove(Move move, UndoInfo& undoInfo);
     void SimpleUndoMove(const UndoInfo& undoInfo);
 
-    void DisplayBoard();
+    void DisplayBoard() const;
 
     Square KingSquare(Color c);
     bool IsEnemyChecked();

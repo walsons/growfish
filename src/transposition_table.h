@@ -68,7 +68,7 @@ public:
                )
                && 
                ((IsLowerBound(ttEntry) && v >= beta)
-                // || (IsUpperBound(ttEntry) && v < beta) I have no idea why this would cause some cases incorrect
+                || (IsUpperBound(ttEntry) && v < beta) // I have no idea why this would cause some cases incorrect
                );
     }
 
