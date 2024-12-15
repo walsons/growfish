@@ -1,27 +1,27 @@
 #include "evaluate.h"
 
 constexpr int GameStartRookMoveBonus[90] = {
-    0, 2, 0, 0, 0, 0, 0, 2, 0,
-    1, 2, 0, 0, 0, 0, 0, 2, 1,
-    1, 2, 0, 0, 0, 0, 0, 2, 1,
-    0, 2, 0, 0, 0, 0, 0, 2, 0,
-    0, 5, 0, 5, 0, 5, 0, 5, 0,
-    0, 5, 0, 5, 0, 5, 0, 5, 0,
-    0, 2, 0, 0, 0, 0, 0, 2, 0,
-    1, 2, 0, 0, 0, 0, 0, 2, 1,
-    1, 2, 0, 0, 0, 0, 0, 2, 1,
-    0, 2, 0, 0, 0, 0, 0, 2, 0,
+    0, 20, 0, 0, 0, 0, 0, 20, 0,
+    10, 20, 0, 0, 0, 0, 0, 20, 10,
+    10, 20, 0, 0, 0, 0, 0, 20, 10,
+    0, 20, 0, 0, 0, 0, 0, 20, 0,
+    0, 30, 0, 50, 0, 50, 0, 30, 0,
+    0, 30, 0, 50, 0, 50, 0, 30, 0,
+    0, 20, 0, 0, 0, 0, 0, 20, 0,
+    10, 20, 0, 0, 0, 0, 0, 20, 10,
+    10, 20, 0, 0, 0, 0, 0, 20, 10,
+    0, 20, 0, 0, 0, 0, 0, 20, 0,
 };
 
 constexpr int GameStartKnightMoveBonus[90] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 0, 1, 0, 0, 0, 1, 0, 1,
-    0, 0, 0, 0, 2, 0, 0, 0, 0,
-    0, 1, 0, 2, 0, 2, 0, 1, 0,
-    0, 1, 0, 2, 0, 2, 0, 1, 0,
-    0, 0, 0, 0, 2, 0, 0, 0, 0,
-    1, 0, 1, 0, 0, 0, 1, 0, 1,
+    10, 0, 10, 0, 0, 0, 10, 0, 10,
+    0, 0, 0, 0, 20, 0, 0, 0, 0,
+    0, 10, 0, 20, 0, 20, 0, 1, 0,
+    0, 10, 0, 20, 0, 20, 0, 1, 0,
+    0, 0, 0, 0, 20, 0, 0, 0, 0,
+    10, 0, 10, 0, 0, 0, 10, 0, 10,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
@@ -40,11 +40,41 @@ int Evaluate::Eval(const Position& position)
     score += ScoreCalculator<PieceType::KING>(position);
 
     // Addition score
-    // 1. Piece in enemy region gain extra 10 score
+    // Piece in enemy region gain extra 10 score
     score += OneCount(position.Pieces(Color::RED) & BlackRegion) * 10;
     score -= OneCount(position.Pieces(Color::BLACK) & RedRegion) * 10;
-    // 2. In order to encourage rook and knight move forward
-    // TODO...
+    // Enemy has two advisor, increase own cannon value
+    // if (OneCount(position.Pieces(Color::BLACK, PieceType::ADVISOR)) == 2)
+    //     score += OneCount(position.Pieces(Color::RED, PieceType::CANNON) * 30);
+    // if (OneCount(position.Pieces(Color::RED, PieceType::ADVISOR)) == 2)
+    //     score += OneCount(position.Pieces(Color::BLACK, PieceType::CANNON) * 30);
+
+    // In order to encourage rook and knight move forward
+    // if (position.piece_count() > 28)
+    // {
+    //     Bitboard rbb = position.Pieces(Color::RED, PieceType::ROOK);
+    //     while (rbb)
+    //     {
+    //         score += GameStartRookMoveBonus[NUM(PopLSB(rbb))];
+    //     }
+    //     rbb = position.Pieces(Color::BLACK, PieceType::ROOK);
+    //     while (rbb)
+    //     {
+    //         score -= GameStartRookMoveBonus[NUM(PopLSB(rbb))];
+    //     }
+    //     Bitboard nbb = position.Pieces(Color::RED, PieceType::KNIGHT);
+    //     while (nbb)
+    //     {
+    //         score += GameStartKnightMoveBonus[NUM(PopLSB(nbb))];
+    //     }
+    //     nbb = position.Pieces(Color::BLACK, PieceType::KNIGHT);
+    //     while (nbb)
+    //     {
+    //         score -= GameStartKnightMoveBonus[NUM(PopLSB(nbb))];
+    //     }
+    // }
+
+
     // 3. Cannon and enemy king in the same line, gain extra 50 score
     // Bitboard redCannonB = position.Pieces(Color::RED, PieceType::CANNON);
     // Bitboard blackKingB = position.Pieces(Color::BLACK, PieceType::KING);

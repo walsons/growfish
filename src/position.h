@@ -68,6 +68,8 @@ public:
     U64 key() const { return key_; }
     Color side_to_move() const { return side_to_move_; }
 
+    int piece_count() const { return 90 - piece_count_[NUM(Piece::NO_PIECE)]; }
+
     template <typename... PieceTypes>
     Bitboard Pieces(PieceType pt, PieceTypes... pts) const
     {
