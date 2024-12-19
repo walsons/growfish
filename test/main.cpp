@@ -13,6 +13,7 @@
 
 constexpr int kSearchDepth = 4;
 
+#include "../src/book.h"
 void Test(int searchDepth = kSearchDepth)
 {
     Position position;
@@ -28,7 +29,6 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("r1ba1abnr/3k5/6c2/p3C1p1p/3RC4/9/P3P1P1P/6N2/9/1RBAKAB2 b - - 0 1 moves g7d7 e6d6 d8e8 e5e4");
     // position.SetPosition("r1b1kabnr/4a4/2C6/4C1pRp/p8/9/P1P1PnP1P/6n2/9/1RBAKAB2 b - - 0 1 moves e8f7 h6h5 a9a7 c7c4 g6g5 b0b1 f3e1 c4e4 e9d9 b1d1");
     // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
-    position.SetPosition("3akab2/3P5/4b4/9/3n1Np2/9/4P4/4B4/9/3AKAB2 b - - 0 1");
 
     position.DisplayBoard();
     // std::cout << position.GenerateFen() << std::endl;

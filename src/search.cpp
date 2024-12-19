@@ -7,9 +7,11 @@
 #include "transposition_table.h"
 #include "history.h"
 #include "move_picker.h"
+#include "book.h"
 
 extern TranspositionTable TT;
 extern History HISTORY;
+extern Book BOOK;
 
 unsigned long long Search::search_nodes = 0;
 
@@ -35,6 +37,17 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     // root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
     // auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
     // root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
+
+    auto fen = root_position_.GenerateFen();
+    assert(fen.size() > 8);
+    fen = fen.substr(0, fen.size() - 8);
+    Move bookMove = BOOK.SearchBestMove(fen);
+    if (bookMove != 0)
+    {
+        best_move_ = bookMove;
+        best_score_ = 1234;
+        return;
+    }
 
     int depth = 2;
     if (maxDepth % 2)  // maxDepth is an odd number
