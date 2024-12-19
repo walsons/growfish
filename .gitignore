@@ -1,2 +1,4 @@
 .vscode
 build
+book/venv
+book/pikafish*
