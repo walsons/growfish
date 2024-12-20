@@ -46,7 +46,7 @@ void Engine()
             {
                 std::string depth;
                 ss >> depth;
-                depth = "7"; // currently we fix depth to 4
+                depth = "7"; // currently we fix depth to 7
 
                 Search search(position);
 
@@ -58,6 +58,14 @@ void Engine()
 
                 std::cout << "time cost:" << duration << std::endl;
                 std::cout << "bestmove:" << Move2String(search.best_move()) << ", score:" << search.best_score() << std::endl;
+            }
+            else if (token == "d")
+            {
+                position.DisplayBoard();
+            }
+            else if (token == "dd")
+            {
+                position.DisplayBoard(true);
             }
         }
         if (flag)

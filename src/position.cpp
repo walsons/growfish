@@ -161,7 +161,7 @@ void Position::SimpleUndoMove(const UndoInfo& undoInfo)
     put_piece(undoInfo.piece, to);
 }
 
-void Position::DisplayBoard() const
+void Position::DisplayBoard(bool reverse) const
 {
     std::string boardStr;
     std::string segStr;
@@ -177,23 +177,47 @@ void Position::DisplayBoard() const
     }
     boardStr = segStr + boardStr;
 
-    std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
+    std::stringstream ss;
+    ss << std::endl;
+    ss << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
     for (int i = 0; i < 10; ++i)
     {
-        std::cout << (9 - i) << " |";
+        ss << (9 - i) << " |";
         for (int j = 0; j < 9; ++j)
         {
-            std::cout << " " << (boardStr[i * 9 + j] == '0' ? ' ' : boardStr[i * 9 + j]) << " " << "|";
+            ss << " " << (boardStr[i * 9 + j] == '0' ? ' ' : boardStr[i * 9 + j]) << " " << "|";
         }
-        std::cout << std::endl;
-        std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
+        ss << std::endl;
+        ss << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
     }
-    std::cout << "  ";
+    ss << "  ";
     for (int j = 0; j < 9; ++j)
     {
-        std::cout << "  " << static_cast<char>('a' + j) << " ";
+        ss << "  " << static_cast<char>('a' + j) << " ";
     }
-    std::cout << std::endl;
+    ss << std::endl;
+
+    std::string board = ss.str();
+    if (reverse)
+        std::reverse(board.begin(), board.end());
+    std::cout << board;
+    // std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
+    // for (int i = 0; i < 10; ++i)
+    // {
+    //     std::cout << (9 - i) << " |";
+    //     for (int j = 0; j < 9; ++j)
+    //     {
+    //         std::cout << " " << (boardStr[i * 9 + j] == '0' ? ' ' : boardStr[i * 9 + j]) << " " << "|";
+    //     }
+    //     std::cout << std::endl;
+    //     std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
+    // }
+    // std::cout << "  ";
+    // for (int j = 0; j < 9; ++j)
+    // {
+    //     std::cout << "  " << static_cast<char>('a' + j) << " ";
+    // }
+    // std::cout << std::endl;
 }
 
 Square Position::KingSquare(Color c)
