@@ -54,16 +54,18 @@ def read_fen(engine):
         response = engine.stdout.readline().strip()
         # print(response)
         if response.startswith("Fen: "):
-            return response[5:]
+            # Trim - - 0 1
+            return response[5:-8]
 
 def position_key(fen):
-    p = position.Position(fen)
+    p = position.Position(fen + " - - 0 1")
     return p.key
 
 
 fen_books = {}
-key_books = {}
-stop_ply = 6
+# key_books = {}
+stop_ply = 4
+pruning_count = 0
 
 def move_forward(engine, ply):
     if ply >= stop_ply:
@@ -72,17 +74,20 @@ def move_forward(engine, ply):
     send_command(engine, 'd')
     fen = read_fen(engine)
 
-    # pruning for accelerate
-    # if fen in fen_books:
-    #     return
+    # Pruning for accelerate
+    if fen in fen_books:
+        global pruning_count
+        pruning_count = pruning_count + 1
+        # print(f"fen: {fen}")
+        return
 
     send_command(engine, 'go depth ' + str(search_depth))
     best_move = read_best_move(engine)
 
     fen_books[fen] = best_move
-    key_books[position_key(fen)] = best_move
+    # key_books[position_key(fen)] = best_move
 
-    # enemy move
+    # Enemy move
     send_command(engine, 'position fen ' + fen + " moves " + best_move)
     send_command(engine, 'd')
     fen = read_fen(engine)
@@ -106,7 +111,7 @@ def write_book(engine):
     best_move = read_best_move(engine)
 
     fen_books[fen] = best_move
-    key_books[position_key(fen)] = best_move
+    # key_books[position_key(fen)] = best_move
 
     # black move
     send_command(engine, 'position fen ' + fen + " moves " + best_move)
@@ -132,6 +137,8 @@ def write_book(engine):
     for move in pv_moves:
         send_command(engine, 'position fen ' + start_fen + " moves " + move)
         move_forward(engine, 0)
+    
+    print(f"Pruning {pruning_count} fen")
 
 
 def main():
@@ -154,9 +161,9 @@ def main():
     filename = 'fendata.json'
     with open(filename, 'w') as f:
         json.dump(fen_books, f, indent=4)
-    filename = 'keydata.json'
-    with open(filename, 'w') as f:
-        json.dump(key_books, f, indent=4)
+    # filename = 'keydata.json'
+    # with open(filename, 'w') as f:
+    #     json.dump(key_books, f, indent=4)
     
     send_command(engine, 'quit')
     engine.terminate()
