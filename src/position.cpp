@@ -220,7 +220,7 @@ void Position::DisplayBoard(bool reverse) const
     // std::cout << std::endl;
 }
 
-Square Position::KingSquare(Color c)
+Square Position::KingSquare(Color c) const
 {
     Bitboard b = Pieces(c, PieceType::KING);
     assert(b);

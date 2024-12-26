@@ -55,7 +55,7 @@ public:
 
     void DisplayBoard(bool reverse = false) const;
 
-    Square KingSquare(Color c);
+    Square KingSquare(Color c) const;
     bool IsEnemyChecked();
     bool IsSelfChecked();
 
