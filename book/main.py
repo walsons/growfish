@@ -8,12 +8,17 @@ We use a Python file to create the book.
 """
 
 import subprocess
-import position
 
 
 engine_name = "pikafish.exe"
 nnue_name = "pikafish.nnue"
 search_depth = 8
+fen_books = {}
+pv_num = 10
+stop_ply = 5
+expected_fen_num = 2 * (pv_num ** stop_ply) * 0.9
+pruning_count = 0
+
 
 def start_engine(engine_path):
     return subprocess.Popen(engine_path, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
@@ -57,19 +62,12 @@ def read_fen(engine):
             # Trim - - 0 1
             return response[5:-8]
 
-def position_key(fen):
-    p = position.Position(fen + " - - 0 1")
-    return p.key
-
-
-fen_books = {}
-# key_books = {}
-stop_ply = 4
-pruning_count = 0
-
 def move_forward(engine, ply):
     if ply >= stop_ply:
         return
+
+    if len(fen_books) % 100 == 0:
+        print(f"current fen: {len(fen_books)}  expected total fen: {expected_fen_num}")
 
     send_command(engine, 'd')
     fen = read_fen(engine)
@@ -85,7 +83,6 @@ def move_forward(engine, ply):
     best_move = read_best_move(engine)
 
     fen_books[fen] = best_move
-    # key_books[position_key(fen)] = best_move
 
     # Enemy move
     send_command(engine, 'position fen ' + fen + " moves " + best_move)
@@ -111,7 +108,6 @@ def write_book(engine):
     best_move = read_best_move(engine)
 
     fen_books[fen] = best_move
-    # key_books[position_key(fen)] = best_move
 
     # black move
     send_command(engine, 'position fen ' + fen + " moves " + best_move)
@@ -147,10 +143,10 @@ def main():
     send_command(engine, 'uci')
     read_response(engine)
     
-    send_command(engine, 'setoption name Threads value 1')
+    send_command(engine, 'setoption name Threads value 8')
     send_command(engine, 'setoption name Hash value 256')
     # set diversity to 10 for each step
-    send_command(engine, 'setoption name MultiPV value 10')
+    send_command(engine, 'setoption name MultiPV value ' + str(pv_num))
     
     send_command(engine, 'isready')
     read_response(engine)
@@ -161,9 +157,6 @@ def main():
     filename = 'fendata.json'
     with open(filename, 'w') as f:
         json.dump(fen_books, f, indent=4)
-    # filename = 'keydata.json'
-    # with open(filename, 'w') as f:
-    #     json.dump(key_books, f, indent=4)
     
     send_command(engine, 'quit')
     engine.terminate()
