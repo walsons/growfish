@@ -63,6 +63,7 @@ void Engine()
                     beg = clock();
                     search.IterativeDeepeningLoop(std::stoi(depth));
                     end = clock();
+                    duration = (double)(end - beg) / CLOCKS_PER_SEC;
                 }
 
                 std::cout << "time cost:" << duration << std::endl;
