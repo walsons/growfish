@@ -8,7 +8,7 @@ void Engine()
 {
     AttackInitializer::InitAttack();
 
-    std::cout << "***** minifish *****" << std::endl;
+    std::cout << "***** growfish *****" << std::endl;
 
     double duration;
     std::string line;
@@ -46,7 +46,7 @@ void Engine()
             {
                 std::string depth;
                 ss >> depth;
-                depth = "7"; // currently we fix depth to 7
+                depth = "6"; // currently we fix depth to 6
 
                 Search search(position);
 
@@ -56,8 +56,19 @@ void Engine()
                 end = clock();
                 duration = (double)(end - beg) / CLOCKS_PER_SEC;
 
+                // research with extra 2 depth if time consumption less than 0.2 second
+                if (duration < 0.2)
+                {
+                    depth = "8";
+                    beg = clock();
+                    search.IterativeDeepeningLoop(std::stoi(depth));
+                    end = clock();
+                }
+
                 std::cout << "time cost:" << duration << std::endl;
-                std::cout << "bestmove:" << Move2String(search.best_move()) << ", score:" << search.best_score() << std::endl;
+                std::cout << "bestmove:" << Move2String(search.best_move()) 
+                          << ", score:" << search.best_score()
+                          << ", depth:" << depth << std::endl;
             }
             else if (token == "d")
             {

@@ -30,13 +30,6 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         root_moves_.push_back(move);
         move = rootMovePicker.NextMove();
     }
-    // MoveGenerator moveGenerator(root_position_);
-    // auto checkMoves = moveGenerator.CheckMoves();
-    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(checkMoves.begin()), std::make_move_iterator(checkMoves.end()));
-    // auto captureMoves = moveGenerator.CaptureMoves();
-    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(captureMoves.begin()), std::make_move_iterator(captureMoves.end()));
-    // auto nonCaptureMoves = moveGenerator.NonCaptureMoves();
-    // root_moves_.insert(root_moves_.end(), std::make_move_iterator(nonCaptureMoves.begin()), std::make_move_iterator(nonCaptureMoves.end()));
 
     auto fen = root_position_.GenerateFen();
     assert(fen.size() > 8);
@@ -45,15 +38,12 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     if (bookMove != 0)
     {
         best_move_ = bookMove;
-        best_score_ = 1234;
+        best_score_ = 12345;
         return;
     }
 
+    // Disable odd depth
     int depth = 2;
-    if (maxDepth % 2)  // maxDepth is an odd number
-    {
-        depth = 1;
-    }
     for (; depth <= maxDepth; depth += 2)
     {
         SearchStack ss[100];
@@ -64,19 +54,6 @@ void Search::IterativeDeepeningLoop(int maxDepth)
             root_moves_.remove(ss[0].pv[0]);
             root_moves_.push_front(ss[0].pv[0]);
         }
-
-        // for (auto move : root_moves_)
-        // {
-        //     std::cout << move << "; ";
-        // }
-        // std::cout << std::endl;
-
-        // std::cout << "depth: " << depth << " pv: ";
-        // for (auto move: ss[0].pv)
-        // {
-        //     std::cout << move << "; ";
-        // }
-        // std::cout << std::endl;
     }
 }
 
