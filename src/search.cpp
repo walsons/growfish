@@ -87,7 +87,8 @@ void Search::root_search(int depth, SearchStack ss[])
             ss[ply].current_move = move;
             ss[ply].pv.clear();
             ss[ply].pv.push_back(ss[ply].current_move);
-            ss[ply].pv.insert(ss[ply].pv.end(), ss[ply + 1].pv.begin(), ss[ply + 1].pv.end());
+            ss[ply].pv.insert(ss[ply].pv.end(), std::make_move_iterator(ss[ply + 1].pv.begin()), 
+                                                std::make_move_iterator(ss[ply + 1].pv.end()));
         }
     }
 }
@@ -118,12 +119,16 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     }
 
     // Mate distance pruning
-    alpha = std::max(alpha, -MateValue + ply);
-    beta = std::min(beta, MateValue - ply - 1);
-    if (alpha >= beta)
+    // alpha = std::max(alpha, -MateValue + ply);
+    // beta = std::min(beta, MateValue - ply - 1);
+    // if (alpha >= beta)
+    //     return alpha;
+    if (alpha >= MateValue - ply - 1)
         return alpha;
+    if (-MateValue + ply >= beta)
+        return -MateValue + ply;
 
-    // int oldAlpha = alpha;
+    int oldAlpha = alpha;
     while (move)
     {
         UndoInfo undoInfo;
@@ -147,18 +152,19 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
         }
         else if (score > alpha)
         {
+            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::EXACT);
             alpha = score;
             ss[ply].current_move = move;
             ss[ply].pv.clear();
             ss[ply].pv.push_back(ss[ply].current_move);
-            ss[ply].pv.insert(ss[ply].pv.end(), ss[ply + 1].pv.begin(), ss[ply + 1].pv.end());
-            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::EXACT);
+            ss[ply].pv.insert(ss[ply].pv.end(), std::make_move_iterator(ss[ply + 1].pv.begin()), 
+                                                std::make_move_iterator(ss[ply + 1].pv.end()));
         }
         move = movePicker.NextMove();
     }
     // if alpha is not updated, it's a upperbound of this node
-    // if (oldAlpha == alpha)
-    //     TT.Store(position.key(), TT.AdjustSetValue(alpha, ply), depth, 0, ValueType::UPPER_BOUND);
+    if (oldAlpha == alpha)
+        TT.Store(position.key(), TT.AdjustSetValue(alpha, ply), depth, 0, ValueType::UPPER_BOUND);
     
     return alpha;
 }
