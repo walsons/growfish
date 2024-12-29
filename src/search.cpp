@@ -42,11 +42,12 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         return;
     }
 
+    SearchStack ss[100];
+
     // Disable odd depth
     int depth = 2;
     for (; depth <= maxDepth; depth += 2)
     {
-        SearchStack ss[100];
         root_search(depth, ss);
         
         if (ss[0].pv.size() > 0)
@@ -55,6 +56,13 @@ void Search::IterativeDeepeningLoop(int maxDepth)
             root_moves_.push_front(ss[0].pv[0]);
         }
     }
+
+    std::cout << "pv move: ";
+    for (auto pvMove: ss[0].pv)
+    {
+        std::cout << pvMove << " ";
+    }
+    std::cout << std::endl;
 }
 
 void Search::root_search(int depth, SearchStack ss[])
@@ -185,7 +193,8 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
     if (MovePicker(position, 0, killerMove).NextMove() == 0)
     {
         auto score = -MateValue + ply;
-        TT.Store(position.key(), TT.AdjustSetValue(score, ply), 0, 0, ValueType::EXACT);
+        // we can't store this value to transposition due to this case only consider capture moves
+        // TT.Store(position.key(), TT.AdjustSetValue(score, ply), 0, 0, ValueType::EXACT);
         return -MateValue + ply;
     }
     MovePicker movePicker(position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
