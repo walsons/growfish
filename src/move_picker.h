@@ -74,19 +74,18 @@ private:
     std::list<ScoreMove> GenerateNonCaptureMove();
 
     template <Color c>
-    int SEE(Square to, Position &position, std::vector<Square> &swapPieces, Bitboard &swapPiecesBB)
+    int SEE(Square from, Square to, Position &position, Bitboard &swapPiecesBB)
     {
-        Piece p = position.piece_from_square(swapPieces.back());
+        Piece p = position.piece_from_square(from);
 
         bool stop = false;
-        auto makeCapture = [this, &stop, &position, to, p, &swapPieces, &swapPiecesBB](Bitboard attack) {
+        auto makeCapture = [this, &stop, &position, &swapPiecesBB, to, p](Bitboard attack) {
             if (attack)
             {
                 stop = true;
                 Square from = PopLSB(attack);
-                swapPieces.push_back(from);
                 swapPiecesBB |= SquareBB(from);
-                int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(to, position, swapPieces, swapPiecesBB);
+                int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(from, to, position, swapPiecesBB);
                 return value > 0 ? value : 0;
             }
             return 0;
@@ -150,13 +149,11 @@ private:
     template <Color c>
     int SEECapture(Move captureMove)
     {
-        std::vector<Square> swapPieces;
         Bitboard swapPiecesBB = 0;
         auto from = captureMove.MoveFrom();
         auto to = captureMove.MoveTo();
-        swapPieces.push_back(from);
         swapPiecesBB |= SquareBB(from);
-        int value = GetPieceValue(TypeOfPiece(position_.piece_from_square(to))) - SEE<!c>(to, position_, swapPieces, swapPiecesBB);
+        int value = GetPieceValue(TypeOfPiece(position_.piece_from_square(to))) - SEE<!c>(from, to, position_, swapPiecesBB);
         return value;
     }
 
