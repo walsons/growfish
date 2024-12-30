@@ -59,6 +59,9 @@ public:
     bool IsEnemyChecked();
     bool IsSelfChecked();
 
+    Bitboard CheckersBB(Square ksq, Color kc, Bitboard occupancy) const;
+    bool IsLegalMove(Move move) const;
+
     Piece piece_from_square(Square s) const { return board_[s]; }
     Color color_from_square(Square s) const 
     { 

@@ -36,6 +36,8 @@ public:
 
     bool IsLegalMove(Move move)
     {
+        return position_.IsLegalMove(move);
+
         Color c = position_.side_to_move();
         auto kPos = position_.KingSquare(c);
         int kRow = kPos / 9;
