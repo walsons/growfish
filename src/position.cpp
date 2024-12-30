@@ -237,6 +237,29 @@ bool Position::IsSelfChecked()
     return IsChecked(side_to_move_);
 }
 
+Bitboard Position::CheckersBB(Square ksq, Color kc, Bitboard occupancy) const
+{
+    Bitboard checkers= ( (Attack<PieceType::ROOK>(occupancy, ksq) & Pieces(PieceType::ROOK))
+                       | (Attack<PieceType::CANNON>(occupancy, ksq) & Pieces(PieceType::CANNON))
+                       | (Attack<PieceType::KNIGHT_TO>(occupancy, ksq) & Pieces(PieceType::KNIGHT))
+                       | (Attack<PieceType::ROOK>(occupancy, ksq) & Pieces(PieceType::KING))  // king
+                       | ( kc == Color::RED ? (Attack<PieceType::PAWN_TO, Color::BLACK>(ksq) & Pieces(PieceType::PAWN))
+                                            : (Attack<PieceType::PAWN_TO, Color::RED>(ksq) & Pieces(PieceType::PAWN))
+                         ) 
+                       ) & Pieces(!kc);
+    return checkers;
+}
+
+bool Position::IsLegalMove(Move move) const
+{
+    auto from = move.MoveFrom(), to = move.MoveTo();
+    auto occupancy = (AllPieces() ^ SquareBB(from)) | SquareBB(to);
+    if (TypeOfPiece(piece_from_square(from)) == PieceType::KING)
+        return !CheckersBB(to, side_to_move_, occupancy);
+    // checker in "to" position is attacked
+    return !(CheckersBB(KingSquare(side_to_move_), side_to_move_, occupancy) & ~SquareBB(to));
+}
+
 bool Position::IsChecked(Color c)
 {
     Square kPos = KingSquare(c);
