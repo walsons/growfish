@@ -40,6 +40,8 @@ private:
     std::list<Move> root_moves_;
     // Prohibit loop move
     Move prohibited_move_;
+
+    bool print_pv_move_ = false;
 };
 
 #endif

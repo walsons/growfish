@@ -23,71 +23,16 @@ class MoveGenerator
 public:
     friend class MovePicker;
     friend class MagicValidator;  // a class in test/magic_validator.h for test
-    MoveGenerator(const Position& position) : position_(position)
-    {
-    }
+    MoveGenerator(const Position& position) : position_(position) {}
     
-    std::vector<Move> CaptureMoves() 
-    {
-        return GenerateLegalMoves<MoveType::CAPTURE>();
-    }
-
-    std::vector<Move> NonCaptureMoves() 
-    {
-        return GenerateLegalMoves<MoveType::QUIET>();
-    }
-
+    std::vector<Move> CaptureMoves() { return GenerateLegalMoves<MoveType::CAPTURE>(); }
+    std::vector<Move> NonCaptureMoves() { return GenerateLegalMoves<MoveType::QUIET>(); }
     std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
 
     template <MoveType mt>
-    std::vector<Move> GeneratePseudoLegalMoves()
-    {
-        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
-
-        std::vector<Move> pseudoLegalMoves;
-        if (position_.side_to_move() == Color::RED)
-        {
-            AddMove<Color::RED, PieceType::ROOK, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::CANNON, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::KNIGHT, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::PAWN, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::BISHOP, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::ADVISOR, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::RED, PieceType::KING, mt>(position_, pseudoLegalMoves);
-        }
-        else
-        {
-            AddMove<Color::BLACK, PieceType::ROOK, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::CANNON, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::KNIGHT, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::PAWN, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::BISHOP, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::ADVISOR, mt>(position_, pseudoLegalMoves);
-            AddMove<Color::BLACK, PieceType::KING, mt>(position_, pseudoLegalMoves);
-        }
-
-        return pseudoLegalMoves;
-    }
-
+    std::vector<Move> GeneratePseudoLegalMoves();
     template <MoveType mt>
-    std::vector<Move> GenerateLegalMoves()
-    {
-        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::LEGAL);
-
-        std::vector<Move> pseudoLegalMoves;
-        if constexpr (mt == MoveType::LEGAL)
-            pseudoLegalMoves  = GeneratePseudoLegalMoves<MoveType::PSEUDO_LEGAL>();
-        else
-            pseudoLegalMoves = GeneratePseudoLegalMoves<mt>();
-
-        std::vector<Move> legalMoves;
-        for (Move move: pseudoLegalMoves)
-        {
-            if (IsLegalMove(move))
-                legalMoves.push_back(move);
-        }
-        return legalMoves;
-    }
+    std::vector<Move> GenerateLegalMoves();
 
     bool IsLegalMove(Move move)
     {
@@ -353,5 +298,55 @@ private:
 private:
     Position position_;
 };
+
+template <MoveType mt>
+std::vector<Move> MoveGenerator::GeneratePseudoLegalMoves()
+{
+    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
+
+    std::vector<Move> pseudoLegalMoves;
+    if (position_.side_to_move() == Color::RED)
+    {
+        AddMove<Color::RED, PieceType::ROOK, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::CANNON, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::KNIGHT, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::PAWN, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::BISHOP, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::ADVISOR, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::RED, PieceType::KING, mt>(position_, pseudoLegalMoves);
+    }
+    else
+    {
+        AddMove<Color::BLACK, PieceType::ROOK, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::CANNON, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::KNIGHT, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::PAWN, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::BISHOP, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::ADVISOR, mt>(position_, pseudoLegalMoves);
+        AddMove<Color::BLACK, PieceType::KING, mt>(position_, pseudoLegalMoves);
+    }
+
+    return pseudoLegalMoves;
+}
+
+template <MoveType mt>
+std::vector<Move> MoveGenerator::GenerateLegalMoves()
+{
+    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::LEGAL);
+
+    std::vector<Move> pseudoLegalMoves;
+    if constexpr (mt == MoveType::LEGAL)
+        pseudoLegalMoves  = GeneratePseudoLegalMoves<MoveType::PSEUDO_LEGAL>();
+    else
+        pseudoLegalMoves = GeneratePseudoLegalMoves<mt>();
+
+    std::vector<Move> legalMoves;
+    for (Move move: pseudoLegalMoves)
+    {
+        if (IsLegalMove(move))
+            legalMoves.push_back(move);
+    }
+    return legalMoves;
+}
 
 #endif

@@ -57,12 +57,15 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         }
     }
 
-    std::cout << "pv move: ";
-    for (auto pvMove: ss[0].pv)
+    if (print_pv_move_)
     {
-        std::cout << pvMove << " ";
+        std::cout << "pv move: ";
+        for (auto pvMove: ss[0].pv)
+        {
+            std::cout << pvMove << " ";
+        }
+        std::cout << std::endl;
     }
-    std::cout << std::endl;
 }
 
 void Search::root_search(int depth, SearchStack ss[])
@@ -127,10 +130,6 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     }
 
     // Mate distance pruning
-    // alpha = std::max(alpha, -MateValue + ply);
-    // beta = std::min(beta, MateValue - ply - 1);
-    // if (alpha >= beta)
-    //     return alpha;
     if (alpha >= MateValue - ply - 1)
         return alpha;
     if (-MateValue + ply >= beta)
@@ -192,9 +191,7 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
     Move killerMove[2] = {0, 0};
     if (MovePicker(position, 0, killerMove).NextMove() == 0)
     {
-        auto score = -MateValue + ply;
         // we can't store this value to transposition due to this case only consider capture moves
-        // TT.Store(position.key(), TT.AdjustSetValue(score, ply), 0, 0, ValueType::EXACT);
         return -MateValue + ply;
     }
     MovePicker movePicker(position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
