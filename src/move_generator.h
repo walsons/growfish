@@ -38,79 +38,27 @@ public:
     {
         return position_.IsLegalMove(move);
 
-        Color c = position_.side_to_move();
-        auto kPos = position_.KingSquare(c);
-        int kRow = kPos / 9;
-        int kCol = kPos % 9;
-        if (!position_.IsSelfChecked())
-        {
-            auto from = MoveFrom(move);
-            auto to = MoveTo(move);
-            if (from != kPos)
-            {
-                if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
-                {
-                    return true;
-                }
-                else
-                {
-                    UndoInfo undoInfo;
-                    position_.SimpleMakeMove(move, undoInfo);
-                    if (!position_.IsSelfChecked())
-                    {
-                        position_.SimpleUndoMove(undoInfo);
-                        return true;
-                    }
-                    position_.SimpleUndoMove(undoInfo);
-                }
-            }
-            else
-            {
-                UndoInfo undoInfo;
-                position_.SimpleMakeMove(move, undoInfo);
-                if (!position_.IsSelfChecked())
-                {
-                    position_.SimpleUndoMove(undoInfo);
-                    return true;
-                }
-                position_.SimpleUndoMove(undoInfo);
-            }
-        }
-        else
-        {
-            auto from = MoveFrom(move);
-            auto to = MoveTo(move);
-            if (from != kPos)
-            {
-                if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
-                {
-                    return false;
-                }
-                else
-                {
-                    UndoInfo undoInfo;
-                    position_.SimpleMakeMove(move, undoInfo);
-                    if (!position_.IsSelfChecked())
-                    {
-                        position_.SimpleUndoMove(undoInfo);
-                        return true;
-                    }
-                    position_.SimpleUndoMove(undoInfo);
-                }
-            }
-            else
-            {
-                UndoInfo undoInfo;
-                position_.SimpleMakeMove(move, undoInfo);
-                if (!position_.IsSelfChecked())
-                {
-                    position_.SimpleUndoMove(undoInfo);
-                    return true;
-                }
-                position_.SimpleUndoMove(undoInfo);
-            }
-        }
-        return false;
+        // Following code can be refered to optimize in the future
+        // if (!position_.IsSelfChecked())
+        // {
+        //     if (from != kPos)
+        //     {
+        //         if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
+        //         {
+        //             return true;
+        //         }
+        //     }
+        // }
+        // else
+        // {
+        //     if (from != kPos)
+        //     {
+        //         if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
+        //         {
+        //             return false;
+        //         }
+        //     }
+        // }
     }
 
     template <Color c, PieceType pt, MoveType mt>
