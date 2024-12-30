@@ -7,7 +7,6 @@
 
 Book::Book()
 {
-    // std::ifstream file("keydata.json");
     std::ifstream file("fendata.json");
     if (!file.is_open()) {
         std::cerr << "Unable to open book!" << std::endl;
@@ -22,17 +21,10 @@ Book::Book()
         auto pos = line.find(':');
         auto key = line.substr(5, pos - 6);
         auto move = line.substr(pos + 3, 4);
-        // book_.insert({std::stoull(key), String2Move(move)});
         book_.insert({key, String2Move(move)});
     }
     file.close();
 }
-
-// Move Book::SearchBestMove(unsigned long long key)
-// {
-//     auto it = book_.find(key);
-//     return it != book_.end() ? it->second : Move(0);
-// }
 
 Move Book::SearchBestMove(std::string key)
 {

@@ -1,9 +1,5 @@
 #include "magic.h"
 
-// Magic RookMagic[SQ_NUM];
-// Magic CannonMagic[SQ_NUM];
-// Magic KnightMagic[SQ_NUM];
-// Magic BishopMagic[SQ_NUM];
 
 size_t MagicInitializer::count_1s(Bitboard b) const
 {

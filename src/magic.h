@@ -503,10 +503,6 @@ struct Magic
     Bitboard* attacks = nullptr;
 };
 
-// extern Magic RookMagic[SQ_NUM];
-// extern Magic CannonMagic[SQ_NUM];
-// extern Magic KnightMagic[SQ_NUM];
-// extern Magic BishopMagic[SQ_NUM];
 template <PieceType pt>
 Magic PieceMagic[SQ_NUM];
 template <>
