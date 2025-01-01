@@ -135,7 +135,7 @@ def write_book(engine):
         send_command(engine, "position fen " + start_fen + " moves " + move)
         move_forward(engine, 0)
     
-    print(f"Pruning {pruning_count} fen")
+    print(f"Pruning times: {pruning_count}")
 
 
 def main():
