@@ -929,6 +929,11 @@ Bitboard Attack(Bitboard occupies, Square s)
     auto index = (occupies * magic.magic_number) >> magic.shift;
     return magic.attacks[index];
 }
+template <PieceType pt>
+Bitboard Attack(Square s) 
+{
+    return Attack<pt>(Bitboard(0), s);
+}
 
 template <PieceType pt, Color c>
 Bitboard Attack(Square s)
@@ -940,8 +945,8 @@ Bitboard Attack(Square s)
         return AttackInitializer::PawnToAttackBB<c>[s];
 }
 
-template <PieceType pt>
-Bitboard Attack(Square s);
+// template <PieceType pt>
+// Bitboard Attack(Square s);
 template <>
 inline Bitboard Attack<PieceType::ADVISOR>(Square s)
 {

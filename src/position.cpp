@@ -112,8 +112,8 @@ void Position::MakeMove(Move move, UndoInfo& undoInfo)
 
     undoInfo = { move, board_[to] };
     move_piece(from, to);
-    // board_[to] = board_[from];
-    // board_[from] = Piece::NO_PIECE;
+
+    SetBlockers(side_to_move_, KingSquare(side_to_move_));
 
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
     key_ ^= Zobrist::BlackToMoveZobrist();
@@ -124,8 +124,6 @@ void Position::UndoMove(const UndoInfo& undoInfo)
     auto from = MoveFrom(undoInfo.move);
     auto to = MoveTo(undoInfo.move);
 
-    // board_[from] = board_[to];
-    // board_[to] = undoInfo.piece;
     move_piece(to, from);
     put_piece(undoInfo.piece, to);
 
@@ -133,6 +131,8 @@ void Position::UndoMove(const UndoInfo& undoInfo)
     key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
     key_ ^= Zobrist::PieceSquareZobrist(board_[to], to);
     key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
+
+    SetBlockers(side_to_move_, KingSquare(side_to_move_));
 
     key_ ^= Zobrist::BlackToMoveZobrist();
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);

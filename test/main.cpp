@@ -28,7 +28,10 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("rnbakabnr/9/7c1/p1p1C1p1p/9/9/P1P1P1P1P/1C4N2/9/1RBAKAB1R b - - 0 1 moves a6a5 b2b4");
     // position.SetPosition("r1ba1abnr/3k5/6c2/p3C1p1p/3RC4/9/P3P1P1P/6N2/9/1RBAKAB2 b - - 0 1 moves g7d7 e6d6 d8e8 e5e4");
     // position.SetPosition("r1b1kabnr/4a4/2C6/4C1pRp/p8/9/P1P1PnP1P/6n2/9/1RBAKAB2 b - - 0 1 moves e8f7 h6h5 a9a7 c7c4 g6g5 b0b1 f3e1 c4e4 e9d9 b1d1");
-    // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
+    // position.SetPosition("2bakab1r/9/9/4P3p/4R4/9/31PnP1P/9/9/2B1K1n2 w - - 0 1");
+
+    // position.SetPosition("2b2k3/9/8b/9/2p5C/9/2c3P2/8B/9/1NBAKA3 b - - 0 1 moves c3d3 b0c2 d3d6 c2b4 d6h6 i5h5 h6d6 c0a2 d6b6 e0e1 b6d6 e1e2 c9e7 a2c0");
+    position.SetPosition("r1bk1abnr/9/1c7/2p1C1p2/p7p/9/P1P1P1P1P/9/9/RNBAKABR1 b - - 0 1 moves h9g7 e6e5 i9h9");
 
     position.DisplayBoard();
     // std::cout << position.GenerateFen() << std::endl;
@@ -292,6 +295,7 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
         double maxOneStepTimeConsumption = 0;
         while (std::getline(fin, line))
         {
+            std::cout << line << std::endl;
             Position position(line);
             Search search(position);
             auto onePlyBeg = clock();

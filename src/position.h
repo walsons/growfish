@@ -9,6 +9,7 @@
 #include "types.h"
 #include "function.h"
 #include "zobrist.h"
+#include "magic.h"
 
 const std::string kStartPos = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
 
@@ -92,6 +93,16 @@ public:
         return by_color_bb_[NUM(Color::RED)] | by_color_bb_[NUM(Color::BLACK)];
     }
 
+    Bitboard blockers_for_king(Color c) { return blockers_for_king_[NUM(c)]; }
+
+    Bitboard LineBB(Square s1, Square s2)
+    {
+        // TODO: cache it
+        Bitboard b = (Attack<PieceType::ROOK>(s1) & Attack<PieceType::ROOK>(s2)) | SquareBB(s1) | SquareBB(s2);
+        return b;
+    }
+
+
 private:
     bool IsChecked(Color c);
     Piece PieceFromChar(char c) const;
@@ -100,6 +111,38 @@ private:
     void put_piece(Piece p, Square s);
     void remove_piece(Square s);
     void move_piece(Square from, Square to);
+
+    Bitboard BetweenBB(Square s1, Square s2)
+    {
+        // TODO: cache it
+        Bitboard b = (Attack<PieceType::ROOK>(SquareBB(s2), s1) & Attack<PieceType::ROOK>(SquareBB(s1), s2));
+        return b;
+    }
+
+    bool MoreThan1Bit(Bitboard b)
+    {
+        return b & (b - 1);
+    }
+
+    void SetBlockers(Color kc, Square ks)
+    {
+        blockers_for_king_[NUM(kc)] = 0;
+        pinners[NUM(!kc)] = 0;
+        // TODO: Cannon and knight will complete in the future
+        Bitboard snipers = (Attack<PieceType::ROOK>(ks) & (Pieces(PieceType::ROOK) | Pieces(PieceType::KING))) & Pieces(!kc);
+        Bitboard occupancy = AllPieces() ^ snipers;
+        while (snipers)
+        {
+            Square s = PopLSB(snipers);
+            Bitboard b = BetweenBB(ks, s) & occupancy;
+            if (b && !MoreThan1Bit(b))
+            {
+                blockers_for_king_[NUM(kc)] |= b;
+                if (b & Pieces(color_from_square(ks)))
+                    pinners[NUM(!kc)] &= SquareBB(s);
+            }
+        }
+    }
 
 private:
     Board board_;
@@ -110,6 +153,9 @@ private:
     Bitboard by_type_bb_[NUM(PieceType::PIECE_TYPE_NUM)];
     Bitboard by_color_bb_[NUM(Color::COLOR_NUM)];
     int piece_count_[NUM(Piece::PIECE_NUM)];
+
+    Bitboard blockers_for_king_[NUM(Color::COLOR_NUM)];
+    Bitboard pinners[NUM(Color::COLOR_NUM)];
 };
 
 #endif

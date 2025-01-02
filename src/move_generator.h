@@ -27,7 +27,7 @@ public:
     
     std::vector<Move> CaptureMoves() { return GenerateLegalMoves<MoveType::CAPTURE>(); }
     std::vector<Move> NonCaptureMoves() { return GenerateLegalMoves<MoveType::QUIET>(); }
-    std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
+    std::vector<Move> CheckMoves() { return GenerateLegalMoves<MoveType::QUIET_CHECK>(); }  // TODO
 
     template <MoveType mt>
     std::vector<Move> GeneratePseudoLegalMoves();
@@ -114,6 +114,29 @@ public:
     template <Color c, PieceType pt, MoveType mt>
     void PieceMove(Square s, std::vector<Move> &moves)
     {
+        if constexpr (mt == MoveType::QUIET_CHECK)
+        {
+
+            Bitboard attack = 0, attain = 0;
+            PieceMoveBitboard<c, pt, MoveType::QUIET_CHECK>(s, attack, attain);
+            attack &= position_.Pieces(!c);
+            attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
+            Bitboard avaliable_to = attack | attain;
+            Bitboard blockers = position_.blockers_for_king(c);
+            if (blockers & position_.Pieces(c))
+            {
+                Square from = PopLSB(blockers);
+                Bitboard checkBB = ~position_.LineBB(from, position_.KingSquare(c));
+                checkBB &= avaliable_to;
+                while (checkBB)
+                {
+                    Square to = PopLSB(checkBB);
+                    moves.push_back(ConstructMove(from, to));
+                }
+            }
+            return;
+        }
+
         Bitboard attack = 0, attain = 0;
         PieceMoveBitboard<c, pt, mt>(s, attack, attain);
         if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
@@ -213,7 +236,7 @@ private:
             || pt == PieceType::PAWN
             , "Unsupported piece type"
         );
-        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
+        static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::QUIET_CHECK || mt == MoveType::PSEUDO_LEGAL);
 
         attack = 0;
         attain = 0;
@@ -252,7 +275,7 @@ private:
 template <MoveType mt>
 std::vector<Move> MoveGenerator::GeneratePseudoLegalMoves()
 {
-    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::PSEUDO_LEGAL);
+    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::QUIET_CHECK || mt == MoveType::PSEUDO_LEGAL);
 
     std::vector<Move> pseudoLegalMoves;
     if (position_.side_to_move() == Color::RED)
@@ -282,7 +305,7 @@ std::vector<Move> MoveGenerator::GeneratePseudoLegalMoves()
 template <MoveType mt>
 std::vector<Move> MoveGenerator::GenerateLegalMoves()
 {
-    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::LEGAL);
+    static_assert(mt == MoveType::CAPTURE || mt == MoveType::QUIET || mt == MoveType::QUIET_CHECK || mt == MoveType::LEGAL);
 
     std::vector<Move> pseudoLegalMoves;
     if constexpr (mt == MoveType::LEGAL)
