@@ -74,88 +74,9 @@ private:
     std::list<ScoreMove> GenerateNonCaptureMove();
 
     template <Color c>
-    int SEE(Square from, Square to, Position &position, Bitboard &swapPiecesBB)
-    {
-        Piece p = position.piece_from_square(from);
-
-        bool stop = false;
-        auto makeCapture = [this, &stop, &position, &swapPiecesBB, to, p](Bitboard attack) {
-            if (attack)
-            {
-                stop = true;
-                Square from = PopLSB(attack);
-                swapPiecesBB |= SquareBB(from);
-                int value = GetPieceValue(TypeOfPiece(p)) - SEE<!c>(from, to, position, swapPiecesBB);
-                return value > 0 ? value : 0;
-            }
-            return 0;
-        };
-
-        Bitboard pAttack = Attack<PieceType::PAWN_TO, c>(to);
-        pAttack &= position.Pieces(c, PieceType::PAWN);
-        pAttack &= ~swapPiecesBB;
-        int value = makeCapture(pAttack);
-        if (stop)
-            return value;
-        
-        Bitboard aAttack = Attack<PieceType::ADVISOR>(to);
-        aAttack &= position.Pieces(c, PieceType::ADVISOR);
-        aAttack &= ~swapPiecesBB;
-        value = makeCapture(aAttack);
-        if (stop)
-            return value;
-
-        Bitboard occupancy = position.AllPieces();
-        occupancy ^= swapPiecesBB;
-
-        Bitboard bAttack = Attack<PieceType::BISHOP>(occupancy, to);
-        bAttack &= position.Pieces(c, PieceType::BISHOP);
-        bAttack &= ~swapPiecesBB;
-        value = makeCapture(aAttack);
-        if (stop)
-            return value;
-
-        Bitboard nAttack = Attack<PieceType::KNIGHT_TO>(occupancy, to);
-        nAttack &= position.Pieces(c, PieceType::KNIGHT);
-        nAttack &= ~swapPiecesBB;
-        value = makeCapture(nAttack);
-        if (stop)
-            return value;
-
-        Bitboard cAttack = Attack<PieceType::CANNON>(occupancy, to);
-        cAttack &= position.Pieces(c, PieceType::CANNON);
-        cAttack &= ~swapPiecesBB;
-        value = makeCapture(cAttack);
-        if (stop)
-            return value;
-        
-        Bitboard rAttack = Attack<PieceType::ROOK>(occupancy, to);
-        rAttack &= position.Pieces(c, PieceType::ROOK);
-        rAttack &= ~swapPiecesBB;
-        value = makeCapture(rAttack);
-        if (stop)
-            return value;
-
-        Bitboard kAttack = Attack<PieceType::KING>(to);
-        kAttack &= position.Pieces(c, PieceType::KING);
-        kAttack &= ~swapPiecesBB;
-        value = makeCapture(kAttack);
-        if (stop)
-            return value;
-
-        return 0;
-    }
-
+    int SEE(Piece victim, Square to, Bitboard &swapPiecesBB);
     template <Color c>
-    int SEECapture(Move captureMove)
-    {
-        Bitboard swapPiecesBB = 0;
-        auto from = captureMove.MoveFrom();
-        auto to = captureMove.MoveTo();
-        swapPiecesBB |= SquareBB(from);
-        int value = GetPieceValue(TypeOfPiece(position_.piece_from_square(to))) - SEE<!c>(from, to, position_, swapPiecesBB);
-        return value;
-    }
+    int SEECapture(Move captureMove);
 
 private:
     Position position_;
@@ -167,5 +88,85 @@ private:
     std::list<ScoreMove> moves_;
     std::list<ScoreMove> bad_captures_;
 };
+
+template <Color c>
+int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
+{
+    auto makeCapture = [this, victim, to, &swapPiecesBB](Bitboard attack, int &value) {
+        if (attack)
+        {
+            Square from = PopLSB(attack);
+            swapPiecesBB |= SquareBB(from);
+            Piece attacker = position_.piece_from_square(from);
+            // attacker become victim in next SEE
+            value = GetPieceValue(TypeOfPiece(victim)) - SEE<!c>(attacker, to, swapPiecesBB);
+            value = value > 0 ? value : 0;
+            return true;
+        }
+        return false;
+    };
+
+    int value = 0;
+
+    Bitboard attack = Attack<PieceType::PAWN_TO, c>(to);
+    attack &= position_.Pieces(c, PieceType::PAWN);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+    
+    attack = Attack<PieceType::ADVISOR>(to);
+    attack &= position_.Pieces(c, PieceType::ADVISOR);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+
+    Bitboard occupancy = position_.AllPieces();
+    occupancy ^= swapPiecesBB;
+
+    attack = Attack<PieceType::BISHOP>(occupancy, to);
+    attack &= position_.Pieces(c, PieceType::BISHOP);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+
+    attack = Attack<PieceType::KNIGHT_TO>(occupancy, to);
+    attack &= position_.Pieces(c, PieceType::KNIGHT);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+
+    attack = Attack<PieceType::CANNON>(occupancy, to);
+    attack &= position_.Pieces(c, PieceType::CANNON);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+    
+    attack = Attack<PieceType::ROOK>(occupancy, to);
+    attack &= position_.Pieces(c, PieceType::ROOK);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+
+    attack = Attack<PieceType::KING>(to);
+    attack &= position_.Pieces(c, PieceType::KING);
+    attack &= ~swapPiecesBB;
+    if (makeCapture(attack, value))
+        return value;
+
+    return 0;
+}
+
+template <Color c>
+int MovePicker::SEECapture(Move captureMove)
+{
+    auto from = captureMove.MoveFrom();
+    auto to = captureMove.MoveTo();
+    Bitboard swapPiecesBB = SquareBB(from);
+    Piece attacker = position_.piece_from_square(from);
+    Piece victim = position_.piece_from_square(to);
+    // attacker become victim in next SEE
+    int value = GetPieceValue(TypeOfPiece(victim)) - SEE<!c>(attacker, to, swapPiecesBB);
+    return value;
+}
 
 #endif
