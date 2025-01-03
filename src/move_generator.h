@@ -114,19 +114,18 @@ public:
     template <Color c, PieceType pt, MoveType mt>
     void PieceMove(Square s, std::vector<Move> &moves)
     {
+        Bitboard attack = 0, attain = 0;
+        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
         if constexpr (mt == MoveType::QUIET_CHECK)
         {
-
-            Bitboard attack = 0, attain = 0;
-            PieceMoveBitboard<c, pt, MoveType::QUIET_CHECK>(s, attack, attain);
             attack &= position_.Pieces(!c);
             attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
             Bitboard avaliable_to = attack | attain;
-            Bitboard blockers = position_.blockers_for_king(c);
-            if (blockers & position_.Pieces(c))
+            Bitboard blockers = position_.blockers_for_king(!c);
+            if (blockers & SquareBB(s))
             {
                 Square from = PopLSB(blockers);
-                Bitboard checkBB = ~position_.LineBB(from, position_.KingSquare(c));
+                Bitboard checkBB = ~LineBB(from, position_.KingSquare(c));
                 checkBB &= avaliable_to;
                 while (checkBB)
                 {
@@ -134,11 +133,7 @@ public:
                     moves.push_back(ConstructMove(from, to));
                 }
             }
-            return;
         }
-
-        Bitboard attack = 0, attain = 0;
-        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
         if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
         {
             attack &= position_.Pieces(!c);
@@ -158,6 +153,7 @@ public:
             }
         }
     }
+
     // runtime version
     template <MoveType mt>
     void PieceMove(Square s, std::vector<Move> &moves)

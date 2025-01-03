@@ -1,6 +1,34 @@
 #include "bitboard.h"
 #include <iostream>
 
+#include "magic.h"
+
+Bitboard LINE_BB[SQ_NUM][SQ_NUM];
+Bitboard BETWEEN_BB[SQ_NUM][SQ_NUM]; 
+void InitBB()
+{
+    for (Square s1 = SQ_A0; s1 <= SQ_NUM; s1 += SQ_NORTH)
+    {
+        for (Square s2 = SQ_A0; s2 <= SQ_NUM; s2 += SQ_NORTH)
+        {
+            LINE_BB[s1][s2] = (Attack<PieceType::ROOK>(s1) & Attack<PieceType::ROOK>(s2)) | SquareBB(s1) | SquareBB(s2);
+            BETWEEN_BB[s1][s2] = (Attack<PieceType::ROOK>(SquareBB(s2), s1) & Attack<PieceType::ROOK>(SquareBB(s1), s2));
+        }
+    }
+}
+Bitboard LineBB(Square s1, Square s2)
+{
+    return LINE_BB[s1][s2];
+}
+Bitboard BetweenBB(Square s1, Square s2)
+{
+    return BETWEEN_BB[s1][s2];
+}
+bool MoreThan1Bit(Bitboard b)
+{
+    return b & (b - 1);
+}
+
 void ShowBitboard(Bitboard b)
 {
     for (int r = Rank::RANK_9; r >= Rank::RANK_0; --r)

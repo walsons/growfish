@@ -95,14 +95,6 @@ public:
 
     Bitboard blockers_for_king(Color c) { return blockers_for_king_[NUM(c)]; }
 
-    Bitboard LineBB(Square s1, Square s2)
-    {
-        // TODO: cache it
-        Bitboard b = (Attack<PieceType::ROOK>(s1) & Attack<PieceType::ROOK>(s2)) | SquareBB(s1) | SquareBB(s2);
-        return b;
-    }
-
-
 private:
     bool IsChecked(Color c);
     Piece PieceFromChar(char c) const;
@@ -111,18 +103,6 @@ private:
     void put_piece(Piece p, Square s);
     void remove_piece(Square s);
     void move_piece(Square from, Square to);
-
-    Bitboard BetweenBB(Square s1, Square s2)
-    {
-        // TODO: cache it
-        Bitboard b = (Attack<PieceType::ROOK>(SquareBB(s2), s1) & Attack<PieceType::ROOK>(SquareBB(s1), s2));
-        return b;
-    }
-
-    bool MoreThan1Bit(Bitboard b)
-    {
-        return b & (b - 1);
-    }
 
     void SetBlockers(Color kc, Square ks)
     {

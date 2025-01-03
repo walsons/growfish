@@ -87,6 +87,11 @@ inline int OneCount(Bitboard b)
     return count;
 }
 
+void InitBB();
+Bitboard LineBB(Square s1, Square s2);
+Bitboard BetweenBB(Square s1, Square s2);
+bool MoreThan1Bit(Bitboard b);
+
 // Show bitboard in piece board format for test
 void ShowBitboard(Bitboard b);
 

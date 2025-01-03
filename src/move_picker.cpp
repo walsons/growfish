@@ -42,7 +42,6 @@ std::list<ScoreMove> MovePicker::GenerateCheckMove()
     auto checkMoves = move_generator_.GenerateLegalMoves<MoveType::QUIET_CHECK>();
     for (auto move : checkMoves)
     {
-        position_.DisplayBoard();
         moves.push_back({move, 0});
     }
     return moves;
