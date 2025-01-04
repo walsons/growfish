@@ -861,7 +861,7 @@ private:
                     b |= SquareBB(to[i]);
             }
         }
-        PawnAttackBB<c>[s] = b;
+        PawnAttackBB[NUM(c)][s] = b;
 
         Square tto[3] = { s + SQ_WEST, s + (c  == Color::RED ? SQ_SOUTH: SQ_NORTH), s + SQ_EAST };
         Bitboard tb = 0;
@@ -878,7 +878,7 @@ private:
                     tb |= SquareBB(tto[i]);
             }
         }
-        PawnToAttackBB<c>[s] = tb;
+        PawnToAttackBB[NUM(c)][s] = tb;
     }
 
     void init_advisor_attack(Square s) const
@@ -910,48 +910,53 @@ private:
     }
 
 public:
-    template <Color c>
-    static Bitboard PawnAttackBB[SQ_NUM];
-    template <Color c>
-    static Bitboard PawnToAttackBB[SQ_NUM];
+    static Bitboard PawnAttackBB[NUM(Color::COLOR_NUM)][SQ_NUM];
+    static Bitboard PawnToAttackBB[NUM(Color::COLOR_NUM)][SQ_NUM];
     static Bitboard AdvisorAttackBB[SQ_NUM];
     static Bitboard KingAttackBB[SQ_NUM];
 };
 
 
 template <PieceType pt>
-Bitboard Attack(Bitboard occupies, Square s) 
+Bitboard AttackBB(Square s, Color c)
+{
+    static_assert(pt == PieceType::PAWN || pt == PieceType::PAWN_TO,
+                 "Unknown piece type");
+    if constexpr (pt == PieceType::PAWN)
+        return AttackInitializer::PawnAttackBB[NUM(c)][s];
+    else
+        return AttackInitializer::PawnToAttackBB[NUM(c)][s];
+}
+
+template <PieceType pt>
+Bitboard AttackBB(Square s, Bitboard occupancy) 
 {
     static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON || pt == PieceType::KNIGHT || pt == PieceType::KNIGHT_TO || pt == PieceType::BISHOP,
                   "Unknown piece type");
     const Magic &magic = PieceMagic<pt>[s];
-    occupies &= magic.mask;
-    auto index = (occupies * magic.magic_number) >> magic.shift;
+    occupancy &= magic.mask;
+    auto index = (occupancy * magic.magic_number) >> magic.shift;
     return magic.attacks[index];
 }
 
-template <PieceType pt, Color c>
-Bitboard Attack(Square s)
+template <PieceType pt>
+Bitboard AttackBB(Square s)
 {
-    static_assert(pt == PieceType::PAWN || pt == PieceType::PAWN_TO);
-    if (pt == PieceType::PAWN)
-        return AttackInitializer::PawnAttackBB<c>[s];
-    else
-        return AttackInitializer::PawnToAttackBB<c>[s];
+    static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON || pt == PieceType::KNIGHT || pt == PieceType::KNIGHT_TO || pt == PieceType::BISHOP,
+                  "Unknown piece type");
+    return AttackBB<pt>(s, Bitboard(0));
 }
 
-template <PieceType pt>
-Bitboard Attack(Square s);
 template <>
-inline Bitboard Attack<PieceType::ADVISOR>(Square s)
+inline Bitboard AttackBB<PieceType::ADVISOR>(Square s)
 {
     return AttackInitializer::AdvisorAttackBB[s];
 }
+
 template <>
-inline Bitboard Attack<PieceType::KING>(Square s)
+inline Bitboard AttackBB<PieceType::KING>(Square s)
 {
     return AttackInitializer::KingAttackBB[s];
 }
-
 
 #endif

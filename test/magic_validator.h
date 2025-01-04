@@ -464,127 +464,17 @@ private:
     void GenerateLegalMoves(Position position)
     {
         GeneratePseudoLegalMoves(position);
-
-        auto movesFilter = [&](std::vector<Move>& pseudoLegalMoves, std::vector<Move>& legalMoves) {
-            for (auto pMove : pseudoLegalMoves)
-            {
-                UndoInfo undoInfo;
-                position_.SimpleMakeMove(pMove, undoInfo);
-                if (!position_.IsSelfChecked())
-                {
-                    if (position_.IsEnemyChecked())
-                        check_moves_.push_back(pMove);
-                    else
-                        legalMoves.push_back(pMove);
-                }
-                position_.SimpleUndoMove(undoInfo);
-            }
-        };
-
-        movesFilter(pseudo_legal_capture_moves_, capture_moves_);
-        movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
+        for (auto pseudoMove : pseudo_legal_capture_moves_)
+        {
+            if (position_.IsLegalMove(pseudoMove))
+                capture_moves_.push_back(pseudoMove);
+        }
+        for (auto pseudoMove : pseudo_legal_non_capture_moves_)
+        {
+            if (position_.IsLegalMove(pseudoMove))
+                non_capture_moves_.push_back(pseudoMove);
+        }
     }
-
-    /*
-    void GenerateLegalMoves(Position position)
-    {
-        Color c = position_.side_to_move();
-        auto kPos = position_.KingSquare(c);
-        int kRow = kPos / 9;
-        int kCol = kPos % 9;
-
-        GeneratePseudoLegalMoves(position);
-
-        auto movesFilter = [&](std::vector<Move>& pseudoLegalMoves, std::vector<Move>& legalMoves) {
-            if (!position_.IsSelfChecked())
-            {
-                for (auto pMove : pseudoLegalMoves)
-                {
-                    auto from = MoveFrom(pMove);
-                    auto to = MoveTo(pMove);
-                    if (from != kPos)
-                    {
-                        if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
-                        {
-                            // TODO: optimize this funciton, due to this case will probably has check move
-                            legalMoves.push_back(pMove);
-                        }
-                        else
-                        {
-                            UndoInfo undoInfo;
-                            position_.SimpleMakeMove(pMove, undoInfo);
-                            if (!position_.IsSelfChecked())
-                            {
-                                if (position_.IsEnemyChecked())
-                                    check_moves_.push_back(pMove);
-                                else
-                                    legalMoves.push_back(pMove);
-                            }
-                            position_.SimpleUndoMove(undoInfo);
-                        }
-                    }
-                    else
-                    {
-                        UndoInfo undoInfo;
-                        position_.SimpleMakeMove(pMove, undoInfo);
-                        if (!position_.IsSelfChecked())
-                        {
-                            if (position_.IsEnemyChecked())
-                                check_moves_.push_back(pMove);
-                            else
-                                legalMoves.push_back(pMove);
-                        }
-                        position_.SimpleUndoMove(undoInfo);
-                    }
-                }
-            }
-            else
-            {
-                for (auto pMove : pseudoLegalMoves)
-                {
-                    auto from = MoveFrom(pMove);
-                    auto to = MoveTo(pMove);
-                    if (from != kPos)
-                    {
-                        if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            UndoInfo undoInfo;
-                            position_.SimpleMakeMove(pMove, undoInfo);
-                            if (!position_.IsSelfChecked())
-                            {
-                                if (position_.IsEnemyChecked())
-                                    check_moves_.push_back(pMove);
-                                else
-                                    legalMoves.push_back(pMove);
-                            }
-                            position_.SimpleUndoMove(undoInfo);
-                        }
-                    }
-                    else
-                    {
-                        UndoInfo undoInfo;
-                        position_.SimpleMakeMove(pMove, undoInfo);
-                        if (!position_.IsSelfChecked())
-                        {
-                            if (position_.IsEnemyChecked())
-                                check_moves_.push_back(pMove);
-                            else
-                                legalMoves.push_back(pMove);
-                        }
-                        position_.SimpleUndoMove(undoInfo);
-                    }
-                }
-            }
-        };
-        
-        movesFilter(pseudo_legal_capture_moves_, capture_moves_);
-        movesFilter(pseudo_legal_non_capture_moves_, non_capture_moves_);
-    }
-    */
 
 private:
     Position position_;
