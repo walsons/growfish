@@ -13,4 +13,4 @@ set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # add the executable
-add_executable(growfish_test ${src_files} main.cpp)
+add_executable(growfish_test ${src_files} main.cpp magic_validator.cpp)
