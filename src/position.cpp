@@ -6,6 +6,44 @@
 #include "bitboard.h"
 #include "magic.h"
 
+void Position::MakeMove(Move move, UndoInfo& undoInfo)
+{
+    auto from = MoveFrom(move);
+    auto to = MoveTo(move);
+
+    key_ ^= Zobrist::PieceSquareZobrist(board_[from], from);
+    key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
+    key_ ^= Zobrist::PieceSquareZobrist(board_[to], to);
+    key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
+
+    undoInfo = { move, board_[to] };
+    move_piece(from, to);
+    // board_[to] = board_[from];
+    // board_[from] = Piece::NO_PIECE;
+
+    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
+    key_ ^= Zobrist::BlackToMoveZobrist();
+}
+
+void Position::UndoMove(const UndoInfo& undoInfo)
+{
+    auto from = MoveFrom(undoInfo.move);
+    auto to = MoveTo(undoInfo.move);
+
+    // board_[from] = board_[to];
+    // board_[to] = undoInfo.piece;
+    move_piece(to, from);
+    put_piece(undoInfo.piece, to);
+
+    key_ ^= Zobrist::PieceSquareZobrist(board_[from], from);
+    key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
+    key_ ^= Zobrist::PieceSquareZobrist(board_[to], to);
+    key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
+
+    key_ ^= Zobrist::BlackToMoveZobrist();
+    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
+}
+
 void Position::SetPosition(const std::string& fen)
 {
     std::memset(by_type_bb_, 0, sizeof(Bitboard) * NUM(PieceType::PIECE_TYPE_NUM));
@@ -72,7 +110,7 @@ void Position::SetPosition(const std::string& fen)
     }
 };
 
-std::string Position::GenerateFen()
+std::string Position::GenerateFen() const
 {
     std::string fen;
     std::string seg;
@@ -98,62 +136,6 @@ std::string Position::GenerateFen()
     fen.push_back(side_to_move_ == Color::RED ? 'w' : 'b');
     fen += " - - 0 1";
     return fen;
-}
-
-void Position::MakeMove(Move move, UndoInfo& undoInfo)
-{
-    auto from = MoveFrom(move);
-    auto to = MoveTo(move);
-
-    key_ ^= Zobrist::PieceSquareZobrist(board_[from], from);
-    key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
-    key_ ^= Zobrist::PieceSquareZobrist(board_[to], to);
-    key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
-
-    undoInfo = { move, board_[to] };
-    move_piece(from, to);
-    // board_[to] = board_[from];
-    // board_[from] = Piece::NO_PIECE;
-
-    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
-    key_ ^= Zobrist::BlackToMoveZobrist();
-}
-
-void Position::UndoMove(const UndoInfo& undoInfo)
-{
-    auto from = MoveFrom(undoInfo.move);
-    auto to = MoveTo(undoInfo.move);
-
-    // board_[from] = board_[to];
-    // board_[to] = undoInfo.piece;
-    move_piece(to, from);
-    put_piece(undoInfo.piece, to);
-
-    key_ ^= Zobrist::PieceSquareZobrist(board_[from], from);
-    key_ ^= Zobrist::PieceSquareZobrist(Piece::NO_PIECE, from);
-    key_ ^= Zobrist::PieceSquareZobrist(board_[to], to);
-    key_ ^= Zobrist::PieceSquareZobrist(board_[from], to);
-
-    key_ ^= Zobrist::BlackToMoveZobrist();
-    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
-}
-
-void Position::SimpleMakeMove(Move move, UndoInfo& undoInfo)
-{
-    auto from = MoveFrom(move);
-    auto to = MoveTo(move);
-
-    undoInfo = { move, board_[to] };
-    move_piece(from, to);
-}
-
-void Position::SimpleUndoMove(const UndoInfo& undoInfo)
-{
-    auto from = MoveFrom(undoInfo.move);
-    auto to = MoveTo(undoInfo.move);
-
-    move_piece(to, from);
-    put_piece(undoInfo.piece, to);
 }
 
 void Position::DisplayBoard(bool reverse) const
@@ -234,13 +216,11 @@ bool Position::IsSelfChecked()
 
 Bitboard Position::CheckersBB(Square ksq, Color kc, Bitboard occupancy) const
 {
-    Bitboard checkers= ( (Attack<PieceType::ROOK>(occupancy, ksq) & Pieces(PieceType::ROOK))
-                       | (Attack<PieceType::CANNON>(occupancy, ksq) & Pieces(PieceType::CANNON))
-                       | (Attack<PieceType::KNIGHT_TO>(occupancy, ksq) & Pieces(PieceType::KNIGHT))
-                       | (Attack<PieceType::ROOK>(occupancy, ksq) & Pieces(PieceType::KING))  // king
-                       | ( kc == Color::RED ? (Attack<PieceType::PAWN_TO, Color::BLACK>(ksq) & Pieces(PieceType::PAWN))
-                                            : (Attack<PieceType::PAWN_TO, Color::RED>(ksq) & Pieces(PieceType::PAWN))
-                         ) 
+    Bitboard checkers= ( (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::ROOK))
+                       | (AttackBB<PieceType::CANNON>(ksq, occupancy) & Pieces(PieceType::CANNON))
+                       | (AttackBB<PieceType::KNIGHT_TO>(ksq, occupancy) & Pieces(PieceType::KNIGHT))
+                       | (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::KING))  // king
+                       | (AttackBB<PieceType::PAWN_TO>(ksq, !kc) & Pieces(!kc, PieceType::PAWN))
                        ) & Pieces(!kc);
     return checkers;
 }
@@ -257,37 +237,13 @@ bool Position::IsLegalMove(Move move) const
 
 bool Position::IsChecked(Color c)
 {
-    Square kPos = KingSquare(c);
+    Square ksq = KingSquare(c);
 
-    /***** Rook *****/
-    if (Attack<PieceType::ROOK>(AllPieces(), kPos) & Pieces(!c, PieceType::ROOK))
-        return true;
-
-    /***** Cannon *****/
-    if (Attack<PieceType::CANNON>(AllPieces(), kPos) & Pieces(!c, PieceType::CANNON))
-        return true;
-
-    /***** Knight *****/
-    if (Attack<PieceType::KNIGHT_TO>(AllPieces(), kPos) & Pieces(!c, PieceType::KNIGHT))
-        return true;
-
-    /**** King *****/
-    if (Attack<PieceType::ROOK>(AllPieces(), kPos) & Pieces(!c, PieceType::KING))
-        return true;
-
-    /***** Pawn *****/
-    if (c == Color::RED)
-    {
-        if (Attack<PieceType::PAWN_TO, Color::BLACK>(kPos) & Pieces(Color::BLACK, PieceType::PAWN))
-            return true;
-    }
-    else
-    {
-        if (Attack<PieceType::PAWN_TO, Color::RED>(kPos) & Pieces(Color::RED, PieceType::PAWN))
-            return true;
-    }
-
-    return false;
+    return AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::ROOK)
+        || AttackBB<PieceType::CANNON>(ksq, AllPieces()) & Pieces(!c, PieceType::CANNON)
+        || AttackBB<PieceType::KNIGHT_TO>(ksq, AllPieces()) & Pieces(!c, PieceType::KNIGHT)
+        || AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::KING)
+        || AttackBB<PieceType::PAWN_TO>(ksq, !c) & Pieces(!c, PieceType::PAWN);
 }
 
 Piece Position::PieceFromChar(char c) const

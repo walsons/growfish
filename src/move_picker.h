@@ -108,13 +108,13 @@ int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
 
     int value = 0;
 
-    Bitboard attack = Attack<PieceType::PAWN_TO, c>(to);
+    Bitboard attack = AttackBB<PieceType::PAWN_TO>(to, c);
     attack &= position_.Pieces(c, PieceType::PAWN);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
         return value;
     
-    attack = Attack<PieceType::ADVISOR>(to);
+    attack = AttackBB<PieceType::ADVISOR>(to);
     attack &= position_.Pieces(c, PieceType::ADVISOR);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
@@ -123,31 +123,31 @@ int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
     Bitboard occupancy = position_.AllPieces();
     occupancy ^= swapPiecesBB;
 
-    attack = Attack<PieceType::BISHOP>(occupancy, to);
+    attack = AttackBB<PieceType::BISHOP>(to, occupancy);
     attack &= position_.Pieces(c, PieceType::BISHOP);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
         return value;
 
-    attack = Attack<PieceType::KNIGHT_TO>(occupancy, to);
+    attack = AttackBB<PieceType::KNIGHT_TO>(to, occupancy);
     attack &= position_.Pieces(c, PieceType::KNIGHT);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
         return value;
 
-    attack = Attack<PieceType::CANNON>(occupancy, to);
+    attack = AttackBB<PieceType::CANNON>(to, occupancy);
     attack &= position_.Pieces(c, PieceType::CANNON);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
         return value;
     
-    attack = Attack<PieceType::ROOK>(occupancy, to);
+    attack = AttackBB<PieceType::ROOK>(to, occupancy);
     attack &= position_.Pieces(c, PieceType::ROOK);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))
         return value;
 
-    attack = Attack<PieceType::KING>(to);
+    attack = AttackBB<PieceType::KING>(to);
     attack &= position_.Pieces(c, PieceType::KING);
     attack &= ~swapPiecesBB;
     if (makeCapture(attack, value))

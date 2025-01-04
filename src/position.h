@@ -26,12 +26,9 @@ public:
         std::memcpy(b, board.b, 90 * sizeof(Piece));
         return *this;
     }
-    Piece& operator[](Square index) {
-        return b[index];
-    }
-    const Piece& operator[](Square index) const {
-        return b[index];
-    }
+
+    Piece& operator[](Square index) { return b[index]; }
+    const Piece& operator[](Square index) const { return b[index]; }
 private:
     Piece* b;  // board representation
 };
@@ -41,18 +38,12 @@ class Position
 public:
     Position(const std::string& fen = kStartPos) { SetPosition(fen); }
 
-    void SetPosition(const std::string& fen);
-    void ResetPosition() { SetPosition(kStartPos); }
-
-    std::string GenerateFen();
-
     void MakeMove(Move move, UndoInfo& undoInfo);
     void UndoMove(const UndoInfo& undoInfo);
 
-    // These two functions is used to for IsChecked()
-    void SimpleMakeMove(Move move, UndoInfo& undoInfo);
-    void SimpleUndoMove(const UndoInfo& undoInfo);
-
+    void SetPosition(const std::string& fen);
+    void ResetPosition() { SetPosition(kStartPos); }
+    std::string GenerateFen() const;
     void DisplayBoard(bool reverse = false) const;
 
     Square KingSquare(Color c) const;

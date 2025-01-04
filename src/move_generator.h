@@ -11,8 +11,8 @@
 enum class MoveType : char
 {
     CAPTURE,
-    QUIET,
-    QUIET_CHECK,
+    QUIET,  // Non capture
+    QUIET_CHECK,  // Check in quiescence search
     EVASION,
     PSEUDO_LEGAL,
     LEGAL
@@ -25,47 +25,22 @@ public:
     friend class MagicValidator;  // a class in test/magic_validator.h for test
     MoveGenerator(const Position& position) : position_(position) {}
     
-    std::vector<Move> CaptureMoves() { return GenerateLegalMoves<MoveType::CAPTURE>(); }
-    std::vector<Move> NonCaptureMoves() { return GenerateLegalMoves<MoveType::QUIET>(); }
-    std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
-
     template <MoveType mt>
     std::vector<Move> GeneratePseudoLegalMoves();
     template <MoveType mt>
     std::vector<Move> GenerateLegalMoves();
 
-    bool IsLegalMove(Move move)
-    {
-        return position_.IsLegalMove(move);
+    std::vector<Move> CaptureMoves() { return GenerateLegalMoves<MoveType::CAPTURE>(); }
+    std::vector<Move> NonCaptureMoves() { return GenerateLegalMoves<MoveType::QUIET>(); }
+    std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
 
-        // Following code can be refered to optimize in the future
-        // if (!position_.IsSelfChecked())
-        // {
-        //     if (from != kPos)
-        //     {
-        //         if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(from, kPos) > 1)
-        //         {
-        //             return true;
-        //         }
-        //     }
-        // }
-        // else
-        // {
-        //     if (from != kPos)
-        //     {
-        //         if (from / 9 != kRow && from % 9 != kCol && to / 9 != kRow && to % 9 != kCol && Distance(to, kPos) > 2)
-        //         {
-        //             return false;
-        //         }
-        //     }
-        // }
-    }
+    bool IsLegalMove(Move move);
 
     template <Color c, PieceType pt, MoveType mt>
     Bitboard PieceMove(Square s)
     {
         Bitboard attack = 0, attain = 0;
-        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
+        PieceMoveBB<c, pt, mt>(s, attack, attain);
         attack &= position_.Pieces(!c);
         attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
         return attack | attain;
@@ -115,7 +90,7 @@ public:
     void PieceMove(Square s, std::vector<Move> &moves)
     {
         Bitboard attack = 0, attain = 0;
-        PieceMoveBitboard<c, pt, mt>(s, attack, attain);
+        PieceMoveBB<c, pt, mt>(s, attack, attain);
         if constexpr (mt == MoveType::CAPTURE || mt == MoveType::PSEUDO_LEGAL)
         {
             attack &= position_.Pieces(!c);
@@ -202,7 +177,7 @@ private:
     }
 
     template <Color c, PieceType pt, MoveType mt>
-    void PieceMoveBitboard(Square s, Bitboard &attack, Bitboard &attain)
+    void PieceMoveBB(Square s, Bitboard &attack, Bitboard &attain)
     {
         static_assert( pt == PieceType::ROOK 
             || pt == PieceType::CANNON
@@ -222,28 +197,23 @@ private:
         if constexpr (pt == PieceType::ADVISOR
                         || pt == PieceType::KING)
         {
-            attack = Attack<pt>(s);
+            attack = AttackBB<pt>(s);
         }
         else if constexpr (pt == PieceType::PAWN)
         {
-            attack = Attack<PieceType::PAWN, c>(s);
+            attack = AttackBB<PieceType::PAWN>(s, c);
         }
         else
         {
             occupies = ~position_.Pieces(PieceType::NO_PIECE_TYPE);
-            attack = Attack<pt>(occupies, s);
+            attack = AttackBB<pt>(s, occupies);
         }
 
         if constexpr (pt == PieceType::CANNON)
-            attain = Attack<PieceType::ROOK>(occupies, s);
+            attain = AttackBB<PieceType::ROOK>(s, occupies);
         else
             attain = attack;
     }
-
-    // Moves that don't consider being checked
-    void GeneratePseudoLegalMoves();
-    // Available moves
-    void GenerateLegalMoves();
 
 private:
     Position position_;
