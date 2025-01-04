@@ -295,7 +295,7 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
         double maxOneStepTimeConsumption = 0;
         while (std::getline(fin, line))
         {
-            std::cout << line << std::endl;
+            // std::cout << line << std::endl;
             Position position(line);
             Search search(position);
             auto onePlyBeg = clock();
@@ -322,7 +322,7 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
 int main(int argc, char* argv[])
 {
     AttackInitializer::InitAttack();
-    // MagicInitializer::InitMagic();
+    InitBB();
 
     if (argc == 1)
     {
