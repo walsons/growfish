@@ -23,15 +23,10 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("rnbakabnr/9/2c6/p1p1C1p1p/9/1C7/P1P1P1P1P/6N2/9/1RBAKAB1R w - - 0 1");
     // position.SetPosition("rnbakabnr/9/9/p1p1C1p1p/9/1C7/P1P1P1P1P/6N2/8R/1RBAKAB2 b - - 0 1");
     // position.SetPosition("r1ba1abnr/3k5/6c2/6p1p/p3C4/3RC4/P3P1P1P/9/9/1RBAKABN1 b - - 0 1");
-    // position.SetPosition("r1ba1abnr/3k5/6c2/6p1p/p3C4/3RC4/P3P1P1P/9/9/1RBAKABN1 b - - 0 1 moves g7d7");
     // position.SetPosition("rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1");
-    // position.SetPosition("rnbakabnr/9/7c1/p1p1C1p1p/9/9/P1P1P1P1P/1C4N2/9/1RBAKAB1R b - - 0 1 moves a6a5 b2b4");
-    // position.SetPosition("r1ba1abnr/3k5/6c2/p3C1p1p/3RC4/9/P3P1P1P/6N2/9/1RBAKAB2 b - - 0 1 moves g7d7 e6d6 d8e8 e5e4");
-    // position.SetPosition("r1b1kabnr/4a4/2C6/4C1pRp/p8/9/P1P1PnP1P/6n2/9/1RBAKAB2 b - - 0 1 moves e8f7 h6h5 a9a7 c7c4 g6g5 b0b1 f3e1 c4e4 e9d9 b1d1");
     // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
 
     position.DisplayBoard();
-    // std::cout << position.GenerateFen() << std::endl;
     Search search(position);
 
     clock_t beg, end;
@@ -368,37 +363,37 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 1.623s, search nodes 313384)
-        robot_battle_1729653504763.txt  (depth 4: timecost 0.132s, search nodes 30080)
-        robot_battle_1729666476581.txt  (depth 4: timecost 1.559s, search nodes 391403)
-        robot_battle_1729759105954.txt  (depth 4: timecost 0.269s, search nodes 59161)
-        robot_battle_1730124987011.txt  (depth 4: timecost 0.693s, search nodes 147499)
-        robot_battle_1730130702948.txt  (depth 4: timecost 1.278s, search nodes 261090)
-        robot_battle_1730422269049.txt  (depth 4: timecost 1.21s, search nodes 306975)
-        robot_battle_1732956559883.txt  (depth 4: timecost 2.167s, search nodes 521695)
-        robot_battle_1733750483345.txt  (depth 4: timecost 1.539s, search nodes 375602)
-        robot_battle_1733750496914.txt  (depth 4: timecost 2.009s, search nodes 513232)
-        robot_battle_1733917013899.txt  (depth 4: timecost 1.212s, search nodes 306033)
-        robot_battle_1733917045094.txt  (depth 4: timecost 1.43s, search nodes 300729)
-        robot_battle_1733922523712.txt  (depth 4: timecost 3.814s, search nodes 738925)
-        robot_battle_1733924013886.txt  (depth 4: timecost 3.571s, search nodes 694360)
-        All files cost time is: 22.506s
+        robot_battle.txt  (depth 4: timecost 1.632s, search nodes 313384)
+        robot_battle_1729653504763.txt  (depth 4: timecost 0.134s, search nodes 30080)
+        robot_battle_1729666476581.txt  (depth 4: timecost 1.573s, search nodes 391403)
+        robot_battle_1729759105954.txt  (depth 4: timecost 0.271s, search nodes 59161)
+        robot_battle_1730124987011.txt  (depth 4: timecost 0.698s, search nodes 147499)
+        robot_battle_1730130702948.txt  (depth 4: timecost 1.283s, search nodes 261090)
+        robot_battle_1730422269049.txt  (depth 4: timecost 1.204s, search nodes 306975)
+        robot_battle_1732956559883.txt  (depth 4: timecost 2.171s, search nodes 521695)
+        robot_battle_1733750483345.txt  (depth 4: timecost 1.549s, search nodes 375602)
+        robot_battle_1733750496914.txt  (depth 4: timecost 2.013s, search nodes 513232)
+        robot_battle_1733917013899.txt  (depth 4: timecost 1.199s, search nodes 295985)
+        robot_battle_1733917045094.txt  (depth 4: timecost 1.437s, search nodes 300729)
+        robot_battle_1733922523712.txt  (depth 4: timecost 3.013s, search nodes 634883)
+        robot_battle_1733924013886.txt  (depth 4: timecost 3.542s, search nodes 692526)
+        All files cost time is: 21.719s
 
-        robot_battle.txt  (depth 6: timecost 32.717s, search nodes 5684563)
-        robot_battle_1729653504763.txt  (depth 6: timecost 1.591s, search nodes 295152)
-        robot_battle_1729666476581.txt  (depth 6: timecost 46.738s, search nodes 9484888)
-        robot_battle_1729759105954.txt  (depth 6: timecost 6.478s, search nodes 1175340)
-        robot_battle_1730124987011.txt  (depth 6: timecost 20.002s, search nodes 3722778)
-        robot_battle_1730130702948.txt  (depth 6: timecost 30.491s, search nodes 5853281)
-        robot_battle_1730422269049.txt  (depth 6: timecost 20.526s, search nodes 4504646)
-        robot_battle_1732956559883.txt  (depth 6: timecost 45.855s, search nodes 9237230)
-        robot_battle_1733750483345.txt  (depth 6: timecost 35.372s, search nodes 7016815)
-        robot_battle_1733750496914.txt  (depth 6: timecost 55.368s, search nodes 11784188)
-        robot_battle_1733917013899.txt  (depth 6: timecost 31.197s, search nodes 6508927)
-        robot_battle_1733917045094.txt  (depth 6: timecost 33.972s, search nodes 5872613)
-        robot_battle_1733922523712.txt  (depth 6: timecost 62.513s, search nodes 12124855)
-        robot_battle_1733924013886.txt  (depth 6: timecost 56.73s, search nodes 10899882)
-        All files cost time is: 479.55s
+        robot_battle.txt  (depth 6: timecost 28.121s, search nodes 5684563)
+        robot_battle_1729653504763.txt  (depth 6: timecost 1.624s, search nodes 295152)
+        robot_battle_1729666476581.txt  (depth 6: timecost 47.225s, search nodes 9484888)
+        robot_battle_1729759105954.txt  (depth 6: timecost 6.472s, search nodes 1175340)
+        robot_battle_1730124987011.txt  (depth 6: timecost 19.917s, search nodes 3722778)
+        robot_battle_1730130702948.txt  (depth 6: timecost 30.34s, search nodes 5853281)
+        robot_battle_1730422269049.txt  (depth 6: timecost 20.397s, search nodes 4504646)
+        robot_battle_1732956559883.txt  (depth 6: timecost 45.951s, search nodes 9237230)
+        robot_battle_1733750483345.txt  (depth 6: timecost 35.282s, search nodes 7016815)
+        robot_battle_1733750496914.txt  (depth 6: timecost 57.412s, search nodes 11784188)
+        robot_battle_1733917013899.txt  (depth 6: timecost 31.317s, search nodes 6495518)
+        robot_battle_1733917045094.txt  (depth 6: timecost 34.841s, search nodes 5872613)
+        robot_battle_1733922523712.txt  (depth 6: timecost 54.581s, search nodes 10734989)
+        robot_battle_1733924013886.txt  (depth 6: timecost 55.743s, search nodes 10826307)
+        All files cost time is: 469.223s
         */
 
         if (argc == 4)
@@ -442,7 +437,13 @@ int main(int argc, char* argv[])
             "robot_battle_1730124987011.txt",
             "robot_battle_1730130702948.txt",
             "robot_battle_1730422269049.txt",
-            "robot_battle_1732956559883.txt"
+            "robot_battle_1732956559883.txt",
+            "robot_battle_1733750483345.txt",
+            "robot_battle_1733750496914.txt",
+            "robot_battle_1733917013899.txt",
+            "robot_battle_1733917045094.txt",
+            "robot_battle_1733922523712.txt",
+            "robot_battle_1733924013886.txt"
         };
         MagicValidator::ValidatePseudoLegalMove(files);
         MagicValidator::ValidateLegalMove(files);

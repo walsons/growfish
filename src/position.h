@@ -47,8 +47,7 @@ public:
     void DisplayBoard(bool reverse = false) const;
 
     Square KingSquare(Color c) const;
-    bool IsEnemyChecked();
-    bool IsSelfChecked();
+    bool IsChecked(Color c) const;
 
     Bitboard CheckersBB(Square ksq, Color kc, Bitboard occupancy) const;
     bool IsLegalMove(Move move) const;
@@ -84,7 +83,6 @@ public:
     }
 
 private:
-    bool IsChecked(Color c);
     Piece PieceFromChar(char c) const;
     char CharFromPiece(Piece piece) const;
 

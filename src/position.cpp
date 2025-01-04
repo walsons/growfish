@@ -178,23 +178,6 @@ void Position::DisplayBoard(bool reverse) const
     if (reverse)
         std::reverse(board.begin(), board.end());
     std::cout << board;
-    // std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
-    // for (int i = 0; i < 10; ++i)
-    // {
-    //     std::cout << (9 - i) << " |";
-    //     for (int j = 0; j < 9; ++j)
-    //     {
-    //         std::cout << " " << (boardStr[i * 9 + j] == '0' ? ' ' : boardStr[i * 9 + j]) << " " << "|";
-    //     }
-    //     std::cout << std::endl;
-    //     std::cout << "  +---+---+---+---+---+---+---+---+---+" << std::endl;
-    // }
-    // std::cout << "  ";
-    // for (int j = 0; j < 9; ++j)
-    // {
-    //     std::cout << "  " << static_cast<char>('a' + j) << " ";
-    // }
-    // std::cout << std::endl;
 }
 
 Square Position::KingSquare(Color c) const
@@ -204,25 +187,25 @@ Square Position::KingSquare(Color c) const
     return PopLSB(b);
 }
 
-bool Position::IsEnemyChecked()
+bool Position::IsChecked(Color c) const
 {
-    return IsChecked(side_to_move_ == Color::RED ? Color::BLACK : Color::RED);
-}
+    Square ksq = KingSquare(c);
 
-bool Position::IsSelfChecked()
-{
-    return IsChecked(side_to_move_);
+    return AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::ROOK)
+        || AttackBB<PieceType::CANNON>(ksq, AllPieces()) & Pieces(!c, PieceType::CANNON)
+        || AttackBB<PieceType::KNIGHT_TO>(ksq, AllPieces()) & Pieces(!c, PieceType::KNIGHT)
+        || AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::KING)
+        || AttackBB<PieceType::PAWN_TO>(ksq, !c) & Pieces(!c, PieceType::PAWN);
 }
 
 Bitboard Position::CheckersBB(Square ksq, Color kc, Bitboard occupancy) const
 {
-    Bitboard checkers= ( (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::ROOK))
-                       | (AttackBB<PieceType::CANNON>(ksq, occupancy) & Pieces(PieceType::CANNON))
-                       | (AttackBB<PieceType::KNIGHT_TO>(ksq, occupancy) & Pieces(PieceType::KNIGHT))
-                       | (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::KING))  // king
-                       | (AttackBB<PieceType::PAWN_TO>(ksq, !kc) & Pieces(!kc, PieceType::PAWN))
-                       ) & Pieces(!kc);
-    return checkers;
+    return ( (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::ROOK))
+           | (AttackBB<PieceType::CANNON>(ksq, occupancy) & Pieces(PieceType::CANNON))
+           | (AttackBB<PieceType::KNIGHT_TO>(ksq, occupancy) & Pieces(PieceType::KNIGHT))
+           | (AttackBB<PieceType::ROOK>(ksq, occupancy) & Pieces(PieceType::KING))  // king
+           | (AttackBB<PieceType::PAWN_TO>(ksq, !kc) & Pieces(!kc, PieceType::PAWN))
+           ) & Pieces(!kc);
 }
 
 bool Position::IsLegalMove(Move move) const
@@ -233,17 +216,6 @@ bool Position::IsLegalMove(Move move) const
         return !CheckersBB(to, side_to_move_, occupancy);
     // checker in "to" position is attacked
     return !(CheckersBB(KingSquare(side_to_move_), side_to_move_, occupancy) & ~SquareBB(to));
-}
-
-bool Position::IsChecked(Color c)
-{
-    Square ksq = KingSquare(c);
-
-    return AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::ROOK)
-        || AttackBB<PieceType::CANNON>(ksq, AllPieces()) & Pieces(!c, PieceType::CANNON)
-        || AttackBB<PieceType::KNIGHT_TO>(ksq, AllPieces()) & Pieces(!c, PieceType::KNIGHT)
-        || AttackBB<PieceType::ROOK>(ksq, AllPieces()) & Pieces(!c, PieceType::KING)
-        || AttackBB<PieceType::PAWN_TO>(ksq, !c) & Pieces(!c, PieceType::PAWN);
 }
 
 Piece Position::PieceFromChar(char c) const
