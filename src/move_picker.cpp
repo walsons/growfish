@@ -12,27 +12,24 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
     , phase_(phase)
 {
     // ensure tt_move and killer_move is valid(existed and legal)
-    auto validMove = [&](Move move) {
+    auto moveValid = [&](Move move) {
         auto from = move.MoveFrom(), to = move.MoveTo();
-        if (position_.piece_from_square(from) != Piece::NO_PIECE && position_.color_from_square(from) == position_.side_to_move())
+        if (SquareBB(from) & position_.Pieces(position_.side_to_move()))
         {
-            if (position_.piece_from_square(from) != Piece::NO_PIECE)
+            Bitboard b = move_generator_.PieceMove<MoveType::PSEUDO_LEGAL>(from);
+            if  (SquareBB(to) & b)
             {
-                Bitboard b = move_generator_.PieceMove<MoveType::PSEUDO_LEGAL>(from);
-                if  (SquareBB(to) & b)
-                {
-                    return move_generator_.IsLegalMove(move);
-                }
+                return move_generator_.IsLegalMove(move);
             }
         }
         return false;
     };
 
-    if (tt_move_ != 0 && !validMove(tt_move_))
+    if (tt_move_ != 0 && !moveValid(tt_move_))
         tt_move_ = 0;
-    if (killer_move1_ != 0 && !validMove(killer_move1_))
+    if (killer_move1_ != 0 && !moveValid(killer_move1_))
         killer_move1_ = 0;
-    if (killer_move2_ != 0 && !validMove(killer_move2_))
+    if (killer_move2_ != 0 && !moveValid(killer_move2_))
         killer_move2_ = 0;
 }
     
