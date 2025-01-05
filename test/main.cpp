@@ -25,6 +25,8 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("r1ba1abnr/3k5/6c2/6p1p/p3C4/3RC4/P3P1P1P/9/9/1RBAKABN1 b - - 0 1");
     // position.SetPosition("rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1");
     // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
+    // position.SetPosition("6b1c/5k3/8b/2N6/2p4C1/6B2/6P2/3K4B/4A4/5A3 w - - 0 1");
+    position.SetPosition("r1bk1abnr/9/9/2p1p1p1p/p8/9/P1P1P1P1P/1c5C1/3R5/RNBAKAB2 b - - 0 1");
 
     position.DisplayBoard();
     Search search(position);
@@ -288,6 +290,7 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
         while (std::getline(fin, line))
         {
             Position position(line);
+            // std::cout << position.GenerateFen() << std::endl;
             Search search(position);
             auto onePlyBeg = clock();
             search.IterativeDeepeningLoop(searchDepth);

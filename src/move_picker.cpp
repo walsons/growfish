@@ -31,6 +31,27 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
         killer_move1_ = 0;
     if (killer_move2_ != 0 && !moveValid(killer_move2_))
         killer_move2_ = 0;
+
+    if (position_.IsChecked(position_.side_to_move()))
+    {
+        std::list<ScoreMove> evasionList;
+        if (phase_ == Phase::QSEARCH_CAPTURE)
+        {
+            evasionList = GenerateEvasionMove(1);
+        }
+        else
+        {
+            evasionList = GenerateEvasionMove();
+        }
+        for (auto item : evasionList)
+        {
+            evasions_.push_back(item);
+        }
+        std::stable_sort(evasions_.begin(), evasions_.end(), [](ScoreMove a, ScoreMove b) {
+            return a.score > b.score;
+        });
+        evasions_index_ = 0;
+    }
 }
     
 std::list<ScoreMove> MovePicker::GenerateCheckMove()
@@ -84,8 +105,45 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     return moves;
 }
 
+std::list<ScoreMove> MovePicker::GenerateEvasionMove(int a)
+{
+    std::list<ScoreMove> moves;
+    std::vector<Move> captures, quiets;
+    if (tt_move_ != 0)
+    {
+        moves.push_back({tt_move_, 3 * History::kHistoryMax});
+    }
+    move_generator_.EvasionMoves(captures, quiets);
+    for (auto move : captures)
+    {
+        int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+        moves.push_back({ move, score + 2 * History::kHistoryMax });
+    }
+
+    if (a == 1)
+        return moves;
+    if (killer_move1_ != 0)
+        moves.push_back({killer_move1_, History::kHistoryMax + 1000});
+    if (killer_move2_ != 0)
+        moves.push_back({killer_move2_, History::kHistoryMax + 500});
+    for (auto move : quiets)
+    {
+        int score = HISTORY.HistoryValue(position_, move);
+        moves.push_back({ move, score });
+    }
+
+    return moves;
+
+}
+
 Move MovePicker::NextMove()
 {
+    if (position_.IsChecked(position_.side_to_move()))
+    {
+        position_.DisplayBoard();
+        std::cout << position_.GenerateFen() << std::endl;
+    }
+
     Move selectedMove;
     bool loop = true;
 
@@ -153,6 +211,12 @@ Move MovePicker::NextMove()
                 phase_ = Phase::END;
             }
             break;
+            case Phase::EVASION:
+            {
+                moves_ = GenerateEvasionMove();
+                phase_ = Phase::END;
+            }
+            break;
             case Phase::QSEARCH_CAPTURE:
             {
                 moves_ = GenerateCaptureMove();
@@ -168,5 +232,13 @@ Move MovePicker::NextMove()
         }
     }
 
+    if (position_.IsChecked(position_.side_to_move()) && selectedMove != 0)
+    {
+        std::cout << selectedMove << "  " << evasions_[evasions_index_].move << std::endl;
+        if ((selectedMove != evasions_[evasions_index_].move))
+            int a = 0;
+        // assert((selectedMove == evasions_[evasions_index_].move));
+        evasions_index_++;
+    }
     return selectedMove;
 }
