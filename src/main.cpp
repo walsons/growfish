@@ -6,8 +6,6 @@
 
 void Engine()
 {
-    AttackInitializer::InitAttack();
-
     std::cout << "***** growfish *****" << std::endl;
 
     double duration;
