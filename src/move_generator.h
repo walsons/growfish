@@ -77,8 +77,6 @@ public:
             Bitboard attack = 0, attain = 0;
             PieceMoveBB<c, pt, MoveType::PSEUDO_LEGAL>(s, attack, attain);
 
-            // ShowBitboard(attack);
-            // ShowBitboard(position_.Pieces(!c));
             attack &= position_.Pieces(!c);
             attain &= position_.Pieces(PieceType::NO_PIECE_TYPE);
 
@@ -127,31 +125,34 @@ public:
 
     void EvasionMoves(std::vector<Move> &captureMoves, std::vector<Move> &quietMoves)
     {
-        Square ksq = position_.KingSquare(position_.side_to_move());
-        Bitboard checkerBB = position_.CheckersBB(ksq, position_.side_to_move(), position_.AllPieces());
+        Color c = position_.side_to_move();
+        Square ksq = position_.KingSquare(c);
+        Bitboard checkerBB = position_.CheckersBB(ksq, c, position_.AllPieces());
         // attackTo maybe the best move
         constexpr Bitboard allOnes = (Bitboard(1) << 90) - 1;
         Bitboard cannonFroms = allOnes, cannonTos = allOnes, otherTos = allOnes;
         while (checkerBB)  // rook, cannon, knight, pawn
         {
             Square s = PopLSB(checkerBB);
-            if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::ROOK)
-            {
-                otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
-            }
-            else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::CANNON)
+            if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::CANNON)
             {
                 cannonFroms &= BetweenBB(ksq, s);
                 cannonTos &= (BetweenBB(ksq, s) | SquareBB(s));
             }
-            else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::KNIGHT)
-            {
+            // else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::ROOK)
+            // {
+            //     otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
+            // }
+            // else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::KNIGHT)
+            // {
+            //     otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
+            // }
+            // else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::PAWN)
+            // {
+            //     otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
+            // }
+            else
                 otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
-            }
-            else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::PAWN)
-            {
-                otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
-            }
             // other moves are king move
         }
         cannonFroms &= position_.Pieces(position_.side_to_move());
@@ -166,7 +167,6 @@ public:
             tos = cannonTos;
         }
 
-        Color c = position_.side_to_move();
         constexpr PieceType pts[] = {PieceType::ROOK, PieceType::CANNON,
                            PieceType::KNIGHT, PieceType::PAWN,
                            PieceType::BISHOP, PieceType::ADVISOR,

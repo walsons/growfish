@@ -73,7 +73,7 @@ private:
     std::list<ScoreMove> GenerateCaptureMove();
     std::list<ScoreMove> GenerateCaptureMove_only_mvv_lva();
     std::list<ScoreMove> GenerateNonCaptureMove();
-    std::list<ScoreMove> GenerateEvasionMove(int a = 0);
+    std::list<ScoreMove> GenerateEvasionMove();
 
     template <Color c>
     int SEE(Piece victim, Square to, Bitboard &swapPiecesBB);
@@ -89,9 +89,6 @@ private:
     Phase phase_;
     std::list<ScoreMove> moves_;
     std::list<ScoreMove> bad_captures_;
-
-    std::vector<ScoreMove> evasions_;
-    int evasions_index_;
 };
 
 template <Color c>

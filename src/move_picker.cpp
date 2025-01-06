@@ -35,23 +35,6 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
     if (position_.IsChecked(position_.side_to_move()) && phase_ != Phase::QSEARCH_CAPTURE)
     {
         phase_ = Phase::EVASION;
-        // std::list<ScoreMove> evasionList;
-        // if (phase_ == Phase::QSEARCH_CAPTURE)
-        // {
-        //     evasionList = GenerateEvasionMove(1);
-        // }
-        // else
-        // {
-        //     evasionList = GenerateEvasionMove();
-        // }
-        // for (auto item : evasionList)
-        // {
-        //     evasions_.push_back(item);
-        // }
-        // std::stable_sort(evasions_.begin(), evasions_.end(), [](ScoreMove a, ScoreMove b) {
-        //     return a.score > b.score;
-        // });
-        // evasions_index_ = 0;
     }
 }
     
@@ -100,13 +83,16 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     auto nonCaptureMoves = move_generator_.GenerateLegalMoves<MoveType::QUIET>();
     for (auto move : nonCaptureMoves)
     {
+        // Enable after merge evasion branch
+        // if (move == killer_move1_ || move == killer_move2_)
+        //     continue;
         int score = HISTORY.HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
     return moves;
 }
 
-std::list<ScoreMove> MovePicker::GenerateEvasionMove(int a)
+std::list<ScoreMove> MovePicker::GenerateEvasionMove()
 {
     std::list<ScoreMove> moves;
     std::vector<Move> captures, quiets;
@@ -121,8 +107,6 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove(int a)
         moves.push_back({ move, score + 2 * History::kHistoryMax });
     }
 
-    if (a == 1)
-        return moves;
     if (killer_move1_ != 0)
         moves.push_back({killer_move1_, History::kHistoryMax + 1000});
     if (killer_move2_ != 0)
@@ -139,12 +123,6 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove(int a)
 
 Move MovePicker::NextMove()
 {
-    // if (position_.IsChecked(position_.side_to_move()))
-    // {
-    //     position_.DisplayBoard();
-    //     std::cout << position_.GenerateFen() << std::endl;
-    // }
-
     Move selectedMove;
     bool loop = true;
 
