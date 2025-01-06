@@ -7,6 +7,7 @@
 #include "position.h"
 #include "function.h"
 #include "magic.h"
+#include "bitboard_cache.h"
 
 enum class MoveType : char
 {
@@ -34,24 +35,24 @@ public:
     std::vector<Move> NonCaptureMoves() { return GenerateLegalMoves<MoveType::QUIET>(); }
     std::vector<Move> CheckMoves() { return std::vector<Move>(); }  // TODO
 
-    Bitboard BetweenBB(Square s1, Square s2)
-    {
-        if (RankOf(s1) == RankOf(s2) || FileOf(s1) == FileOf(s2))  // Rook and Cannon
-            return (AttackBB<PieceType::ROOK>(s1, SquareBB(s2)) & AttackBB<PieceType::ROOK>(s2, SquareBB(s1)));
-        // else KNIGHT_TO
-        auto r1 = RankOf(s1), r2 = RankOf(s2);
-        auto c1 = FileOf(s1), c2 = FileOf(s2);
-        Square barrier = s1;
-        if (r2 > r1)
-            barrier += SQ_NORTH;
-        else
-            barrier += SQ_SOUTH;
-        if (c2 > c1)
-            barrier += SQ_EAST;
-        else
-            barrier += SQ_WEST;
-        return SquareBB(barrier);
-    }
+    // Bitboard BetweenBB_(Square s1, Square s2)
+    // {
+    //     if (RankOf(s1) == RankOf(s2) || FileOf(s1) == FileOf(s2))  // Rook and Cannon
+    //         return (AttackBB<PieceType::ROOK>(s1, SquareBB(s2)) & AttackBB<PieceType::ROOK>(s2, SquareBB(s1)));
+    //     // else KNIGHT_TO
+    //     auto r1 = RankOf(s1), r2 = RankOf(s2);
+    //     auto c1 = FileOf(s1), c2 = FileOf(s2);
+    //     Square barrier = s1;
+    //     if (r2 > r1)
+    //         barrier += SQ_NORTH;
+    //     else
+    //         barrier += SQ_SOUTH;
+    //     if (c2 > c1)
+    //         barrier += SQ_EAST;
+    //     else
+    //         barrier += SQ_WEST;
+    //     return SquareBB(barrier);
+    // }
 
     Bitboard AttackerBB(Square s)
     {
