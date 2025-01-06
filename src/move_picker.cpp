@@ -83,9 +83,8 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     auto nonCaptureMoves = move_generator_.GenerateLegalMoves<MoveType::QUIET>();
     for (auto move : nonCaptureMoves)
     {
-        // Enable after merge evasion branch
-        // if (move == killer_move1_ || move == killer_move2_)
-        //     continue;
+        if (move == killer_move1_ || move == killer_move2_)
+            continue;
         int score = HISTORY.HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
@@ -113,6 +112,8 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove()
         moves.push_back({killer_move2_, History::kHistoryMax + 500});
     for (auto move : quiets)
     {
+        if (move == killer_move1_ || move == killer_move2_)
+            continue;
         int score = HISTORY.HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
