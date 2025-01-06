@@ -31,6 +31,11 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
         killer_move1_ = 0;
     if (killer_move2_ != 0 && !moveValid(killer_move2_))
         killer_move2_ = 0;
+
+    if (position_.IsChecked(position_.side_to_move()) && phase_ != Phase::QSEARCH_CAPTURE)
+    {
+        phase_ = Phase::EVASION;
+    }
 }
     
 std::list<ScoreMove> MovePicker::GenerateCheckMove()
@@ -78,10 +83,42 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     auto nonCaptureMoves = move_generator_.GenerateLegalMoves<MoveType::QUIET>();
     for (auto move : nonCaptureMoves)
     {
+        // Enable after merge evasion branch
+        // if (move == killer_move1_ || move == killer_move2_)
+        //     continue;
         int score = HISTORY.HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
     return moves;
+}
+
+std::list<ScoreMove> MovePicker::GenerateEvasionMove()
+{
+    std::list<ScoreMove> moves;
+    std::vector<Move> captures, quiets;
+    if (tt_move_ != 0)
+    {
+        moves.push_back({tt_move_, 3 * History::kHistoryMax});
+    }
+    move_generator_.EvasionMoves(captures, quiets);
+    for (auto move : captures)
+    {
+        int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+        moves.push_back({ move, score + 2 * History::kHistoryMax });
+    }
+
+    if (killer_move1_ != 0)
+        moves.push_back({killer_move1_, History::kHistoryMax + 1000});
+    if (killer_move2_ != 0)
+        moves.push_back({killer_move2_, History::kHistoryMax + 500});
+    for (auto move : quiets)
+    {
+        int score = HISTORY.HistoryValue(position_, move);
+        moves.push_back({ move, score });
+    }
+
+    return moves;
+
 }
 
 Move MovePicker::NextMove()
@@ -153,6 +190,12 @@ Move MovePicker::NextMove()
                 phase_ = Phase::END;
             }
             break;
+            case Phase::EVASION:
+            {
+                moves_ = GenerateEvasionMove();
+                phase_ = Phase::END;
+            }
+            break;
             case Phase::QSEARCH_CAPTURE:
             {
                 moves_ = GenerateCaptureMove();
@@ -168,5 +211,28 @@ Move MovePicker::NextMove()
         }
     }
 
+    // if (position_.IsChecked(position_.side_to_move()) && selectedMove != 0)
+    // {
+    //     // std::cout << selectedMove << "  " << evasions_[evasions_index_].move << std::endl;
+    //     if ((selectedMove != evasions_[evasions_index_].move))
+    //     {
+    //         bool found = false;
+    //         for (auto item : evasions_)
+    //         {
+    //             if (item.move == selectedMove)
+    //             {
+    //                 found = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (!found)
+    //         {
+    //             position_.DisplayBoard();
+    //             GenerateEvasionMove();
+    //         }
+    //         assert(found);
+    //     }
+    //     evasions_index_++;
+    // }
     return selectedMove;
 }

@@ -288,6 +288,7 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
         while (std::getline(fin, line))
         {
             Position position(line);
+            // std::cout << position.GenerateFen() << std::endl;
             Search search(position);
             auto onePlyBeg = clock();
             search.IterativeDeepeningLoop(searchDepth);

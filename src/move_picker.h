@@ -60,6 +60,7 @@ public:
         KILLER,
         NON_CAPTURE,
         BAD_CAPTURE,
+        EVASION,
         QSEARCH_CAPTURE,
         END,
     };
@@ -72,6 +73,7 @@ private:
     std::list<ScoreMove> GenerateCaptureMove();
     std::list<ScoreMove> GenerateCaptureMove_only_mvv_lva();
     std::list<ScoreMove> GenerateNonCaptureMove();
+    std::list<ScoreMove> GenerateEvasionMove();
 
     template <Color c>
     int SEE(Piece victim, Square to, Bitboard &swapPiecesBB);
