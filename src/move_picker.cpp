@@ -32,25 +32,26 @@ MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[],
     if (killer_move2_ != 0 && !moveValid(killer_move2_))
         killer_move2_ = 0;
 
-    if (position_.IsChecked(position_.side_to_move()))
+    if (position_.IsChecked(position_.side_to_move()) && phase_ != Phase::QSEARCH_CAPTURE)
     {
-        std::list<ScoreMove> evasionList;
-        if (phase_ == Phase::QSEARCH_CAPTURE)
-        {
-            evasionList = GenerateEvasionMove(1);
-        }
-        else
-        {
-            evasionList = GenerateEvasionMove();
-        }
-        for (auto item : evasionList)
-        {
-            evasions_.push_back(item);
-        }
-        std::stable_sort(evasions_.begin(), evasions_.end(), [](ScoreMove a, ScoreMove b) {
-            return a.score > b.score;
-        });
-        evasions_index_ = 0;
+        phase_ = Phase::EVASION;
+        // std::list<ScoreMove> evasionList;
+        // if (phase_ == Phase::QSEARCH_CAPTURE)
+        // {
+        //     evasionList = GenerateEvasionMove(1);
+        // }
+        // else
+        // {
+        //     evasionList = GenerateEvasionMove();
+        // }
+        // for (auto item : evasionList)
+        // {
+        //     evasions_.push_back(item);
+        // }
+        // std::stable_sort(evasions_.begin(), evasions_.end(), [](ScoreMove a, ScoreMove b) {
+        //     return a.score > b.score;
+        // });
+        // evasions_index_ = 0;
     }
 }
     
@@ -138,11 +139,11 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove(int a)
 
 Move MovePicker::NextMove()
 {
-    if (position_.IsChecked(position_.side_to_move()))
-    {
-        position_.DisplayBoard();
-        std::cout << position_.GenerateFen() << std::endl;
-    }
+    // if (position_.IsChecked(position_.side_to_move()))
+    // {
+    //     position_.DisplayBoard();
+    //     std::cout << position_.GenerateFen() << std::endl;
+    // }
 
     Move selectedMove;
     bool loop = true;
@@ -232,13 +233,28 @@ Move MovePicker::NextMove()
         }
     }
 
-    if (position_.IsChecked(position_.side_to_move()) && selectedMove != 0)
-    {
-        std::cout << selectedMove << "  " << evasions_[evasions_index_].move << std::endl;
-        if ((selectedMove != evasions_[evasions_index_].move))
-            int a = 0;
-        // assert((selectedMove == evasions_[evasions_index_].move));
-        evasions_index_++;
-    }
+    // if (position_.IsChecked(position_.side_to_move()) && selectedMove != 0)
+    // {
+    //     // std::cout << selectedMove << "  " << evasions_[evasions_index_].move << std::endl;
+    //     if ((selectedMove != evasions_[evasions_index_].move))
+    //     {
+    //         bool found = false;
+    //         for (auto item : evasions_)
+    //         {
+    //             if (item.move == selectedMove)
+    //             {
+    //                 found = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (!found)
+    //         {
+    //             position_.DisplayBoard();
+    //             GenerateEvasionMove();
+    //         }
+    //         assert(found);
+    //     }
+    //     evasions_index_++;
+    // }
     return selectedMove;
 }

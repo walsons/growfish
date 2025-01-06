@@ -99,24 +99,27 @@ public:
                         quietMoves.push_back(move);
                 }
             }
-            else if ((attack = (attack & tos)))
+            else
             {
-                while (attack)
+                if ((attack = (attack & tos)))
                 {
-                    Square to = PopLSB(attack);
-                    Move move = ConstructMove(s, to);
-                    if (IsLegalMove(move))
-                        captureMoves.push_back(move);
+                    while (attack)
+                    {
+                        Square to = PopLSB(attack);
+                        Move move = ConstructMove(s, to);
+                        if (IsLegalMove(move))
+                            captureMoves.push_back(move);
+                    }
                 }
-            }
-            else if ((attain = (attain & tos)))
-            {
-                while (attain)
+                if ((attain = (attain & tos)))
                 {
-                    Square to = PopLSB(attain);
-                    Move move = ConstructMove(s, to);
-                    if (IsLegalMove(move))
-                        quietMoves.push_back(move);
+                    while (attain)
+                    {
+                        Square to = PopLSB(attain);
+                        Move move = ConstructMove(s, to);
+                        if (IsLegalMove(move))
+                            quietMoves.push_back(move);
+                    }
                 }
             }
         }
@@ -128,47 +131,41 @@ public:
         Bitboard checkerBB = position_.CheckersBB(ksq, position_.side_to_move(), position_.AllPieces());
         // attackTo maybe the best move
         constexpr Bitboard allOnes = (Bitboard(1) << 90) - 1;
-        Bitboard froms = allOnes, tos = froms, attackTo = froms;
-        while (checkerBB)
+        Bitboard cannonFroms = allOnes, cannonTos = allOnes, otherTos = allOnes;
+        while (checkerBB)  // rook, cannon, knight, pawn
         {
             Square s = PopLSB(checkerBB);
-            attackTo &= SquareBB(s); // rook, cannon, knight, pawn
             if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::ROOK)
             {
-                tos &= BetweenBB(ksq, s);
+                otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
             }
             else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::CANNON)
             {
-                tos &= BetweenBB(ksq, s);
-                froms &= BetweenBB(ksq, s);
+                cannonFroms &= BetweenBB(ksq, s);
+                cannonTos &= (BetweenBB(ksq, s) | SquareBB(s));
             }
             else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::KNIGHT)
             {
-                tos &= BetweenBB(ksq, s);
+                otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
+            }
+            else if (TypeOfPiece(position_.piece_from_square(s)) == PieceType::PAWN)
+            {
+                otherTos &= (BetweenBB(ksq, s) | SquareBB(s));
             }
             // other moves are king move
         }
-        if (froms == allOnes)
-            froms = 0;
-        if (tos == allOnes)
-            tos = 0;
-        if (attackTo == allOnes)
-            attackTo = 0;
+        cannonFroms &= position_.Pieces(position_.side_to_move());
+        Bitboard froms = 0, tos = 0;
+        if (otherTos != allOnes)
+        {
+            tos = otherTos;
+        }
+        else if (cannonFroms != allOnes)
+        {
+            froms = cannonFroms;
+            tos = cannonTos;
+        }
 
-        // if (attackTo)
-        // {
-        //     Square s = PopLSB(attackTo);
-        //     Bitboard b = AttackerBB(s);
-        //     while (b)
-        //     {
-        //         Square from = PopLSB(b);
-        //         auto move = ConstructMove(from, s);
-        //         if (IsLegalMove(move))
-        //             moves.push_back(move);
-        //     }
-        // }
-        tos |= attackTo;
-        froms &= position_.Pieces(position_.side_to_move());
         Color c = position_.side_to_move();
         constexpr PieceType pts[] = {PieceType::ROOK, PieceType::CANNON,
                            PieceType::KNIGHT, PieceType::PAWN,
@@ -195,32 +192,6 @@ public:
             // EvasionMoves<Color::BLACK, pts[6]>(captureMoves, quietMoves, froms, tos);
         }
         
-
-
-        // while (froms)
-        // {
-        //     Square s = PopLSB(froms);
-        //     Bitboard b = PieceMove<MoveType::PSEUDO_LEGAL>(s);
-        //     while (b)
-        //     {
-        //         Square to = PopLSB(b);
-        //         auto move = ConstructMove(s, to);
-        //         if (IsLegalMove(move))
-        //             moves.push_back(move);
-        //     }
-        // }
-        // while (tos)
-        // {
-        //     Square s = PopLSB(tos);
-        //     Bitboard b = AttackerBB(s);
-        //     while (b)
-        //     {
-        //         Square from = PopLSB(b);
-        //         auto move = ConstructMove(from, s);
-        //         if (IsLegalMove(move))
-        //             moves.push_back(move);
-        //     }
-        // }
         Bitboard b = PieceMove<MoveType::PSEUDO_LEGAL>(ksq);
         while (b)
         {
