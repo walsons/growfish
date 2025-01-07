@@ -13,7 +13,7 @@ extern TranspositionTable TT;
 extern History HISTORY;
 extern Book BOOK;
 
-unsigned long long Search::search_nodes = 0;
+std::atomic<unsigned long long> Search::search_nodes = 0;
 
 void Search::IterativeDeepeningLoop(int maxDepth)
 {
@@ -107,13 +107,13 @@ void Search::root_search(int depth, SearchStack ss[])
 int Search::search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply)
 {
     ++Search::search_nodes;
-    TTEntry* ttEntry = TT[position.key()];
-    if (ttEntry != nullptr && TT.CanUseTT(ttEntry, depth, ply, beta))
+    TTEntry ttEntry = TT[position.key()];
+    if (ttEntry.key != 0 && TT.CanUseTT(ttEntry, depth, ply, beta))
     {
-        return TT.AdjustGetValue(ttEntry->value, ply);
+        return TT.AdjustGetValue(ttEntry.value, ply);
     }
 
-    MovePicker movePicker(position, ttEntry != nullptr ? ttEntry->move : Move(), ss[ply].killer_move);
+    MovePicker movePicker(position, ttEntry.key != 0 ? ttEntry.move : Move(), ss[ply].killer_move);
     Move move = movePicker.NextMove();
     if (move == 0) 
     {

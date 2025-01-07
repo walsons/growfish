@@ -1,6 +1,8 @@
 #ifndef TRANSPOSITION_TABLE_H
 #define TRANSPOSITION_TABLE_H
 
+#include <mutex>
+
 #include "structures.h"
 #include "evaluate.h"
 
@@ -20,8 +22,24 @@ public:
         : key(p_key), value(p_value), depth(p_depth), generation(p_generation), move(p_move), type(p_type)
     {
     }
+    TTEntry(const TTEntry& ttEntry)
+        : key(ttEntry.key), value(ttEntry.value), depth(ttEntry.depth), generation(ttEntry.generation), move(ttEntry.move), type(ttEntry.type)
+    {
+    }
+    TTEntry& operator=(const TTEntry& ttEntry)
+    {
+        key = (ttEntry.key);
+        value = (ttEntry.value);
+        depth = (ttEntry.depth);
+        generation = (ttEntry.generation);
+        move = (ttEntry.move);
+        type = (ttEntry.type);
+        return *this;
+    }
 
 public:
+    std::mutex mutex;
+
     U64 key;
     int value;
     int depth;
@@ -33,15 +51,15 @@ public:
 class TranspositionTable
 {
 public:
-    TranspositionTable(size_t sizeOfMB);
+    TranspositionTable(size_t sizeOfMB = 32);
     void NewSearch();
     void Clear();
     void Store(U64 key, int value, int depth, Move move, ValueType type);
-    TTEntry* operator[](U64 key);
+    TTEntry operator[](U64 key);
 
     // EXACT is considered as both lower and upper bound
-    bool IsLowerBound(TTEntry* ttEntry) { return int(ttEntry->type) & int(ValueType::LOWER_BOUND); }
-    bool IsUpperBound(TTEntry* ttEntry) { return int(ttEntry->type) & int(ValueType::UPPER_BOUND); }
+    bool IsLowerBound(const TTEntry& ttEntry) { return int(ttEntry.type) & int(ValueType::LOWER_BOUND); }
+    bool IsUpperBound(const TTEntry& ttEntry) { return int(ttEntry.type) & int(ValueType::UPPER_BOUND); }
 
     int AdjustSetValue(int value, int ply)
     {
@@ -59,10 +77,10 @@ public:
             return value + ply;
         return value;
     }
-    bool CanUseTT(TTEntry* ttEntry, int depth, int ply, int beta)
+    bool CanUseTT(const TTEntry& ttEntry, int depth, int ply, int beta)
     {
-        int v = AdjustGetValue(ttEntry->value, ply);
-        return (ttEntry->depth >= depth
+        int v = AdjustGetValue(ttEntry.value, ply);
+        return (ttEntry.depth >= depth
                 || v > MateValue - 100
                 || v < -MateValue + 100
                )

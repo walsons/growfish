@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <list>
+#include <atomic>
 
 #include "position.h"
 
@@ -31,7 +32,7 @@ private:
 
 public:
     // This number is used to calculate how many nodes have been searched
-    static unsigned long long search_nodes;
+    static std::atomic<unsigned long long> search_nodes;
 
 private:
     Position root_position_;
