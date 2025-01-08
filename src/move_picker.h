@@ -65,7 +65,7 @@ public:
         END,
     };
 
-    MovePicker(const Position& position, Move ttMove, Move killerMove[], Phase phase = Phase::TT);
+    MovePicker(size_t threadIndex, const Position& position, Move ttMove, Move killerMove[], Phase phase = Phase::TT);
     Move NextMove();
 
 private:
@@ -81,6 +81,8 @@ private:
     int SEECapture(Move captureMove);
 
 private:
+    size_t thread_index_;
+
     Position position_;
     Move tt_move_;
     Move killer_move1_;

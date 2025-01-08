@@ -10,7 +10,9 @@
 #include "book.h"
 
 extern TranspositionTable TT;
-extern History HISTORY;
+// extern History HISTORY;
+size_t THREAD_NUM = 4;
+std::vector<History> HISTORIES(THREAD_NUM);
 extern Book BOOK;
 
 std::atomic<unsigned long long> Search::search_nodes = 0;
@@ -19,11 +21,15 @@ void Search::IterativeDeepeningLoop(int maxDepth)
 {
     Search::search_nodes = 1;  // root node
     TT.NewSearch();
-    HISTORY.Clear();
+    // HISTORY.Clear();
+    for (auto& history: HISTORIES)
+    {
+        history.Clear();
+    }
 
     root_moves_.clear();
     Move emptyKillerMove[2] = {0, 0};
-    MovePicker rootMovePicker(root_position_, 0, emptyKillerMove);
+    MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
     Move move = rootMovePicker.NextMove();
     while (move)
     {
@@ -42,13 +48,20 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         return;
     }
 
-    SearchStack ss[100];
-
-    // Disable odd depth
-    int depth = 2;
-    for (; depth <= maxDepth; depth += 2)
+    // start other threads
+    for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
     {
-        root_search(depth, ss);
+        // threads_.push_back(std::thread(&Search::thread_root_search, this, maxDepth, new SearchStack[100], threadIndex, root_position_, root_moves_));
+        // threads_.back().detach();
+        std::thread t(&Search::thread_root_search, this, maxDepth, new SearchStack[100], threadIndex, root_position_, root_moves_);
+        t.detach();
+    }
+
+    SearchStack ss[100];
+    // Disable odd depth
+    for (int depth = 2; depth <= maxDepth; depth += 2)
+    {
+        root_search(depth, ss, 0);
         
         if (ss[0].pv.size() > 0)
         {
@@ -66,9 +79,14 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         }
         std::cout << std::endl;
     }
+
+    // for (auto& thread: threads_)
+    // {
+    //     thread.join();
+    // }
 }
 
-void Search::root_search(int depth, SearchStack ss[])
+void Search::root_search(int depth, SearchStack ss[], size_t threadIndex)
 {
     ++Search::search_nodes;
     best_move_ = 0;
@@ -87,9 +105,10 @@ void Search::root_search(int depth, SearchStack ss[])
     for (auto move: root_moves_)
     {
         UndoInfo undoInfo;
-        root_position_.MakeMove(move, undoInfo);
-        int score = -search(root_position_, depth - 1, -beta, -alpha, ss, ply + 1);
-        root_position_.UndoMove(undoInfo);
+        Position position = root_position_;
+        position.MakeMove(move, undoInfo);
+        int score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        position.UndoMove(undoInfo);
         if (score > alpha)
         {
             best_move_ = move;
@@ -104,7 +123,38 @@ void Search::root_search(int depth, SearchStack ss[])
     }
 }
 
-int Search::search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply)
+void Search::thread_root_search(int depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves)
+{
+    ++Search::search_nodes;
+    if (depth <= 0) { return; }
+
+    if (rootMoves.empty()) 
+    {
+        return;
+    }
+
+    int alpha = -Infinite, beta = Infinite;
+    int ply = 0;
+    for (auto move: rootMoves)
+    {
+        UndoInfo undoInfo;
+        Position position = rootPosition;
+        position.MakeMove(move, undoInfo);
+        int score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        position.UndoMove(undoInfo);
+        if (score > alpha)
+        {
+            alpha = score;
+            ss[ply].current_move = move;
+            ss[ply].pv.clear();
+            ss[ply].pv.push_back(ss[ply].current_move);
+            ss[ply].pv.insert(ss[ply].pv.end(), std::make_move_iterator(ss[ply + 1].pv.begin()), 
+                                                std::make_move_iterator(ss[ply + 1].pv.end()));
+        }
+    }
+}
+
+int Search::search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex)
 {
     ++Search::search_nodes;
     TTEntry ttEntry = TT[position.key()];
@@ -113,7 +163,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
         return TT.AdjustGetValue(ttEntry.value, ply);
     }
 
-    MovePicker movePicker(position, ttEntry.key != 0 ? ttEntry.move : Move(), ss[ply].killer_move);
+    MovePicker movePicker(threadIndex, position, ttEntry.key != 0 ? ttEntry.move : Move(), ss[ply].killer_move);
     Move move = movePicker.NextMove();
     if (move == 0) 
     {
@@ -125,7 +175,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
 
     if (depth == 0)
     {
-        auto score = qsearch(position, alpha, beta, ss, ply + 1);
+        auto score = qsearch(position, alpha, beta, ss, ply + 1, threadIndex);
         return score;
     }
 
@@ -140,7 +190,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
-        auto score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1);
+        auto score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score >= beta)
         {
@@ -148,7 +198,8 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
             // Only non capture move do history and as killer move 
             if (position.piece_from_square(move.MoveTo()) == Piece::NO_PIECE)
             {
-                HISTORY.Success(position, move, depth);
+                // HISTORY.Success(position, move, depth);
+                HISTORIES[threadIndex].Success(position, move, depth);
                 if (ss[ply].killer_move[0] != move)
                 {
                     ss[ply].killer_move[1] = ss[ply].killer_move[0];
@@ -176,7 +227,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     return alpha;
 }
 
-int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply)
+int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex)
 {
     ++Search::search_nodes;
     auto score = Evaluate::Eval(position);
@@ -189,18 +240,18 @@ int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], i
         alpha = score;
     }
     Move killerMove[2] = {0, 0};
-    if (MovePicker(position, 0, killerMove).NextMove() == 0)
+    if (MovePicker(threadIndex, position, 0, killerMove).NextMove() == 0)
     {
         // we can't store this value to transposition due to this case only consider capture moves
         return -MateValue + ply;
     }
-    MovePicker movePicker(position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
+    MovePicker movePicker(threadIndex, position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
     Move move = movePicker.NextMove();
     while (move)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
-        score = -qsearch(position, -beta, -alpha, ss, ply + 1);
+        score = -qsearch(position, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score >= beta)
         {
