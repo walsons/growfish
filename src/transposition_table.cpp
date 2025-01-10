@@ -39,7 +39,7 @@ void TranspositionTable::Store(U64 key, int value, int depth, Move move, ValueTy
         }
     }
     std::lock_guard<std::mutex> lock(replace->mutex);
-    *replace = TTEntry{key, value, depth, generation_, move, type};
+    *replace = TTEntry{key, value, type, depth, generation_, move};
 }
 
 TTEntry TranspositionTable::operator[](U64 key)

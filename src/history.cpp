@@ -28,7 +28,7 @@ void History::Success(const Position &position, Move move, int depth)
     }
 }
 
-int History::HistoryValue(const Position &position, Move move) const 
+Value History::HistoryValue(const Position &position, Move move) const 
 {
     auto from = move.MoveFrom();
     auto to = move.MoveTo();

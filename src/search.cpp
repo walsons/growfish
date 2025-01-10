@@ -18,7 +18,7 @@ extern Book BOOK;
 
 std::atomic<unsigned long long> Search::search_nodes = 0;
 
-void Search::IterativeDeepeningLoop(int maxDepth)
+void Search::IterativeDeepeningLoop(Depth maxDepth)
 {
     Search::search_nodes = 1;  // root node
     TT.NewSearch();
@@ -58,7 +58,7 @@ void Search::IterativeDeepeningLoop(int maxDepth)
 
     SearchStack ss[100];
     // Disable odd depth
-    for (int depth = 2; depth <= maxDepth; depth += 2)
+    for (Depth depth = 2; depth <= maxDepth; depth += 2)
     {
         root_search(depth, ss, 0);
         
@@ -78,14 +78,9 @@ void Search::IterativeDeepeningLoop(int maxDepth)
         }
         std::cout << std::endl;
     }
-
-    // for (auto& thread: threads_)
-    // {
-    //     thread.join();
-    // }
 }
 
-void Search::root_search(int depth, SearchStack ss[], size_t threadIndex)
+void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
 {
     ++Search::search_nodes;
     best_move_ = 0;
@@ -99,14 +94,14 @@ void Search::root_search(int depth, SearchStack ss[], size_t threadIndex)
         return;
     }
 
-    int alpha = -Infinite, beta = Infinite;
-    int ply = 0;
+    Value alpha = -Infinite, beta = Infinite;
+    Ply ply = 0;
     for (auto move: root_moves_)
     {
         UndoInfo undoInfo;
         Position position = root_position_;
         position.MakeMove(move, undoInfo);
-        int score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score > alpha)
         {
@@ -122,7 +117,7 @@ void Search::root_search(int depth, SearchStack ss[], size_t threadIndex)
     }
 }
 
-void Search::thread_root_search(int depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves)
+void Search::thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves)
 {
     ++Search::search_nodes;
     if (depth <= 0) { return; }
@@ -132,14 +127,14 @@ void Search::thread_root_search(int depth, SearchStack ss[], size_t threadIndex,
         return;
     }
 
-    int alpha = -Infinite, beta = Infinite;
-    int ply = 0;
+    Value alpha = -Infinite, beta = Infinite;
+    Ply ply = 0;
     for (auto move: rootMoves)
     {
         UndoInfo undoInfo;
         Position position = rootPosition;
         position.MakeMove(move, undoInfo);
-        int score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score > alpha)
         {
@@ -153,7 +148,7 @@ void Search::thread_root_search(int depth, SearchStack ss[], size_t threadIndex,
     }
 }
 
-int Search::search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex)
+Value Search::search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex)
 {
     ++Search::search_nodes;
     TTEntry ttEntry = TT[position.key()];
@@ -166,7 +161,7 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     Move move = movePicker.NextMove();
     if (move == 0) 
     {
-        auto score = -MateValue + ply;
+        Value score = -MateValue + ply;
         TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, 0, ValueType::EXACT);
         // We like choose fastest checkmate in search
         return score;
@@ -184,12 +179,12 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     if (-MateValue + ply >= beta)
         return -MateValue + ply;
 
-    int oldAlpha = alpha;
+    Value oldAlpha = alpha;
     while (move)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
-        auto score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score >= beta)
         {
@@ -226,10 +221,10 @@ int Search::search(Position& position, int depth, int alpha, int beta, SearchSta
     return alpha;
 }
 
-int Search::qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex)
+Value Search::qsearch(Position& position, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex)
 {
     ++Search::search_nodes;
-    auto score = Evaluate::Eval(position);
+    Value score = Evaluate::Eval(position);
     if (score >= beta)
     {
         return score;

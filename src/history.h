@@ -9,13 +9,13 @@ public:
     History();
     void Clear();
     void Success(const Position &position, Move move, int depth);
-    int HistoryValue(const Position &position, Move move) const;
+    Value HistoryValue(const Position &position, Move move) const;
 
 public:
-    static const int kHistoryMax = 1 << 14;
+    static const Value kHistoryMax = (1 << 13);
 
 private:
-    int history_[PieceIndex(Piece::PIECE_NUM)][Square::SQ_NUM];
+    Value history_[PieceIndex(Piece::PIECE_NUM)][Square::SQ_NUM];
 };
 
 #endif
