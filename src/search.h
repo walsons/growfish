@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <list>
+#include <atomic>
+#include <thread>
 
 #include "position.h"
 
@@ -24,14 +26,15 @@ public:
     int best_score() { return best_score_; }
 
 private:
-    void root_search(int depth, SearchStack ss[]);
-    int search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply);
+    void root_search(int depth, SearchStack ss[], size_t threadIndex);
+    void thread_root_search(int depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves);
+    int search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex);
     // Quiescence search
-    int qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply);
+    int qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex);
 
 public:
     // This number is used to calculate how many nodes have been searched
-    static unsigned long long search_nodes;
+    static std::atomic<unsigned long long> search_nodes;
 
 private:
     Position root_position_;
@@ -42,6 +45,8 @@ private:
     Move prohibited_move_;
 
     bool print_pv_move_ = false;
+    
+    std::vector<std::thread> threads_;
 };
 
 #endif

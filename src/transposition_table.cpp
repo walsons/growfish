@@ -3,7 +3,7 @@
 #include <cstring>
 
 
-TranspositionTable::TranspositionTable(size_t sizeOfMB = 16) : generation_(0)
+TranspositionTable::TranspositionTable(size_t sizeOfMB) : generation_(0)
 {
     // size is MB, it will allocate 2 ^ n like 1, 2, 4... MB memory, which smaller or equal to size.
     size_ = 1; 
@@ -38,20 +38,24 @@ void TranspositionTable::Store(U64 key, int value, int depth, Move move, ValueTy
             }
         }
     }
+    std::lock_guard<std::mutex> lock(replace->mutex);
     *replace = TTEntry{key, value, depth, generation_, move, type};
 }
 
-TTEntry* TranspositionTable::operator[](U64 key)
+TTEntry TranspositionTable::operator[](U64 key)
 {
+    TTEntry ttEntry;
     int index = (key & (size_ - 1) * same_key_item_num);
     for (int i = 0; i < same_key_item_num; i++)
     {
         if (tt_entry_[index + i].key == key)
         {
-            return &tt_entry_[index + i];
+            std::lock_guard<std::mutex> lock(tt_entry_[index + i].mutex);
+            ttEntry = tt_entry_[index + i];
+            break;
         }
     }
-    return nullptr;
+    return ttEntry;
 }
 
 TranspositionTable TT;

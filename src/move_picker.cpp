@@ -1,10 +1,12 @@
 #include "move_picker.h"
 #include <algorithm>
 
-extern History HISTORY;
+// extern History HISTORY;
+extern std::vector<History> HISTORIES;
 
-MovePicker::MovePicker(const Position& position, Move ttMove, Move killerMove[], Phase phase)
-    : position_(position)
+MovePicker::MovePicker(size_t threadIndex, const Position& position, Move ttMove, Move killerMove[], Phase phase)
+    : thread_index_(threadIndex)
+    , position_(position)
     , tt_move_(ttMove)
     , killer_move1_(killerMove[0])
     , killer_move2_(killerMove[1])
@@ -85,7 +87,8 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     {
         if (move == killer_move1_ || move == killer_move2_)
             continue;
-        int score = HISTORY.HistoryValue(position_, move);
+        // int score = HISTORY.HistoryValue(position_, move);
+        int score = HISTORIES[thread_index_].HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
     return moves;
@@ -114,7 +117,8 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove()
     {
         if (move == killer_move1_ || move == killer_move2_)
             continue;
-        int score = HISTORY.HistoryValue(position_, move);
+        // int score = HISTORY.HistoryValue(position_, move);
+        int score = HISTORIES[thread_index_].HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
 

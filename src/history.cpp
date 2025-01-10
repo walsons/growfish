@@ -36,4 +36,4 @@ int History::HistoryValue(const Position &position, Move move) const
     return history_[PieceIndex(piece)][to];
 }
 
-History HISTORY;
+// History HISTORY;
