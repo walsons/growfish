@@ -11,7 +11,8 @@
 
 extern TranspositionTable TT;
 // extern History HISTORY;
-size_t THREAD_NUM = 4;
+// currently only works well on amd CPU, while on intel CPU, multiple thread perform worse than single thread
+size_t THREAD_NUM = 1;  
 std::vector<History> HISTORIES(THREAD_NUM);
 extern Book BOOK;
 
@@ -51,9 +52,7 @@ void Search::IterativeDeepeningLoop(int maxDepth)
     // start other threads
     for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
     {
-        // threads_.push_back(std::thread(&Search::thread_root_search, this, maxDepth, new SearchStack[100], threadIndex, root_position_, root_moves_));
-        // threads_.back().detach();
-        std::thread t(&Search::thread_root_search, this, maxDepth, new SearchStack[100], threadIndex, root_position_, root_moves_);
+        std::thread t(&Search::thread_root_search, this, (maxDepth / 2 * 2), new SearchStack[100], threadIndex, root_position_, root_moves_);
         t.detach();
     }
 
