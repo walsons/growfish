@@ -6,24 +6,16 @@
 #include "position.h"
 #include "bitboard.h"
 
-// pikafish piece value
-//constexpr int RookValue = 1213;
-//constexpr int KnightValue = 964;
-//constexpr int BishopValue = 191;
-//constexpr int AdvisorValue = 216;
-//constexpr int KingValue = MAXS;
-//constexpr int CannonValue = 746;
-//constexpr int PawnValue = 140;
 
-constexpr int Infinite = 60000;
-constexpr int MateValue = 50000;
-constexpr int RookValue = 1600;
-constexpr int KnightValue = 750;
-constexpr int BishopValue = 150;
-constexpr int AdvisorValue = 150;
-constexpr int KingValue = MateValue;
-constexpr int CannonValue = 750;
-constexpr int PawnValue = 100;
+constexpr Value Infinite = 30000;
+constexpr Value MateValue = 20000;
+constexpr Value RookValue = 1600;
+constexpr Value KnightValue = 750;
+constexpr Value BishopValue = 150;
+constexpr Value AdvisorValue = 150;
+constexpr Value KingValue = MateValue;
+constexpr Value CannonValue = 750;
+constexpr Value PawnValue = 100;
 
 template <PieceType pt> constexpr int PieceValue;
 template <> constexpr int PieceValue<PieceType::ROOK> = RookValue;
@@ -36,7 +28,7 @@ template <> constexpr int PieceValue<PieceType::PAWN> = PawnValue;
 
 inline int GetPieceValue(PieceType pt)
 {
-    int value = 0;
+    Value value = 0;
     switch (pt)
     {
     case PieceType::ROOK:
@@ -69,10 +61,10 @@ inline int GetPieceValue(PieceType pt)
 class Evaluate
 {
 public:
-    static int Eval(const Position& position);
+    static Value Eval(const Position& position);
 private:
     template <PieceType pt>
-    static int ScoreCalculator(const Position& position)
+    static Value ScoreCalculator(const Position& position)
     {
         return OneCount(position.Pieces(Color::RED, pt)) * PieceValue<pt> - OneCount(position.Pieces(Color::BLACK, pt)) * PieceValue<pt>;
     }
@@ -81,9 +73,9 @@ private:
 // gain more score near enemy king(prefer vertical)
 // gain more score side by side with other friend pawn
 template <>
-inline int Evaluate::ScoreCalculator<PieceType::PAWN>(const Position& position)
+inline Value Evaluate::ScoreCalculator<PieceType::PAWN>(const Position& position)
 {
-    int score = 0;
+    Value score = 0;
     Bitboard redPawnBB = position.Pieces(Color::RED, PieceType::PAWN);
     Bitboard blackPawnBB = position.Pieces(Color::BLACK, PieceType::PAWN);
 

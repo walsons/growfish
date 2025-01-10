@@ -55,10 +55,10 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove()
     Color c = position_.side_to_move();
     for (auto move : captureMoves)
     {
-        int score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
+        Value score = (c == Color::RED ? SEECapture<Color::RED>(move) : SEECapture<Color::BLACK>(move));
         if (score >= 0)
         {
-            int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+            Value score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
             moves.push_back({ move, score });
         }
         else
@@ -73,7 +73,7 @@ std::list<ScoreMove> MovePicker::GenerateCaptureMove_only_mvv_lva()
     auto captureMoves = move_generator_.GenerateLegalMoves<MoveType::CAPTURE>();
     for (auto move : captureMoves)
     {
-        int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+        Value score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
         moves.push_back({ move, score });
     }
     return moves;
@@ -87,8 +87,7 @@ std::list<ScoreMove> MovePicker::GenerateNonCaptureMove()
     {
         if (move == killer_move1_ || move == killer_move2_)
             continue;
-        // int score = HISTORY.HistoryValue(position_, move);
-        int score = HISTORIES[thread_index_].HistoryValue(position_, move);
+        Value score = HISTORIES[thread_index_].HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
     return moves;
@@ -100,25 +99,25 @@ std::list<ScoreMove> MovePicker::GenerateEvasionMove()
     std::vector<Move> captures, quiets;
     if (tt_move_ != 0)
     {
-        moves.push_back({tt_move_, 3 * History::kHistoryMax});
+        moves.push_back({tt_move_, Infinite});
     }
     move_generator_.EvasionMoves(captures, quiets);
     for (auto move : captures)
     {
-        int score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
-        moves.push_back({ move, score + 2 * History::kHistoryMax });
+        Value score = MVV_LVA[PieceIndex(position_.piece_from_square(move.MoveFrom()))][PieceIndex(position_.piece_from_square(move.MoveTo()))];
+        score += History::kHistoryMax + 200;
+        moves.push_back({move, score});
     }
 
     if (killer_move1_ != 0)
-        moves.push_back({killer_move1_, History::kHistoryMax + 1000});
+        moves.push_back({killer_move1_, History::kHistoryMax + 200});
     if (killer_move2_ != 0)
-        moves.push_back({killer_move2_, History::kHistoryMax + 500});
+        moves.push_back({killer_move2_, History::kHistoryMax + 100});
     for (auto move : quiets)
     {
         if (move == killer_move1_ || move == killer_move2_)
             continue;
-        // int score = HISTORY.HistoryValue(position_, move);
-        int score = HISTORIES[thread_index_].HistoryValue(position_, move);
+        Value score = HISTORIES[thread_index_].HistoryValue(position_, move);
         moves.push_back({ move, score });
     }
 
@@ -216,28 +215,5 @@ Move MovePicker::NextMove()
         }
     }
 
-    // if (position_.IsChecked(position_.side_to_move()) && selectedMove != 0)
-    // {
-    //     // std::cout << selectedMove << "  " << evasions_[evasions_index_].move << std::endl;
-    //     if ((selectedMove != evasions_[evasions_index_].move))
-    //     {
-    //         bool found = false;
-    //         for (auto item : evasions_)
-    //         {
-    //             if (item.move == selectedMove)
-    //             {
-    //                 found = true;
-    //                 break;
-    //             }
-    //         }
-    //         if (!found)
-    //         {
-    //             position_.DisplayBoard();
-    //             GenerateEvasionMove();
-    //         }
-    //         assert(found);
-    //     }
-    //     evasions_index_++;
-    // }
     return selectedMove;
 }

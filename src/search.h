@@ -20,17 +20,17 @@ class Search
 public:
     Search(const Position& position) : root_position_(position) {}
     void SetPosition(const Position& position) { root_position_ = position; }
-    void IterativeDeepeningLoop(int maxDepth);
+    void IterativeDeepeningLoop(Depth maxDepth);
 
     Move best_move() { return best_move_; }
-    int best_score() { return best_score_; }
+    Value best_score() { return best_score_; }
 
 private:
-    void root_search(int depth, SearchStack ss[], size_t threadIndex);
-    void thread_root_search(int depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves);
-    int search(Position& position, int depth, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex);
+    void root_search(Depth depth, SearchStack ss[], size_t threadIndex);
+    void thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves);
+    Value search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
     // Quiescence search
-    int qsearch(Position& position, int alpha, int beta, SearchStack ss[], int ply, size_t threadIndex);
+    Value qsearch(Position& position, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
 
 public:
     // This number is used to calculate how many nodes have been searched
@@ -39,7 +39,7 @@ public:
 private:
     Position root_position_;
     Move best_move_;
-    int best_score_;
+    Value best_score_;
     std::list<Move> root_moves_;
     // Prohibit loop move
     Move prohibited_move_;

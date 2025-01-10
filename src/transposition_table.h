@@ -17,23 +17,23 @@ enum class ValueType : char
 class TTEntry
 {
 public:
-    TTEntry() : key(0), value(0), depth(0), generation(0), move(0), type(ValueType::UNKNOWN) {}
-    TTEntry(U64 p_key, int p_value, int p_depth, int p_generation, Move p_move, ValueType p_type)
-        : key(p_key), value(p_value), depth(p_depth), generation(p_generation), move(p_move), type(p_type)
+    TTEntry() : key(0), value(0), type(ValueType::UNKNOWN), depth(0), generation(0), move(0) {}
+    TTEntry(U64 p_key, int p_value, ValueType p_type, int p_depth, int p_generation, Move p_move)
+        : key(p_key), value(p_value), type(p_type), depth(p_depth), generation(p_generation), move(p_move)
     {
     }
     TTEntry(const TTEntry& ttEntry)
-        : key(ttEntry.key), value(ttEntry.value), depth(ttEntry.depth), generation(ttEntry.generation), move(ttEntry.move), type(ttEntry.type)
+        : key(ttEntry.key), value(ttEntry.value), type(ttEntry.type), depth(ttEntry.depth), generation(ttEntry.generation), move(ttEntry.move)
     {
     }
     TTEntry& operator=(const TTEntry& ttEntry)
     {
         key = (ttEntry.key);
         value = (ttEntry.value);
+        type = (ttEntry.type);
         depth = (ttEntry.depth);
         generation = (ttEntry.generation);
         move = (ttEntry.move);
-        type = (ttEntry.type);
         return *this;
     }
 
@@ -41,11 +41,11 @@ public:
     std::mutex mutex;
 
     U64 key;
-    int value;
-    int depth;
+    Value value;
+    ValueType type;
+    Depth depth;
     int generation;
     Move move;
-    ValueType type;
 };
 
 class TranspositionTable

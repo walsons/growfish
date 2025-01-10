@@ -26,7 +26,7 @@
        k              101  201  301  401  501  601  701  101  201  301  401  501  601  701
 
 */
-const int MVV_LVA[14][14] = {
+const Value MVV_LVA[14][14] = {
     { 107, 207, 307, 407, 507, 607, 707, 107, 207, 307, 407, 507, 607, 707 },
     { 106, 206, 306, 406, 506, 606, 706, 106, 206, 306, 406, 506, 606, 706 },
     { 105, 205, 305, 405, 505, 605, 705, 105, 205, 305, 405, 505, 605, 705 },
@@ -46,7 +46,7 @@ const int MVV_LVA[14][14] = {
 struct ScoreMove
 {
     Move move;
-    int score;
+    Value score;
 };
 
 class MovePicker
@@ -76,9 +76,9 @@ private:
     std::list<ScoreMove> GenerateEvasionMove();
 
     template <Color c>
-    int SEE(Piece victim, Square to, Bitboard &swapPiecesBB);
+    Value SEE(Piece victim, Square to, Bitboard &swapPiecesBB);
     template <Color c>
-    int SEECapture(Move captureMove);
+    Value SEECapture(Move captureMove);
 
 private:
     size_t thread_index_;
@@ -94,9 +94,9 @@ private:
 };
 
 template <Color c>
-int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
+Value MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
 {
-    auto makeCapture = [this, victim, to, &swapPiecesBB](Bitboard attack, int &value) {
+    auto makeCapture = [this, victim, to, &swapPiecesBB](Bitboard attack, Value &value) {
         if (attack)
         {
             Square from = PopLSB(attack);
@@ -110,7 +110,7 @@ int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
         return false;
     };
 
-    int value = 0;
+    Value value = 0;
 
     Bitboard attack = AttackBB<PieceType::PAWN_TO>(to, c);
     attack &= position_.Pieces(c, PieceType::PAWN);
@@ -161,7 +161,7 @@ int MovePicker::SEE(Piece victim, Square to, Bitboard &swapPiecesBB)
 }
 
 template <Color c>
-int MovePicker::SEECapture(Move captureMove)
+Value MovePicker::SEECapture(Move captureMove)
 {
     auto from = captureMove.MoveFrom();
     auto to = captureMove.MoveTo();
@@ -169,7 +169,7 @@ int MovePicker::SEECapture(Move captureMove)
     Piece attacker = position_.piece_from_square(from);
     Piece victim = position_.piece_from_square(to);
     // attacker become victim in next SEE
-    int value = GetPieceValue(TypeOfPiece(victim)) - SEE<!c>(attacker, to, swapPiecesBB);
+    Value value = GetPieceValue(TypeOfPiece(victim)) - SEE<!c>(attacker, to, swapPiecesBB);
     return value;
 }
 
