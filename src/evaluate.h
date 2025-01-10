@@ -15,8 +15,8 @@
 //constexpr int CannonValue = 746;
 //constexpr int PawnValue = 140;
 
-constexpr int Infinite = 60000;
-constexpr int MateValue = 50000;
+constexpr int Infinite = 30000;
+constexpr int MateValue = 20000;
 constexpr int RookValue = 1600;
 constexpr int KnightValue = 750;
 constexpr int BishopValue = 150;

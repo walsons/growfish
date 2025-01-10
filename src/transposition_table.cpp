@@ -24,34 +24,44 @@ void TranspositionTable::Store(U64 key, int value, int depth, Move move, ValueTy
     TTEntry* replace = &tt_entry_[index];
     for (int i = 0; i < same_key_item_num; i++)
     {
-        if (tt_entry_[index + i].key == 0 || tt_entry_[index + i].key == key)
+        if (tt_entry_[index + i].h_key == 0 || tt_entry_[index + i].h_key == key)
         {
             replace = &tt_entry_[index + i];
             break;
         }
         else
         {
-            if (tt_entry_[index + i].generation < replace->generation ||
-                tt_entry_[index + i].depth < replace->depth)
+            if (tt_entry_[index + i].generation() < replace->generation() ||
+                tt_entry_[index + i].depth() < replace->depth())
             {
                 replace = &tt_entry_[index + i];
             }
         }
     }
     std::lock_guard<std::mutex> lock(replace->mutex);
-    *replace = TTEntry{key, value, depth, generation_, move, type};
+    replace->h_key = key;
+    replace->h_data = TTEntry::Data(generation_, value, depth, move, type);
+    assert(generation_ == replace->generation());
+    assert(value == replace->value());
+    // if (value != replace->value())
+    //     std::cout << value << " " << replace->value() << std::endl;
+    assert(depth == replace->depth());
+    assert(move == replace->move());
+    assert(type == replace->type());
+    // std::cout << generation_ << " " << value << " " << depth << " " << move << " " << int(type) << std::endl;
+    // std::cout << replace->generation() << " " << replace->value() << " " << replace->depth() << " " << replace->move() << " " << int(replace->type()) << std::endl;
 }
 
-TTEntry TranspositionTable::operator[](U64 key)
+TTEntryX TranspositionTable::operator[](U64 key)
 {
-    TTEntry ttEntry;
+    TTEntryX ttEntry;
     int index = (key & (size_ - 1) * same_key_item_num);
     for (int i = 0; i < same_key_item_num; i++)
     {
-        if (tt_entry_[index + i].key == key)
+        if (tt_entry_[index + i].h_key == key)
         {
             std::lock_guard<std::mutex> lock(tt_entry_[index + i].mutex);
-            ttEntry = tt_entry_[index + i];
+            ttEntry.h_key = key;
             break;
         }
     }
