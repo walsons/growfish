@@ -313,21 +313,24 @@ void MagicValidator::PawnMove(Square s)
     // The forward direction
     static constexpr Direction SQ_FORWARD = (c == Color::RED ? SQ_NORTH : SQ_SOUTH);
 
-    if (IsEmpty(position_.piece_from_square(s + SQ_FORWARD)))
-        pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_FORWARD));
-    else if (IsColor<!c>(position_.piece_from_square(s + SQ_FORWARD)))
-        pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_FORWARD));
+    if (LegalSquare(s + SQ_FORWARD))
+    {
+        if (IsEmpty(position_.piece_from_square(s + SQ_FORWARD)))
+            pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_FORWARD));
+        else if (IsColor<!c>(position_.piece_from_square(s + SQ_FORWARD)))
+            pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_FORWARD));
+    }
 
     if (SQ_BEG <= s && s < SQ_END)
     {
-        if (Distance(s, s + SQ_EAST) <= 1)
+        if (LegalSquare(s + SQ_EAST) && Distance(s, s + SQ_EAST) <= 1)
         {
             if (IsEmpty(position_.piece_from_square(s + SQ_EAST)))
                 pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
             else if (IsColor<!c>(position_.piece_from_square(s + SQ_EAST)))
                 pseudo_legal_capture_moves_.push_back(ConstructMove(s, s + SQ_EAST));
         }
-        if (Distance(s, s + SQ_WEST) <= 1)
+        if (LegalSquare(s + SQ_WEST) && Distance(s, s + SQ_WEST) <= 1)
         {
             if (IsEmpty(position_.piece_from_square(s + SQ_WEST)))
                 pseudo_legal_non_capture_moves_.push_back(ConstructMove(s, s + SQ_WEST));

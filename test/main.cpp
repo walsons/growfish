@@ -3,6 +3,7 @@
 #include <chrono>
 #include <algorithm>
 #include <random>
+#include <unordered_set>
 
 #include "../src/position.h"
 #include "../src/search.h"
@@ -311,6 +312,33 @@ double TestSpeed(const std::string &fileName, int searchDepth = kSearchDepth, bo
     return 0;
 }
 
+// regenerate fen without move, remove same fen, shuffle fen, then merge to "robot_battle.txt"
+void Merge(const std::vector<std::string> &files)
+{
+    std::unordered_set<std::string> m;
+    for (auto &file : files)
+    {
+        std::ifstream fin(file, std::ios::in);
+        if (fin.is_open())
+        {
+            std::string line;
+            while (std::getline(fin, line))
+            {
+                Position position(line);
+                m.insert(position.GenerateFen());
+            }
+        }
+        else
+            std::cout << "Cannot open file" << std::endl;
+    }
+    std::ofstream fout("robot_battle.txt", std::ios::out);
+    for (auto item : m)
+    {
+        fout << item << std::endl;
+    }
+    std::cout << "Merge completed" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc == 1)
@@ -361,37 +389,8 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 1.594s, search nodes 306486)
-        robot_battle_1729653504763.txt  (depth 4: timecost 0.128s, search nodes 29849)
-        robot_battle_1729666476581.txt  (depth 4: timecost 1.527s, search nodes 386067)
-        robot_battle_1729759105954.txt  (depth 4: timecost 0.264s, search nodes 58383)
-        robot_battle_1730124987011.txt  (depth 4: timecost 0.691s, search nodes 145997)
-        robot_battle_1730130702948.txt  (depth 4: timecost 1.237s, search nodes 255349)
-        robot_battle_1730422269049.txt  (depth 4: timecost 1.157s, search nodes 303249)
-        robot_battle_1732956559883.txt  (depth 4: timecost 2.132s, search nodes 514438)
-        robot_battle_1733750483345.txt  (depth 4: timecost 1.556s, search nodes 370025)
-        robot_battle_1733750496914.txt  (depth 4: timecost 1.989s, search nodes 506921)
-        robot_battle_1733917013899.txt  (depth 4: timecost 1.189s, search nodes 292657)
-        robot_battle_1733917045094.txt  (depth 4: timecost 1.426s, search nodes 294252)
-        robot_battle_1733922523712.txt  (depth 4: timecost 2.742s, search nodes 622356)
-        robot_battle_1733924013886.txt  (depth 4: timecost 3.252s, search nodes 679283)
-        All files cost time is: 20.884s
-
-        robot_battle.txt  (depth 6: timecost 29.647s, search nodes 5575057)
-        robot_battle_1729653504763.txt  (depth 6: timecost 1.614s, search nodes 304255)
-        robot_battle_1729666476581.txt  (depth 6: timecost 45.872s, search nodes 9363021)
-        robot_battle_1729759105954.txt  (depth 6: timecost 6.565s, search nodes 1180757)
-        robot_battle_1730124987011.txt  (depth 6: timecost 19.287s, search nodes 3583283)
-        robot_battle_1730130702948.txt  (depth 6: timecost 30.127s, search nodes 5790675)
-        robot_battle_1730422269049.txt  (depth 6: timecost 20.164s, search nodes 4461479)
-        robot_battle_1732956559883.txt  (depth 6: timecost 44.344s, search nodes 9080002)
-        robot_battle_1733750483345.txt  (depth 6: timecost 34.055s, search nodes 6865398)
-        robot_battle_1733750496914.txt  (depth 6: timecost 54.237s, search nodes 11780857)
-        robot_battle_1733917013899.txt  (depth 6: timecost 30.385s, search nodes 6365313)
-        robot_battle_1733917045094.txt  (depth 6: timecost 35.552s, search nodes 6137872)
-        robot_battle_1733922523712.txt  (depth 6: timecost 54.706s, search nodes 10519209)
-        robot_battle_1733924013886.txt  (depth 6: timecost 54.541s, search nodes 10461978)
-        All files cost time is: 461.096s
+        robot_battle.txt  (depth 4: timecost 21.851s, search nodes 4686946)
+        All files cost time is: 21.851s
         */
 
         if (argc == 4)
@@ -403,19 +402,6 @@ int main(int argc, char* argv[])
         {
             std::vector<std::string> fileList{
                 "robot_battle.txt",
-                "robot_battle_1729653504763.txt",
-                "robot_battle_1729666476581.txt",
-                "robot_battle_1729759105954.txt",
-                "robot_battle_1730124987011.txt",
-                "robot_battle_1730130702948.txt",
-                "robot_battle_1730422269049.txt",
-                "robot_battle_1732956559883.txt",
-                "robot_battle_1733750483345.txt",
-                "robot_battle_1733750496914.txt",
-                "robot_battle_1733917013899.txt",
-                "robot_battle_1733917045094.txt",
-                "robot_battle_1733922523712.txt",
-                "robot_battle_1733924013886.txt"
             };
             double totalTime = 0;
             for (auto file : fileList)
@@ -429,6 +415,13 @@ int main(int argc, char* argv[])
     {
         std::vector<std::string> files{
             "robot_battle.txt",
+        };
+        MagicValidator::ValidatePseudoLegalMove(files);
+        MagicValidator::ValidateLegalMove(files);
+    }
+    else if (argv1 == "merge")
+    {
+        std::vector<std::string> fileList{
             "robot_battle_1729653504763.txt",
             "robot_battle_1729666476581.txt",
             "robot_battle_1729759105954.txt",
@@ -443,8 +436,7 @@ int main(int argc, char* argv[])
             "robot_battle_1733922523712.txt",
             "robot_battle_1733924013886.txt"
         };
-        MagicValidator::ValidatePseudoLegalMove(files);
-        MagicValidator::ValidateLegalMove(files);
+        Merge(fileList);
     }
     else
     {

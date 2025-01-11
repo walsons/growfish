@@ -53,9 +53,11 @@ void Engine()
                 search.IterativeDeepeningLoop(std::stoi(depth));
                 end = clock();
                 duration = (double)(end - beg) / CLOCKS_PER_SEC;
+                std::cout << "time cost (6 depth):" << duration << std::endl;
 
                 // research with extra 2 depth if time consumption less than 0.2 second
-                if (duration < 0.2)
+                // also have condition greater than 0.05 in case of hitting transposition
+                if (duration < 0.2 && duration > 0.05)
                 {
                     depth = "8";
                     beg = clock();
@@ -64,7 +66,7 @@ void Engine()
                     duration = (double)(end - beg) / CLOCKS_PER_SEC;
                 }
 
-                std::cout << "time cost:" << duration << std::endl;
+                std::cout << "time cost (8 depth):" << duration << std::endl;
                 std::cout << "bestmove:" << Move2String(search.best_move()) 
                           << ", score:" << search.best_score()
                           << ", depth:" << depth << std::endl;

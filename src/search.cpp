@@ -22,7 +22,6 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
 {
     Search::search_nodes = 1;  // root node
     TT.NewSearch();
-    // HISTORY.Clear();
     for (auto& history: HISTORIES)
     {
         history.Clear();

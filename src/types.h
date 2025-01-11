@@ -59,6 +59,8 @@ enum Square : char
     SQ_NUM
 };
 
+inline bool LegalSquare(Square s) { return s >= SQ_A0 && s < SQ_NUM; }
+
 inline Square NorthEnd(Square s) { return SQ_NUM; }
 inline Square SouthEnd(Square s) { return static_cast<Square>(SQ_A0 - 1); }
 inline Square EastEnd(Square s) { return static_cast<Square>(static_cast<char>(s) / 9 * 9 + 9); }
