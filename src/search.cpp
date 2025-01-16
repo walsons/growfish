@@ -8,11 +8,11 @@
 #include "history.h"
 #include "move_picker.h"
 #include "book.h"
+#include "thread_pool.h"
 
 extern TranspositionTable TT;
-// extern History HISTORY;
-// currently only works well on amd CPU, while on intel CPU, multiple thread perform worse than single thread
-size_t THREAD_NUM = 1;  
+extern size_t THREAD_NUM;
+extern ThreadPool THREAD_POOL;
 std::vector<History> HISTORIES(THREAD_NUM);
 extern Book BOOK;
 
@@ -52,8 +52,7 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     // start other threads
     for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
     {
-        std::thread t(&Search::thread_root_search, this, (maxDepth / 2 * 2), new SearchStack[100], threadIndex, root_position_, root_moves_);
-        t.detach();
+        THREAD_POOL.submit(&Search::thread_root_search, this, (maxDepth / 2 * 2), new SearchStack[100], threadIndex, root_position_, root_moves_);
     }
 
     SearchStack ss[100];
