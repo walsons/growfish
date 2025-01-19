@@ -8,6 +8,9 @@
 #include <condition_variable>
 #include <atomic>
 
+// currently only works well on amd CPU, while on intel CPU, multiple thread perform worse than single thread
+constexpr size_t THREAD_NUM = 1;  
+
 class ThreadPool {
 public:
     ThreadPool(size_t num_threads);

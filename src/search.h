@@ -45,8 +45,6 @@ private:
     Move prohibited_move_;
 
     bool print_pv_move_ = false;
-    
-    std::vector<std::thread> threads_;
 };
 
 #endif
