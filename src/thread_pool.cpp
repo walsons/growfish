@@ -35,6 +35,4 @@ ThreadPool::~ThreadPool()
         thread.join();
 }
 
-// currently only works well on amd CPU, while on intel CPU, multiple thread perform worse than single thread
-size_t THREAD_NUM = 1;  
 ThreadPool THREAD_POOL(THREAD_NUM);

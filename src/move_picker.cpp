@@ -1,8 +1,8 @@
 #include "move_picker.h"
 #include <algorithm>
+#include "thread_pool.h"
 
-// extern History HISTORY;
-extern std::vector<History> HISTORIES;
+extern History HISTORIES[THREAD_NUM];
 
 MovePicker::MovePicker(size_t threadIndex, const Position& position, Move ttMove, Move killerMove[], Phase phase)
     : thread_index_(threadIndex)

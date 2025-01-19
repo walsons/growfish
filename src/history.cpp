@@ -1,4 +1,5 @@
 #include "history.h"
+#include "thread_pool.h"
 
 History::History()
 {
@@ -36,4 +37,4 @@ Value History::HistoryValue(const Position &position, Move move) const
     return history_[PieceIndex(piece)][to];
 }
 
-// History HISTORY;
+History HISTORIES[THREAD_NUM];

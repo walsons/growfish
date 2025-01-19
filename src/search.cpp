@@ -11,9 +11,8 @@
 #include "thread_pool.h"
 
 extern TranspositionTable TT;
-extern size_t THREAD_NUM;
 extern ThreadPool THREAD_POOL;
-std::vector<History> HISTORIES(THREAD_NUM);
+extern History HISTORIES[THREAD_NUM];
 extern Book BOOK;
 
 std::atomic<unsigned long long> Search::search_nodes = 0;
