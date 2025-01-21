@@ -32,6 +32,22 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     Move move = rootMovePicker.NextMove();
     while (move)
     {
+        UndoInfo undoInfo;
+        root_position_.MakeMove(move, undoInfo);
+        if (root_position_.ExistsInPast(root_position_.key()))
+        {
+            // two case: 
+            // 1. check enemy king (continuously check)
+            // 2. our moving piece is rook (continuously capture)
+            if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
+            {
+                root_position_.UndoMove(undoInfo);
+                move = rootMovePicker.NextMove();
+                continue;
+            }
+        }
+        root_position_.UndoMove(undoInfo);
+
         root_moves_.push_back(move);
         move = rootMovePicker.NextMove();
     }

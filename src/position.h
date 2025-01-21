@@ -5,6 +5,7 @@
 
 #include <string>
 #include <stack>
+#include <unordered_set>
 
 #include "types.h"
 #include "function.h"
@@ -52,6 +53,8 @@ public:
     Bitboard CheckersBB(Square ksq, Color kc, Bitboard occupancy) const;
     bool IsLegalMove(Move move) const;
 
+    bool ExistsInPast(U64 key) const { return past_positions_.find(key) != past_positions_.end(); }
+
     Piece piece_from_square(Square s) const { return board_[s]; }
     Color color_from_square(Square s) const 
     { 
@@ -94,6 +97,9 @@ private:
     Board board_;
     U64 key_;
     Color side_to_move_;
+    
+    // Keep this information for prohibited move
+    std::unordered_set<U64> past_positions_;
 
     // Bitboard
     Bitboard by_type_bb_[NUM(PieceType::PIECE_TYPE_NUM)];
