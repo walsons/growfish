@@ -102,10 +102,13 @@ void Position::SetPosition(const std::string& fen)
     std::string move;
     if (ss >> move)
     {
+        past_positions_.clear();
+        past_positions_.insert(key_);
         while (ss >> move)
         {
             UndoInfo undoInfo;
             MakeMove(String2Move(move), undoInfo);
+            past_positions_.insert(key_);
         }
     }
 };
