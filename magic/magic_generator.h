@@ -12,109 +12,87 @@ public:
     using uint_64 = unsigned long long;
 
     template <PieceType pt>
-    void PrintMagicArray()
-    {
-        std::string magicName;
-        if constexpr (pt == PieceType::ROOK)
-            magicName = "RookMagicNumber";
-        else if (pt == PieceType::CANNON)
-            magicName = "CannonMagicNumber";
-        else if (pt == PieceType::KNIGHT)
-            magicName = "KnightMagicNumber";
-        else if (pt == PieceType::KNIGHT_TO)
-            magicName = "KnightToMagicNumber";
-        else if (pt == PieceType::BISHOP)
-            magicName = "BishopMagicNumber";
-        else
-        {
-            std::cout << "Unknown piece type" << std::endl;
-            return;
-        }
-        std::cout << "constexpr Bitboard " << magicName << "[SQ_NUM] = \n{" << std::endl;
-        std::cout << std::hex;
-        for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
-        {
-            Bitboard magic = find_magic<pt>(s);
-            std::cout << "    (Bitboard(0x" << bitboard_high_64bit(magic) << "ULL) << 64) | Bitboard(0x" << bitboard_low_64bit(magic) << "ULL),\n";
-        }
-        std::cout << "};" << std::endl;
-    }
+    void PrintMagicArray() const;
 
 private:
     template <PieceType pt>
-    Bitboard get_mask(Square s) const
-    {
-        // Only works for rook and cannon, other piece need a specialization
-        static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON, "Unsupported piece type");
-
-        Bitboard mask = 0;
-        int rk = RankOf(s), fl = FileOf(s);
-        for (int r = rk + 1; r < RANK_NB - 1; r++) {
-            mask |= Bitboard(1) << (r * FILE_NB + fl);
-        }
-        for (int r = rk - 1; r > RANK_0; r--) {
-            mask |= Bitboard(1) << (r * FILE_NB + fl);
-        }
-        for (int f = fl + 1; f < FILE_NB - 1; f++) {
-            mask |= Bitboard(1) << (rk * FILE_NB + f);
-        }
-        for (int f = fl - 1; f > FILE_A; f--) {
-            mask |= Bitboard(1) << (rk * FILE_NB + f);
-        }
-        return mask;
-    }
+    Bitboard get_mask(Square s) const;
 
     template <PieceType pt>
     Bitboard attack(Square s, Bitboard occupies) const;
 
     template <PieceType pt>
-    Bitboard find_magic(Square s)
-    {
-        Bitboard mask = get_mask<pt>(s);
-        size_t ones = count_1s(mask);
-        Bitboard* indexs = new Bitboard[(1 << ones)];
-        Bitboard* attacks = new Bitboard[(1 << ones)];
-        for (size_t i = 0; i < (1ULL << ones); ++i)
-        {
-            indexs[i] = index_to_bitboard(i, ones, mask);
-            attacks[i] = attack<pt>(s, indexs[i]);
-        }
-        Bitboard* used = new Bitboard[(1 << ones)];
-        constexpr size_t searchTimes = 100000000;
-        for (size_t k = 0; k < searchTimes; ++k)
-        {
-            Bitboard magic = random_bitboard_few_bits();
-            std::memset(used, 0, sizeof(used[0]) * (1 << ones));
-            bool fail = false;
-            for (int i = 0; !fail && i < (1 << ones); ++i)
-            {
-                int j = transform(indexs[i], magic, ones);
-                if (used[j] == 0)
-                    used[j] = attacks[i];
-                else if (used[j] != attacks[i])
-                    fail = true;
-            }
-            if (!fail)
-            {
-                return magic;
-            }
-        }
-        std::cout << "Failed! search " << searchTimes << " times" << std::endl;
-        return 0;
-    }
+    Bitboard find_magic(Square s) const;
 
     size_t count_1s(Bitboard b) const;
     Bitboard index_to_bitboard(size_t index, size_t bits, Bitboard mask) const;
-    Bitboard random_bitboard();
-    Bitboard random_bitboard_few_bits();
+    Bitboard random_bitboard() const;
+    Bitboard random_bitboard_few_bits() const;
 
-    Bitboard transform(Bitboard b, Bitboard magic, int bits) const { return (b * magic) >> (128 - bits); }
+    Bitboard transform_128(Bitboard b, Bitboard magic, int bits) const { return (b * magic) >> (128 - bits); }
+    Bitboard transform_64_2(Bitboard b, Bitboard magic, int bits) const 
+    { 
+        return ((bitboard_high_64bit(b) * bitboard_high_64bit(magic)) ^ (bitboard_low_64bit(b) * bitboard_low_64bit(magic))) >> (64 - bits);
+    }
+    Bitboard transform(Bitboard b, Bitboard magic, int bits) const { return transform_64_2(b, magic, bits); }
     uint_64 bitboard_high_64bit(Bitboard b) const { return (b >> 64); }
     uint_64 bitboard_low_64bit(Bitboard b) const { return b & (0ULL - 1); }
 
 private:
-    std::default_random_engine e;
+    mutable std::default_random_engine e;
 };
+
+template <PieceType pt>
+void MagicGenerator::PrintMagicArray() const
+{
+    std::string magicName;
+    if constexpr (pt == PieceType::ROOK)
+        magicName = "RookMagicNumber";
+    else if (pt == PieceType::CANNON)
+        magicName = "CannonMagicNumber";
+    else if (pt == PieceType::KNIGHT)
+        magicName = "KnightMagicNumber";
+    else if (pt == PieceType::KNIGHT_TO)
+        magicName = "KnightToMagicNumber";
+    else if (pt == PieceType::BISHOP)
+        magicName = "BishopMagicNumber";
+    else
+    {
+        std::cout << "Unknown piece type" << std::endl;
+        return;
+    }
+    std::cout << "constexpr Bitboard " << magicName << "[SQ_NUM] = \n{" << std::endl;
+    std::cout << std::hex;
+    for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
+    {
+        Bitboard magic = find_magic<pt>(s);
+        std::cout << "    (Bitboard(0x" << bitboard_high_64bit(magic) << "ULL) << 64) | Bitboard(0x" << bitboard_low_64bit(magic) << "ULL),\n";
+    }
+    std::cout << "};" << std::endl;
+}
+
+template <PieceType pt>
+Bitboard MagicGenerator::get_mask(Square s) const
+{
+    // Only works for rook and cannon, other piece need a specialization
+    static_assert(pt == PieceType::ROOK || pt == PieceType::CANNON, "Unsupported piece type");
+
+    Bitboard mask = 0;
+    int rk = RankOf(s), fl = FileOf(s);
+    for (int r = rk + 1; r < RANK_NB - 1; r++) {
+        mask |= Bitboard(1) << (r * FILE_NB + fl);
+    }
+    for (int r = rk - 1; r > RANK_0; r--) {
+        mask |= Bitboard(1) << (r * FILE_NB + fl);
+    }
+    for (int f = fl + 1; f < FILE_NB - 1; f++) {
+        mask |= Bitboard(1) << (rk * FILE_NB + f);
+    }
+    for (int f = fl - 1; f > FILE_A; f--) {
+        mask |= Bitboard(1) << (rk * FILE_NB + f);
+    }
+    return mask;
+}
 
 template <>
 inline Bitboard MagicGenerator::get_mask<PieceType::KNIGHT>(Square s) const
@@ -342,6 +320,45 @@ inline Bitboard MagicGenerator::attack<PieceType::BISHOP>(Square s, Bitboard occ
         }
     }
     return result;
+}
+
+template <PieceType pt>
+Bitboard MagicGenerator::find_magic(Square s) const
+{
+    Bitboard mask = get_mask<pt>(s);
+    size_t ones = count_1s(mask);
+    auto size = 1_bb << ones;
+    std::vector<Bitboard> indexs(size);
+    std::vector<Bitboard> attacks(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        indexs[i] = index_to_bitboard(i, ones, mask);
+        attacks[i] = attack<pt>(s, indexs[i]);
+    }
+    Bitboard* used = new Bitboard[size];  // use array instead of vector for memset all element to 0 faster
+    constexpr size_t searchTimes = 100000000;
+    for (size_t k = 0; k < searchTimes; ++k)
+    {
+        Bitboard magic = random_bitboard_few_bits();
+        std::memset(used, 0, sizeof(used[0]) * size);
+        bool fail = false;
+        for (size_t i = 0; !fail && i < size; ++i)
+        {
+            size_t j = transform(indexs[i], magic, ones);
+            if (used[j] == 0)
+                used[j] = attacks[i];
+            else if (used[j] != attacks[i])
+                fail = true;
+        }
+        if (!fail)
+        {
+            delete[] used;
+            return magic;
+        }
+    }
+    delete[] used;
+    std::cout << "Failed! search " << searchTimes << " times" << std::endl;
+    return 0;
 }
 
 #endif

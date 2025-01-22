@@ -6,6 +6,7 @@ size_t MagicGenerator::count_1s(Bitboard b) const
     for (i = 0; b; ++i, b &= b - 1) {}
     return i;
 }
+
 Bitboard MagicGenerator::index_to_bitboard(size_t index, size_t bits, Bitboard mask) const
 {
     Bitboard result = 0;
@@ -13,19 +14,19 @@ Bitboard MagicGenerator::index_to_bitboard(size_t index, size_t bits, Bitboard m
     {
         size_t j = PopLSB(mask);
         if (index & (1 << i))
-            result |= Bitboard(1) << j;
+            result |= 1_bb << j;
     }
     return result;
 }
 
-Bitboard MagicGenerator::random_bitboard()
+Bitboard MagicGenerator::random_bitboard() const
 {
     // e() range from 0x1 to 0x7ffffffe
     return e() | (Bitboard(e()) << 31) | (Bitboard(e()) << 62) 
-                | (Bitboard(e()) << 93) | (Bitboard(e()) << 124);
+               | (Bitboard(e()) << 93) | (Bitboard(e()) << 124);
 }
 
-Bitboard MagicGenerator::random_bitboard_few_bits()
+Bitboard MagicGenerator::random_bitboard_few_bits() const
 {
     return random_bitboard() & random_bitboard() & random_bitboard();
 }

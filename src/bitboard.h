@@ -75,6 +75,7 @@ inline Square PopLSB(Bitboard& b)
 }
  
 inline Bitboard SquareBB(Square s) { return Bitboard(1ULL) << s; }
+inline Bitboard operator""_bb(unsigned long long shift) { return shift == 0 ? Bitboard(0ULL) : Bitboard(1ULL) << (shift - 1); }
 
 inline int OneCount(Bitboard b)
 {
