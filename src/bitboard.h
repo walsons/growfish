@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-/*
+/* Palace:
     000111000
     000111000
     000111000
@@ -38,11 +38,13 @@ constexpr Bitboard Rank7BB = Rank0BB << (FILE_NB * 7);
 constexpr Bitboard Rank8BB = Rank0BB << (FILE_NB * 8);
 constexpr Bitboard Rank9BB = Rank0BB << (FILE_NB * 9);
 
-inline Bitboard FileBB(File f) { return FileABB << f; }
-inline Bitboard RankBB(Rank r) { return Rank0BB << (FILE_NB * r); }
+inline constexpr Bitboard FileBB(File f) { return FileABB << f; }
+inline constexpr Bitboard RankBB(Rank r) { return Rank0BB << (FILE_NB * r); }
 
 constexpr Bitboard RedRegion = Rank0BB | Rank1BB | Rank2BB | Rank3BB | Rank4BB;
 constexpr Bitboard BlackRegion = Rank5BB | Rank6BB | Rank7BB | Rank8BB | Rank9BB;
+ 
+inline constexpr Bitboard SquareBB(Square s) { return Bitboard(1ULL) << s; }
 
 // Return the least significant bit in a non-zero bitboard
 inline Square LSB(Bitboard b) {
@@ -69,22 +71,16 @@ inline Square LSB(Bitboard b) {
 inline Square PopLSB(Bitboard& b)
 {
     assert(b);
-    const Square s = LSB(b);
+    Square s = LSB(b);
     b &= b - 1;
     return s;
 }
- 
-inline Bitboard SquareBB(Square s) { return Bitboard(1ULL) << s; }
 
-inline int OneCount(Bitboard b)
+inline size_t BB1Count(Bitboard b)
 {
-    int count = 0;
-    while (b)
-    {
-        ++count;
-        PopLSB(b);
-    }
-    return count;
+    size_t i = 0;
+    for (i = 0; b; ++i, b &= b - 1) {}
+    return i;
 }
 
 // Show bitboard in piece board format for test

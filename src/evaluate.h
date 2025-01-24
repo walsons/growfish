@@ -66,7 +66,7 @@ private:
     template <PieceType pt>
     static Value ScoreCalculator(const Position& position)
     {
-        return OneCount(position.Pieces(Color::RED, pt)) * PieceValue<pt> - OneCount(position.Pieces(Color::BLACK, pt)) * PieceValue<pt>;
+        return BB1Count(position.Pieces(Color::RED, pt)) * PieceValue<pt> - BB1Count(position.Pieces(Color::BLACK, pt)) * PieceValue<pt>;
     }
 };
 // Pawn that across to river gain double score, 
@@ -119,7 +119,7 @@ inline Value Evaluate::ScoreCalculator<PieceType::PAWN>(const Position& position
     }
     score += blackDistance;
 
-    return ((OneCount(redPawnBB & BlackRegion) * 2 + OneCount(redPawnBB & RedRegion)) - (OneCount(blackPawnBB & RedRegion) * 2 + OneCount(blackPawnBB & BlackRegion)))
+    return ((BB1Count(redPawnBB & BlackRegion) * 2 + BB1Count(redPawnBB & RedRegion)) - (BB1Count(blackPawnBB & RedRegion) * 2 + BB1Count(blackPawnBB & BlackRegion)))
            * PieceValue<PieceType::PAWN>;
 }
 

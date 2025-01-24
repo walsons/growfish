@@ -11,6 +11,8 @@ using __uint128_t = std::_Unsigned128;
 
 using Bitboard = __uint128_t;
 
+using U64 = unsigned long long;
+
 using Value = short;
 using Ply = Value;  // Ply often used to do addition and subtraction with Value
 using Depth = unsigned char;
