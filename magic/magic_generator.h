@@ -51,9 +51,10 @@ void MagicGenerator::PrintMagicArray() const
 
     ThreadPool magicPool(8);
     std::vector<std::future<std::string>> results;
+    // According to experiment, SQ_G2 cost much more time than others 
     for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
     {
-        results.emplace_back(magicPool.submit([this, s]() {
+        results.emplace_back(magicPool.Submit([this, s]() {
             std::ostringstream oss;
             oss << std::hex;
             Bitboard magic = find_magic<pt>(s);
@@ -82,8 +83,6 @@ Bitboard MagicGenerator::find_magic(Square s) const
         attacks[i] = attack_bb<pt>(s, indexs[i]);
     }
     std::vector<Bitboard> used(size);
-    constexpr size_t searchTimes = 10000000;
-    // for (size_t k = 0; k < searchTimes; ++k)
     while (true)
     {
         Bitboard magic = random_bitboard_few_bits();
@@ -91,7 +90,7 @@ Bitboard MagicGenerator::find_magic(Square s) const
         bool fail = false;
         for (size_t i = 0; !fail && i < size; ++i)
         {
-            size_t j = transform(indexs[i], magic, (128 - ones));
+            size_t j = transform(indexs[i], magic, (128ULL - ones));
             if (used[j] == 0)
                 used[j] = attacks[i];
             else if (used[j] != attacks[i])
@@ -102,8 +101,7 @@ Bitboard MagicGenerator::find_magic(Square s) const
             return magic;
         }
     }
-    std::cout << "Failed! search " << searchTimes << " times" << std::endl;
     return 0;
 }
 
-#endif
+#endif // MAGIC_GENERATOR_H

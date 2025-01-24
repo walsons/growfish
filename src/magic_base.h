@@ -28,7 +28,7 @@ protected:
         return result;
     }
 
-    Bitboard transform(Bitboard occupancy, Bitboard magic, int shift) const { return (occupancy * magic) >> shift; }
+    size_t transform(Bitboard occupancy, Bitboard magic, int shift) const { return (occupancy * magic) >> shift; }
 };
 
 template <PieceType pt>
