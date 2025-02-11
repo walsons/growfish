@@ -1,22 +1,17 @@
 #include "magic.h"
 
 
-size_t MagicInitializer::count_1s(Bitboard b) const
+void MagicInitializer::InitMagic()
 {
-    size_t i = 0;
-    for (i = 0; b; ++i, b &= b - 1) {}
-    return i;
-}
-Bitboard MagicInitializer::index_to_bitboard(size_t index, size_t bits, Bitboard mask) const
-{
-    Bitboard result = 0;
-    for (size_t i = 0; i < bits; ++i)
+    MagicInitializer mi;
+    for (Square s = SQ_A0; s < SQ_NUM; s += SQ_EAST) 
     {
-        size_t j = PopLSB(mask);
-        if (index & (1 << i))
-            result |= Bitboard(1) << j;
+        mi.init_magic<PieceType::ROOK>(s);
+        mi.init_magic<PieceType::CANNON>(s);
+        mi.init_magic<PieceType::KNIGHT>(s);
+        mi.init_magic<PieceType::KNIGHT_TO>(s);
+        mi.init_magic<PieceType::BISHOP>(s);
     }
-    return result;
 }
 
 Bitboard AttackInitializer::PawnAttackBB[NUM(Color::COLOR_NUM)][SQ_NUM] = {};

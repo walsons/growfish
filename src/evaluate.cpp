@@ -16,8 +16,8 @@ Value Evaluate::Eval(const Position& position)
 
     // Addition score
     // Piece in enemy region gain extra 10 score
-    score += OneCount(position.Pieces(Color::RED) & BlackRegion) * 10;
-    score -= OneCount(position.Pieces(Color::BLACK) & RedRegion) * 10;
+    score += BB1Count(position.Pieces(Color::RED) & BlackRegion) * 10;
+    score -= BB1Count(position.Pieces(Color::BLACK) & RedRegion) * 10;
 
     // In order to encourage knight to move from initial position
     if (position.piece_count() > 26)

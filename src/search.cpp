@@ -66,7 +66,7 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     // start other threads
     for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
     {
-        THREAD_POOL.submit(&Search::thread_root_search, this, (maxDepth / 2 * 2), new SearchStack[100], threadIndex, root_position_, root_moves_);
+        THREAD_POOL.Submit(&Search::thread_root_search, this, (maxDepth / 2 * 2), new SearchStack[100], threadIndex, root_position_, root_moves_);
     }
 
     SearchStack ss[100];
