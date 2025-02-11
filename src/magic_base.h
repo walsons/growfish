@@ -7,6 +7,7 @@
 
 #include "bitboard.h"
 
+
 class MagicBase
 {
 protected:
@@ -28,7 +29,7 @@ protected:
         return result;
     }
 
-    size_t transform(Bitboard occupancy, Bitboard magic, int shift) const { return (occupancy * magic) >> shift; }
+    size_t transform(Bitboard occupancy, Bitboard magic, unsigned shift) const { return (occupancy * magic) >> shift; }
 };
 
 template <PieceType pt>
