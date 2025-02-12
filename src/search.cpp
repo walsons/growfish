@@ -17,6 +17,12 @@ extern Book BOOK;
 
 std::atomic<unsigned long long> Search::search_nodes = 0;
 
+void Search::Start(const SearchCondition &sc)
+{
+    max_search_time_ = sc.time;
+    IterativeDeepeningLoop(sc.depth);
+}
+
 void Search::IterativeDeepeningLoop(Depth maxDepth)
 {
     Search::search_nodes = 1;
@@ -39,6 +45,7 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     best_move_ = root_moves_.front();
     best_score_ = -Infinite;
     abort_search_ = false;
+    start_timestamp_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
     // start other threads
     for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
@@ -244,6 +251,11 @@ Value Search::search(Position& position, Depth depth, Value alpha, Value beta, S
                                                 std::make_move_iterator(ss[ply + 1].pv.end()));
         }
         move = movePicker.NextMove();
+
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - start_timestamp_ > max_search_time_)
+        {
+            abort_search_ = true;
+        }
     }
     // if alpha is not updated, it's a upperbound of this node
     if (oldAlpha == alpha)

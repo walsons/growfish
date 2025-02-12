@@ -15,11 +15,20 @@ struct SearchStack
     Move killer_move[2];
 };
 
+struct SearchCondition
+{
+    Depth depth = 6;
+    int64_t time = std::numeric_limits<int64_t>::max();
+};
+
 class Search
 {
 public:
     Search(const Position& position) : root_position_(position) {}
     void SetPosition(const Position& position) { root_position_ = position; }
+
+    void Start(const SearchCondition &sc);
+
     void IterativeDeepeningLoop(Depth maxDepth);
 
     Move best_move() { return best_move_; }
@@ -46,6 +55,9 @@ private:
     // Stop search, also a flag to indicate the return value is not valid
     // This is used to stop the search when the given time is up
     bool abort_search_;
+    int64_t start_timestamp_;
+    int64_t max_search_time_ = std::numeric_limits<int64_t>::max();
+
     bool print_pv_move_ = false;
 };
 
