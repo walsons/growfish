@@ -44,32 +44,32 @@ void Engine()
             {
                 std::string depth;
                 ss >> depth;
-                depth = "6"; // currently we fix depth to 6
 
+                // currently we use default value for SearchCondition
+                SearchCondition sc;
                 Search search(position);
-
                 clock_t beg, end;
                 beg = clock();
-                search.IterativeDeepeningLoop(std::stoi(depth));
+                search.Start(sc);
                 end = clock();
                 duration = (double)(end - beg) / CLOCKS_PER_SEC;
                 std::cout << "time cost (6 depth):" << duration << std::endl;
 
-                // research with extra 2 depth if time consumption less than 0.2 second
-                // also have condition greater than 0.05 in case of hitting transposition
-                if (duration < 0.2 && duration > 0.05)
+                // research with extra 2 depth if time consumption less than 0.4 second
+                // and set time cost limit to 10s
+                if (duration < 0.4)
                 {
-                    depth = "8";
+                    sc.depth = 8;
+                    sc.time = 10000;
                     beg = clock();
-                    search.IterativeDeepeningLoop(std::stoi(depth));
+                    search.Start(sc);
                     end = clock();
                     duration = (double)(end - beg) / CLOCKS_PER_SEC;
+                    std::cout << "time cost (8 depth):" << duration << std::endl;
                 }
 
-                std::cout << "time cost (8 depth):" << duration << std::endl;
                 std::cout << "bestmove:" << Move2String(search.best_move()) 
-                          << ", score:" << search.best_score()
-                          << ", depth:" << depth << std::endl;
+                          << ", score:" << search.best_score() << std::endl;
             }
             else if (token == "d")
             {
