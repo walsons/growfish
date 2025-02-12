@@ -19,49 +19,26 @@ std::atomic<unsigned long long> Search::search_nodes = 0;
 
 void Search::IterativeDeepeningLoop(Depth maxDepth)
 {
-    Search::search_nodes = 1;  // root node
-    TT.NewSearch();
-    for (auto& history: HISTORIES)
-    {
-        history.Clear();
-    }
+    Search::search_nodes = 1;
 
-    root_moves_.clear();
-    Move emptyKillerMove[2] = {0, 0};
-    MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
-    Move move = rootMovePicker.NextMove();
-    while (move)
-    {
-        UndoInfo undoInfo;
-        root_position_.MakeMove(move, undoInfo);
-        if (root_position_.ExistsInPast(root_position_.key()))
-        {
-            // two case: 
-            // 1. check enemy king (continuously check)
-            // 2. our moving piece is rook (continuously capture)
-            if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
-            {
-                root_position_.UndoMove(undoInfo);
-                move = rootMovePicker.NextMove();
-                continue;
-            }
-        }
-        root_position_.UndoMove(undoInfo);
+    // First check if there is a move in the book
+    if (search_book(root_position_.GenerateFen()))
+        return;
 
-        root_moves_.push_back(move);
-        move = rootMovePicker.NextMove();
-    }
-
-    auto fen = root_position_.GenerateFen();
-    assert(fen.size() > 8);
-    fen = fen.substr(0, fen.size() - 8);
-    Move bookMove = BOOK.SearchBestMove(fen);
-    if (bookMove != 0)
+    generate_root_moves();
+    if (root_moves_.empty()) 
     {
-        best_move_ = bookMove;
-        best_score_ = 12345;
+        best_move_ = 0;
+        best_score_ = -MateValue;
         return;
     }
+
+    TT.NewSearch();
+    for (auto& history: HISTORIES) { history.Clear(); }
+    // Ensure best_move_ is valid when search is aborted very fast
+    best_move_ = root_moves_.front();
+    best_score_ = -Infinite;
+    abort_search_ = false;
 
     // start other threads
     for (size_t threadIndex = 1; threadIndex < THREAD_NUM; ++threadIndex)
@@ -93,19 +70,55 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     }
 }
 
+bool Search::search_book(std::string fen)
+{
+    bool hitBook = false;
+    assert(fen.size() > 8);
+    fen = fen.substr(0, fen.size() - 8);
+    Move bookMove = BOOK.SearchBestMove(fen);
+    if (bookMove != 0)
+    {
+        best_move_ = bookMove;
+        best_score_ = 12345;  // A special value to indicate the move is from book
+        hitBook = true;
+    }
+    return hitBook;
+}
+
+void Search::generate_root_moves()
+{
+    root_moves_.clear();
+    Move emptyKillerMove[2] = {0, 0};
+    MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
+    Move move = rootMovePicker.NextMove();
+    while (move)
+    {
+        UndoInfo undoInfo;
+        root_position_.MakeMove(move, undoInfo);
+        if (root_position_.ExistsInPast(root_position_.key()))
+        {
+            // two case: 
+            // 1. check enemy king (continuously check)
+            // 2. our moving piece is rook (continuously capture)
+            if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
+            {
+                root_position_.UndoMove(undoInfo);
+                move = rootMovePicker.NextMove();
+                continue;
+            }
+        }
+        root_position_.UndoMove(undoInfo);
+        root_moves_.push_back(move);
+        move = rootMovePicker.NextMove();
+    }
+}
+
 void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
 {
     ++Search::search_nodes;
-    best_move_ = 0;
-    best_score_ = -Infinite;
-    prohibited_move_ = 0;
+    Value cur_ply_best_move = 0;
+    Value cur_ply_best_score = -Infinite;
     if (depth <= 0) { return; }
-
-    if (root_moves_.empty()) 
-    {
-        best_score_ = -MateValue;
-        return;
-    }
 
     Value alpha = -Infinite, beta = Infinite;
     Ply ply = 0;
@@ -118,8 +131,8 @@ void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
         position.UndoMove(undoInfo);
         if (score > alpha)
         {
-            best_move_ = move;
-            best_score_ = score;
+            cur_ply_best_move = move;
+            cur_ply_best_score = score;
             alpha = score;
             ss[ply].current_move = move;
             ss[ply].pv.clear();
@@ -127,6 +140,11 @@ void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
             ss[ply].pv.insert(ss[ply].pv.end(), std::make_move_iterator(ss[ply + 1].pv.begin()), 
                                                 std::make_move_iterator(ss[ply + 1].pv.end()));
         }
+    }
+    if (!abort_search_)
+    {
+        best_move_ = cur_ply_best_move;
+        best_score_ = cur_ply_best_score;
     }
 }
 
@@ -193,7 +211,7 @@ Value Search::search(Position& position, Depth depth, Value alpha, Value beta, S
         return -MateValue + ply;
 
     Value oldAlpha = alpha;
-    while (move)
+    while (move && !abort_search_)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
@@ -254,7 +272,7 @@ Value Search::qsearch(Position& position, Value alpha, Value beta, SearchStack s
     }
     MovePicker movePicker(threadIndex, position, 0, killerMove, MovePicker::Phase::QSEARCH_CAPTURE);
     Move move = movePicker.NextMove();
-    while (move)
+    while (move && !abort_search_)
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);

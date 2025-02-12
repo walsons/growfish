@@ -26,6 +26,8 @@ public:
     Value best_score() { return best_score_; }
 
 private:
+    bool search_book(std::string fen);
+    void generate_root_moves();
     void root_search(Depth depth, SearchStack ss[], size_t threadIndex);
     void thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves);
     Value search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
@@ -38,12 +40,12 @@ public:
 
 private:
     Position root_position_;
+    std::list<Move> root_moves_;
     Move best_move_;
     Value best_score_;
-    std::list<Move> root_moves_;
-    // Prohibit loop move
-    Move prohibited_move_;
-
+    // Stop search, also a flag to indicate the return value is not valid
+    // This is used to stop the search when the given time is up
+    bool abort_search_;
     bool print_pv_move_ = false;
 };
 
