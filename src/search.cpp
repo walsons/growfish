@@ -19,6 +19,10 @@ std::atomic<unsigned long long> Search::search_nodes = 0;
 
 void Search::Start(const SearchCondition &sc)
 {
+    // First check if there is a move in the book
+    if (search_book(root_position_.GenerateFen()))
+        return;
+
     max_search_time_ = sc.time;
     IterativeDeepeningLoop(sc.depth);
 }
@@ -26,10 +30,6 @@ void Search::Start(const SearchCondition &sc)
 void Search::IterativeDeepeningLoop(Depth maxDepth)
 {
     Search::search_nodes = 1;
-
-    // First check if there is a move in the book
-    if (search_book(root_position_.GenerateFen()))
-        return;
 
     generate_root_moves();
     if (root_moves_.empty()) 
@@ -42,7 +42,7 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     TT.NewSearch();
     for (auto& history: HISTORIES) { history.Clear(); }
     // Ensure best_move_ is valid when search is aborted very fast
-    best_move_ = root_moves_.front();
+    best_move_ = root_moves_.front().move;
     best_score_ = -Infinite;
     abort_search_ = false;
     start_timestamp_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
@@ -58,12 +58,6 @@ void Search::IterativeDeepeningLoop(Depth maxDepth)
     for (Depth depth = 2; depth <= maxDepth; depth += 2)
     {
         root_search(depth, ss, 0);
-        
-        if (ss[0].pv.size() > 0)
-        {
-            root_moves_.remove(ss[0].pv[0]);
-            root_moves_.push_front(ss[0].pv[0]);
-        }
     }
 
     if (print_pv_move_)
@@ -94,30 +88,54 @@ bool Search::search_book(std::string fen)
 
 void Search::generate_root_moves()
 {
+    // root_moves_.clear();
+    // Move emptyKillerMove[2] = {0, 0};
+    // MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
+    // Move move = rootMovePicker.NextMove();
+    // while (move)
+    // {
+    //     UndoInfo undoInfo;
+    //     root_position_.MakeMove(move, undoInfo);
+    //     if (root_position_.ExistsInPast(root_position_.key()))
+    //     {
+    //         // two case: 
+    //         // 1. check enemy king (continuously check)
+    //         // 2. our moving piece is rook (continuously capture)
+    //         if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
+    //         {
+    //             root_position_.UndoMove(undoInfo);
+    //             move = rootMovePicker.NextMove();
+    //             continue;
+    //         }
+    //     }
+    //     root_position_.UndoMove(undoInfo);
+    //     root_moves_.push_back(move);
+    //     move = rootMovePicker.NextMove();
+    // }
+
     root_moves_.clear();
-    Move emptyKillerMove[2] = {0, 0};
-    MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
-    Move move = rootMovePicker.NextMove();
-    while (move)
+    MoveGenerator moveGenerator(root_position_);
+    auto legalmoves = moveGenerator.GenerateLegalMoves<MoveType::LEGAL>();
+    for (auto move: legalmoves)
     {
         UndoInfo undoInfo;
         root_position_.MakeMove(move, undoInfo);
         if (root_position_.ExistsInPast(root_position_.key()))
         {
-            // two case: 
+            // two case for prohibit move(maybe more): 
             // 1. check enemy king (continuously check)
             // 2. our moving piece is rook (continuously capture)
             if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
             {
                 root_position_.UndoMove(undoInfo);
-                move = rootMovePicker.NextMove();
                 continue;
             }
         }
+        // Note qsearch is minus
+        root_moves_.emplace_back(move, -qsearch(root_position_, -Infinite, Infinite, new SearchStack[100], 0, 0));
         root_position_.UndoMove(undoInfo);
-        root_moves_.push_back(move);
-        move = rootMovePicker.NextMove();
     }
+    root_moves_.sort([](const RootMove& a, const RootMove& b) { return a.score > b.score; });
 }
 
 void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
@@ -129,7 +147,7 @@ void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
 
     Value alpha = -Infinite, beta = Infinite;
     Ply ply = 0;
-    for (auto move: root_moves_)
+    for (auto [move, _]: root_moves_)
     {
         UndoInfo undoInfo;
         Position position = root_position_;
@@ -148,26 +166,32 @@ void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
                                                 std::make_move_iterator(ss[ply + 1].pv.end()));
         }
     }
-    if (!abort_search_)
+
+    if (!abort_search_ && cur_ply_best_move != 0)
     {
         best_move_ = cur_ply_best_move;
         best_score_ = cur_ply_best_score;
+        // I have no idea why this way is a little faster than direct update score and sort
+        for (auto it = root_moves_.begin(); it != root_moves_.end(); ++it)
+        {
+            if (it->move == best_move_)
+            {
+                root_moves_.erase(it);
+                break;
+            }
+        }
+        root_moves_.emplace_front(best_move_, best_score_);
     }
 }
 
-void Search::thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves)
+void Search::thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<RootMove> rootMoves)
 {
     ++Search::search_nodes;
     if (depth <= 0) { return; }
 
-    if (rootMoves.empty()) 
-    {
-        return;
-    }
-
     Value alpha = -Infinite, beta = Infinite;
     Ply ply = 0;
-    for (auto move: rootMoves)
+    for (auto [move, _]: rootMoves)
     {
         UndoInfo undoInfo;
         Position position = rootPosition;
@@ -267,6 +291,15 @@ Value Search::search(Position& position, Depth depth, Value alpha, Value beta, S
 Value Search::qsearch(Position& position, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex)
 {
     ++Search::search_nodes;
+
+    TTEntry ttEntry = TT[position.key()];
+    if (ttEntry.key != 0 && TT.CanUseTT(ttEntry, 0, ply, beta))
+    {
+        return TT.AdjustGetValue(ttEntry.value, ply);
+    }
+
+    // bool isChecked = position.IsChecked(position.side_to_move());
+    // Value score = isChecked ? -Infinite : Evaluate::Eval(position);
     Value score = Evaluate::Eval(position);
     if (score >= beta)
     {

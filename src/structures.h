@@ -27,6 +27,16 @@ private:
     short move_;
 };
 
+class RootMove
+{
+public:
+    RootMove() : move(0), score(0) {}
+    RootMove(Move move, Value score) : move(move), score(score) {}
+
+    Move move;
+    Value score;
+};
+
 struct UndoInfo
 {
     Move move;

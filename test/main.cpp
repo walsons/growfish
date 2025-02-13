@@ -26,6 +26,7 @@ void Test(int searchDepth = kSearchDepth)
     // position.SetPosition("r1ba1abnr/3k5/6c2/6p1p/p3C4/3RC4/P3P1P1P/9/9/1RBAKABN1 b - - 0 1");
     // position.SetPosition("rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1");
     // position.SetPosition("2bakab1r/9/r4a3/4p3p/p5pR1/9/P1P1PnP1P/3A1p3/3Rp4/2B1K1n2 w - - 0 1");
+    position.SetPosition("4kab2/4a4/4b4/pnpcp4/9/2n3Pp1/8R/2C6/9/2B1KA3 b - - 0 1");
 
     position.DisplayBoard();
     Search search(position);
@@ -389,8 +390,9 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 21.851s, search nodes 4686946)
-        All files cost time is: 21.851s
+        robot_battle.txt  (depth 4: timecost 22.08s, search nodes 4698777)
+        opening_battle_500.txt  (depth 4: timecost 40.512s, search nodes 6978373)
+        All files cost time is: 62.592s
         */
 
         if (argc == 4)
@@ -402,6 +404,8 @@ int main(int argc, char* argv[])
         {
             std::vector<std::string> fileList{
                 "robot_battle.txt",
+                "opening_battle_500.txt",
+                // "opening_battle_1000.txt",
             };
             double totalTime = 0;
             for (auto file : fileList)

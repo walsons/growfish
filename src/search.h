@@ -38,7 +38,7 @@ private:
     bool search_book(std::string fen);
     void generate_root_moves();
     void root_search(Depth depth, SearchStack ss[], size_t threadIndex);
-    void thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<Move> rootMoves);
+    void thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<RootMove> rootMoves);
     Value search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
     // Quiescence search
     Value qsearch(Position& position, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
@@ -49,7 +49,7 @@ public:
 
 private:
     Position root_position_;
-    std::list<Move> root_moves_;
+    std::list<RootMove> root_moves_;
     Move best_move_;
     Value best_score_;
     // Stop search, also a flag to indicate the return value is not valid
