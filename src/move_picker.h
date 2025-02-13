@@ -68,6 +68,12 @@ public:
     MovePicker(size_t threadIndex, const Position& position, Move ttMove, Move killerMove[], Phase phase = Phase::TT);
     Move NextMove();
 
+    Value SEECapture(Color c, Move captureMove)
+    {
+        return c == Color::RED ? SEECapture<Color::RED>(captureMove)
+                               : SEECapture<Color::BLACK>(captureMove);
+    }
+
 private:
     std::list<ScoreMove> GenerateCheckMove();
     std::list<ScoreMove> GenerateCaptureMove();
