@@ -40,6 +40,7 @@ private:
     void root_search(Depth depth, SearchStack ss[], size_t threadIndex);
     void thread_root_search(Depth depth, SearchStack ss[], size_t threadIndex, Position rootPosition, std::list<RootMove> rootMoves);
     Value search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
+    Value search_nonpv(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
     // Quiescence search
     Value qsearch(Position& position, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex);
 
