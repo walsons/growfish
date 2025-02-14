@@ -390,9 +390,9 @@ int main(int argc, char* argv[])
 
         // =============================   i5-1135G7 (Debug)   ============================= 
         /*
-        robot_battle.txt  (depth 4: timecost 22.08s, search nodes 4698777)
-        opening_battle_500.txt  (depth 4: timecost 40.512s, search nodes 6978373)
-        All files cost time is: 62.592s
+        robot_battle.txt  (depth 4: timecost 23.413s, search nodes 4838040)
+        opening_battle_500.txt  (depth 4: timecost 36.957s, search nodes 6385915)
+        All files cost time is: 60.37s
         */
 
         if (argc == 4)

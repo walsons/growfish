@@ -88,31 +88,6 @@ bool Search::search_book(std::string fen)
 
 void Search::generate_root_moves()
 {
-    // root_moves_.clear();
-    // Move emptyKillerMove[2] = {0, 0};
-    // MovePicker rootMovePicker(0, root_position_, 0, emptyKillerMove);
-    // Move move = rootMovePicker.NextMove();
-    // while (move)
-    // {
-    //     UndoInfo undoInfo;
-    //     root_position_.MakeMove(move, undoInfo);
-    //     if (root_position_.ExistsInPast(root_position_.key()))
-    //     {
-    //         // two case: 
-    //         // 1. check enemy king (continuously check)
-    //         // 2. our moving piece is rook (continuously capture)
-    //         if (root_position_.IsChecked(root_position_.side_to_move()) || TypeOfPiece(root_position_.piece_from_square(MoveTo(move))) == PieceType::ROOK)
-    //         {
-    //             root_position_.UndoMove(undoInfo);
-    //             move = rootMovePicker.NextMove();
-    //             continue;
-    //         }
-    //     }
-    //     root_position_.UndoMove(undoInfo);
-    //     root_moves_.push_back(move);
-    //     move = rootMovePicker.NextMove();
-    // }
-
     root_moves_.clear();
     MoveGenerator moveGenerator(root_position_);
     auto legalmoves = moveGenerator.GenerateLegalMoves<MoveType::LEGAL>();
@@ -147,12 +122,21 @@ void Search::root_search(Depth depth, SearchStack ss[], size_t threadIndex)
 
     Value alpha = -Infinite, beta = Infinite;
     Ply ply = 0;
+    int moveCount = 0;
     for (auto [move, _]: root_moves_)
     {
         UndoInfo undoInfo;
         Position position = root_position_;
         position.MakeMove(move, undoInfo);
-        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = 0;
+        if (moveCount++ == 0)
+            score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        else
+        {
+            score = -search_nonpv(position, depth - 1, -alpha - 1, -alpha, ss, ply + 1, threadIndex);
+            if (score > alpha)
+                score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        }
         position.UndoMove(undoInfo);
         if (score > alpha)
         {
@@ -191,12 +175,21 @@ void Search::thread_root_search(Depth depth, SearchStack ss[], size_t threadInde
 
     Value alpha = -Infinite, beta = Infinite;
     Ply ply = 0;
+    int moveCount = 0;
     for (auto [move, _]: rootMoves)
     {
         UndoInfo undoInfo;
         Position position = rootPosition;
         position.MakeMove(move, undoInfo);
-        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = 0;
+        if (moveCount++ == 0)
+            score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        else
+        {
+            score = -search_nonpv(position, depth - 1, -alpha - 1, -alpha, ss, ply + 1, threadIndex);
+            if (score > alpha)
+                score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        }
         position.UndoMove(undoInfo);
         if (score > alpha)
         {
@@ -208,18 +201,116 @@ void Search::thread_root_search(Depth depth, SearchStack ss[], size_t threadInde
                                                 std::make_move_iterator(ss[ply + 1].pv.end()));
         }
     }
+    // if (alpha != -Infinite)
+    // {
+    //     for (auto it = rootMoves.begin(); it != rootMoves.end(); ++it)
+    //     {
+    //         if (it->move == ss[ply].current_move)
+    //         {
+    //             rootMoves.erase(it);
+    //             rootMoves.emplace_front(ss[ply].current_move, alpha);
+    //             break;
+    //         }
+    //     }
+    // }
 }
 
 Value Search::search(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex)
 {
     ++Search::search_nodes;
+
+    // In PV search, we only use transposition table to retrieve best move for MovePicker,
+    // otherwise it would lead to bad results
+    TTEntry ttEntry = TT[position.key()];
+    MovePicker movePicker(threadIndex, position, ttEntry.key != 0 ? ttEntry.move : Move(), ss[ply].killer_move);
+    Move move = movePicker.NextMove();
+    if (move == 0) 
+    {
+        Value score = -MateValue + ply;
+        TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, 0, ValueType::EXACT);
+        // We like choose fastest checkmate in search
+        return score;
+    }
+
+    if (depth == 0)
+    {
+        auto score = qsearch(position, alpha, beta, ss, ply + 1, threadIndex);
+        return score;
+    }
+
+    // Mate distance pruning
+    if (alpha >= MateValue - ply - 1)
+        return alpha;
+    if (-MateValue + ply >= beta)
+        return -MateValue + ply;
+
+    Value oldAlpha = alpha;
+    int moveCount = 0;
+    while (move && !abort_search_)
+    {
+        UndoInfo undoInfo;
+        position.MakeMove(move, undoInfo);
+        Value score = 0;
+        if (moveCount++ == 0)
+            score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        else
+        {
+            score = -search_nonpv(position, depth - 1, -alpha - 1, -alpha, ss, ply + 1, threadIndex);
+            if (score > alpha)
+                score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        }
+        position.UndoMove(undoInfo);
+        if (score >= beta)
+        {
+            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::LOWER_BOUND);
+            // Only non capture move do history and as killer move 
+            if (position.piece_from_square(move.MoveTo()) == Piece::NO_PIECE)
+            {
+                // HISTORY.Success(position, move, depth);
+                HISTORIES[threadIndex].Success(position, move, depth);
+                if (ss[ply].killer_move[0] != move)
+                {
+                    ss[ply].killer_move[1] = ss[ply].killer_move[0];
+                    ss[ply].killer_move[0] = move;
+                }
+            }
+            return score;
+        }
+        else if (score > alpha)
+        {
+            TT.Store(position.key(), TT.AdjustSetValue(score, ply), depth, move, ValueType::EXACT);
+            alpha = score;
+            ss[ply].current_move = move;
+            ss[ply].pv.clear();
+            ss[ply].pv.push_back(ss[ply].current_move);
+            ss[ply].pv.insert(ss[ply].pv.end(), std::make_move_iterator(ss[ply + 1].pv.begin()), 
+                                                std::make_move_iterator(ss[ply + 1].pv.end()));
+        }
+        move = movePicker.NextMove();
+
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - start_timestamp_ > max_search_time_)
+        {
+            abort_search_ = true;
+        }
+    }
+    // if alpha is not updated, it's a upperbound of this node
+    if (oldAlpha == alpha)
+        TT.Store(position.key(), TT.AdjustSetValue(alpha, ply), depth, 0, ValueType::UPPER_BOUND);
+    
+    return alpha;
+}
+
+Value Search::search_nonpv(Position& position, Depth depth, Value alpha, Value beta, SearchStack ss[], Ply ply, size_t threadIndex)
+{
+    ++Search::search_nodes;
+
     TTEntry ttEntry = TT[position.key()];
     if (ttEntry.key != 0 && TT.CanUseTT(ttEntry, depth, ply, beta))
     {
         return TT.AdjustGetValue(ttEntry.value, ply);
     }
-
     MovePicker movePicker(threadIndex, position, ttEntry.key != 0 ? ttEntry.move : Move(), ss[ply].killer_move);
+
     Move move = movePicker.NextMove();
     if (move == 0) 
     {
@@ -246,7 +337,7 @@ Value Search::search(Position& position, Depth depth, Value alpha, Value beta, S
     {
         UndoInfo undoInfo;
         position.MakeMove(move, undoInfo);
-        Value score = -search(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
+        Value score = -search_nonpv(position, depth - 1, -beta, -alpha, ss, ply + 1, threadIndex);
         position.UndoMove(undoInfo);
         if (score >= beta)
         {
@@ -298,8 +389,6 @@ Value Search::qsearch(Position& position, Value alpha, Value beta, SearchStack s
         return TT.AdjustGetValue(ttEntry.value, ply);
     }
 
-    // bool isChecked = position.IsChecked(position.side_to_move());
-    // Value score = isChecked ? -Infinite : Evaluate::Eval(position);
     Value score = Evaluate::Eval(position);
     if (score >= beta)
     {
