@@ -332,6 +332,19 @@ Value Search::search_nonpv(Position& position, Depth depth, Value alpha, Value b
     if (-MateValue + ply >= beta)
         return -MateValue + ply;
 
+    // razoring
+    if (depth <= 2)
+    {
+        constexpr Value razorMagic = 400;
+        Value score = Evaluate::Eval(position);
+        if (score < beta - razorMagic)
+        {
+            score = qsearch(position, alpha, beta, ss, ply + 1, threadIndex);
+            if (score < beta)
+                return score;
+        }
+    }
+
     Value oldAlpha = alpha;
     while (move && !abort_search_)
     {
