@@ -19,12 +19,27 @@ int main(int argc, char* argv[])
         mg.PrintMagicArray<PieceType::KNIGHT_TO>();
     else if (piece == "b" || piece == "B")
         mg.PrintMagicArray<PieceType::BISHOP>();
+    else if (piece == "lsb" || piece == "lsb")
+        mg.PrintLSBMagic();
     else
         std::cout << "Unkonw piece type to generate" << std::endl;
     return 0;
 }
 
 // Generated magic
+constexpr Bitboard LSBMagicNumber = (Bitboard(0x152c5e643940449dULL) << 64) | Bitboard(0x5da6cf7ee2cbf147ULL);
+constexpr Bitboard LSBMagicIndexArray[128] =
+{
+    42, 43, 44, 0, 45, 0, 0, 30, 46, 50, 0, 14, 0, 0, 31, 0,
+    27, 47, 51, 54, 37, 1, 8, 15, 0, 23, 0, 75, 32, 57, 82, 0,
+    40, 28, 48, 0, 52, 6, 73, 55, 38, 4, 2, 62, 9, 0, 64, 16,
+    0, 11, 24, 79, 70, 0, 76, 0, 0, 33, 58, 66, 18, 83, 0, 88,
+    41, 0, 0, 29, 49, 13, 0, 0, 26, 53, 36, 7, 22, 74, 56, 81,
+    39, 0, 5, 72, 3, 61, 0, 63, 10, 78, 69, 0, 0, 65, 17, 87,
+    0, 0, 12, 0, 25, 35, 21, 80, 0, 71, 60, 0, 77, 68, 0, 86,
+    0, 0, 34, 20, 0, 59, 67, 85, 0, 19, 0, 84, 0, 0, 89, 0,
+};
+
 constexpr Bitboard RookMagicNumber[SQ_NUM] =
 {
     (Bitboard(0x80400050040005c0ULL) << 64) | Bitboard(0x1044100004000001ULL),

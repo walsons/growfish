@@ -108,7 +108,7 @@ inline Value Evaluate::ScoreCalculator<PieceType::PAWN>(const Position& position
         Square ks = position.KingSquare(Color::RED);
         int v = std::abs(ps / 9 - ks / 9);
         int h = std::abs(ps % 9 - ks % 9);
-        score += 2 * (10 - v) + (10 - h);
+        score += (2 * v + h);
         blackPawnSquares.push_back(ps);
     }
     // set first pawn as origin

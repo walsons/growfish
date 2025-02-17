@@ -397,6 +397,9 @@ int main(int argc, char* argv[])
         robot_battle.txt  (depth 4: timecost 15.299s, search nodes 3110975)
         opening_battle_500.txt  (depth 4: timecost 27.728s, search nodes 4281492)
         All files cost time is: 43.027s
+        robot_battle.txt  (depth 6: timecost 264.222s, search nodes 44620701)
+        opening_battle_500.txt  (depth 6: timecost 436.435s, search nodes 71265194)
+        All files cost time is: 700.657s
         */
 
         if (argc == 4)

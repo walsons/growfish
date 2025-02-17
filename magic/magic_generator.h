@@ -14,8 +14,11 @@ class MagicGenerator : public MagicBase
 public:
     template <PieceType pt>
     void PrintMagicArray() const;
+    void PrintLSBMagic() const;
 
 private:
+    Bitboard find_lsb_magic() const;
+
     template <PieceType pt>
     Bitboard find_magic(Square s) const;
 
