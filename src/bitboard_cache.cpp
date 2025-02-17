@@ -8,9 +8,9 @@ BitboardCache::BitboardCache()
     {
         for (Square s2 = SQ_A0; s2 < SQ_NUM; s2 += SQ_EAST)
         {
-            if (RankOf(s1) == RankOf(s2) || FileOf(s1) == FileOf(s2))  // Rook and Cannon
+            if (RankOf(s1) == RankOf(s2) || FileOf(s1) == FileOf(s2))  // ROOK and CANNON
                 between_bb_[s1][s2] = (AttackBB<PieceType::ROOK>(s1, SquareBB(s2)) & AttackBB<PieceType::ROOK>(s2, SquareBB(s1)));
-            else  // KNIGHT_TO, others can be neglect
+            else  // KNIGHT_TO, others can be ignored
             {
                 auto r1 = RankOf(s1), r2 = RankOf(s2);
                 auto c1 = FileOf(s1), c2 = FileOf(s2);

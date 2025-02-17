@@ -26,7 +26,7 @@ Book::Book()
     file.close();
 }
 
-Move Book::SearchBestMove(std::string key)
+Move Book::SearchBestMove(std::string key) const
 {
     auto it = book_.find(key);
     return it != book_.end() ? it->second : Move(0);

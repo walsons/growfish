@@ -335,9 +335,9 @@ Value Search::search_nonpv(Position& position, Depth depth, Value alpha, Value b
     // razoring
     if (depth <= 2)
     {
-        constexpr Value razorMagic = 400;
+        constexpr Value razorMargin = 400;
         Value score = Evaluate::Eval(position);
-        if (score < beta - razorMagic)
+        if (score < beta - razorMargin)
         {
             score = qsearch(position, alpha, beta, ss, ply + 1, threadIndex);
             if (score < beta)
