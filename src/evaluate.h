@@ -14,7 +14,7 @@ constexpr Value KnightValue = 750;
 constexpr Value BishopValue = 150;
 constexpr Value AdvisorValue = 150;
 constexpr Value KingValue = MateValue;
-constexpr Value CannonValue = 760;  // Knight leave initial position will increase 10 score
+constexpr Value CannonValue = 750;
 constexpr Value PawnValue = 100;
 
 template <PieceType pt> constexpr int PieceValue;

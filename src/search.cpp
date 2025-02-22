@@ -332,10 +332,30 @@ Value Search::search_nonpv(Position& position, Depth depth, Value alpha, Value b
     if (-MateValue + ply >= beta)
         return -MateValue + ply;
 
+    // NULL move pruning
+    if (!position.IsChecked(position.side_to_move())
+        && position.Pieces(position.side_to_move(), PieceType::ROOK, PieceType::CANNON, PieceType::KNIGHT) != 0  // avoid zugzwang
+       )
+    {
+        Depth R = 4;
+        position.MakeNULLMove();
+        Value score = -search_nonpv(position, depth > R ? (depth - R) : 0, -beta, -alpha, ss, ply + 1, threadIndex);
+        position.UndoNULLMove();
+        if (score >= beta)
+        {
+            if (depth <= R + 2)
+                return beta;
+            // if depth is large, do verification
+            score = search_nonpv(position, depth - (R + 2), -beta, -alpha, ss, ply + 1, threadIndex);
+            if (score >= beta)
+                return beta;
+        }
+    }
     // razoring
     if (depth <= 2)
     {
-        constexpr Value razorMargin = 400;
+        static constexpr Value razorMargin = 400;
+        // Value razorMargin = 200 * depth;
         Value score = Evaluate::Eval(position);
         if (score < beta - razorMargin)
         {
