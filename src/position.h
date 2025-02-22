@@ -41,6 +41,8 @@ public:
 
     void MakeMove(Move move, UndoInfo& undoInfo);
     void UndoMove(const UndoInfo& undoInfo);
+    void MakeNULLMove();
+    void UndoNULLMove();
 
     void SetPosition(const std::string& fen);
     void ResetPosition() { SetPosition(kStartPos); }

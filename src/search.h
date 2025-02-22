@@ -17,7 +17,7 @@ struct SearchStack
 
 struct SearchCondition
 {
-    Depth depth = 6;
+    Depth depth = 8;
     int64_t time = std::numeric_limits<int64_t>::max();
 };
 

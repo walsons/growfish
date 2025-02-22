@@ -45,7 +45,22 @@ void Engine()
                 std::string depth;
                 ss >> depth;
 
-                // currently we use default value for SearchCondition
+                SearchCondition sc;
+                sc.depth = stoi(depth);
+                Search search(position);
+                clock_t beg, end;
+                beg = clock();
+                search.Start(sc);
+                end = clock();
+                duration = (double)(end - beg) / CLOCKS_PER_SEC;
+                std::cout << "time cost (" << depth << " depth):" << duration << std::endl;
+                std::cout << "bestmove:" << Move2String(search.best_move()) 
+                          << ", score:" << search.best_score() << std::endl;
+            }
+            else if (token == "best")
+            {
+                // Probably the best strategy for the current engine when it comes to both depth and time.
+                // Firstly, use default search condition
                 SearchCondition sc;
                 Search search(position);
                 clock_t beg, end;
@@ -53,19 +68,18 @@ void Engine()
                 search.Start(sc);
                 end = clock();
                 duration = (double)(end - beg) / CLOCKS_PER_SEC;
-                std::cout << "time cost (6 depth):" << duration << std::endl;
+                std::cout << "time cost (8 depth):" << duration << std::endl;
 
-                // research with extra 2 depth if time consumption less than 0.4 second
-                // and set time cost limit to 10s
+                // Second, re-search with extra 2 depth if time consumption less than 0.4s, and set time cost limit to 10s
                 if (duration < 0.4)
                 {
-                    sc.depth = 8;
+                    sc.depth = 10;
                     sc.time = 10000;
                     beg = clock();
                     search.Start(sc);
                     end = clock();
                     duration = (double)(end - beg) / CLOCKS_PER_SEC;
-                    std::cout << "time cost (8 depth):" << duration << std::endl;
+                    std::cout << "time cost (10 depth):" << duration << std::endl;
                 }
 
                 std::cout << "bestmove:" << Move2String(search.best_move()) 

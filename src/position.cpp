@@ -44,6 +44,18 @@ void Position::UndoMove(const UndoInfo& undoInfo)
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
 }
 
+void Position::MakeNULLMove()
+{
+    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
+    key_ ^= Zobrist::BlackToMoveZobrist();
+}
+
+void Position::UndoNULLMove()
+{
+    side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
+    key_ ^= Zobrist::BlackToMoveZobrist();
+}
+
 void Position::SetPosition(const std::string& fen)
 {
     std::memset(by_type_bb_, 0, sizeof(Bitboard) * NUM(PieceType::PIECE_TYPE_NUM));
