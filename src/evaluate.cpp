@@ -1,8 +1,17 @@
 #include "evaluate.h"
 
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+#include "pikafish_nnue_adapter/evaluate.h"
+#endif
 
 Value Evaluate::Eval(const Position& position)
 {
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    auto val = Stockfish::Eval::evaluate(*position.sp_, nullptr);
+    return val;
+#endif
+
     static_assert(NUM(PieceType::PAWN) == 0 && NUM(PieceType::KING) == 6, "piece type value changed");
 
     Value score = 0;

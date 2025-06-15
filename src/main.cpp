@@ -4,8 +4,20 @@
 #include "search.h"
 #include "magic.h"
 
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+#include "pikafish_nnue_adapter/bitboard.h"
+#include "pikafish_nnue_adapter/position.h"
+#include "pikafish_nnue_adapter/uci.h"
+#endif
+
 void Engine()
 {
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    Stockfish::Bitboards::init();
+    Stockfish::Eval::NNUE::init();
+#endif
+
     std::cout << "***** growfish *****" << std::endl;
 
     double duration;

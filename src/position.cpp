@@ -6,6 +6,11 @@
 #include "bitboard.h"
 #include "magic.h"
 
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+#include "pikafish_nnue_adapter/uci.h"
+#endif
+
+
 void Position::MakeMove(Move move, UndoInfo& undoInfo)
 {
     auto from = MoveFrom(move);
@@ -23,6 +28,11 @@ void Position::MakeMove(Move move, UndoInfo& undoInfo)
 
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
     key_ ^= Zobrist::BlackToMoveZobrist();
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    Stockfish::Move stockfishMove = static_cast<Stockfish::Move>((from << 7) | to);
+    sp_->do_move(stockfishMove);
+#endif
 }
 
 void Position::UndoMove(const UndoInfo& undoInfo)
@@ -42,22 +52,41 @@ void Position::UndoMove(const UndoInfo& undoInfo)
 
     key_ ^= Zobrist::BlackToMoveZobrist();
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    Stockfish::Move stockfishMove = static_cast<Stockfish::Move>((from << 7) | to);
+    sp_->undo_move(stockfishMove);
+#endif
 }
 
 void Position::MakeNULLMove()
 {
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
     key_ ^= Zobrist::BlackToMoveZobrist();
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    sp_->do_null_move();
+#endif
 }
 
 void Position::UndoNULLMove()
 {
     side_to_move_ = (side_to_move_ == Color::BLACK ? Color::RED : Color::BLACK);
     key_ ^= Zobrist::BlackToMoveZobrist();
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    sp_->undo_null_move();
+#endif
 }
 
 void Position::SetPosition(const std::string& fen)
 {
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    sp_ = std::make_shared<Stockfish::Position>();
+    Stockfish::UCI::position(fen, *sp_);
+#endif
+
     std::memset(by_type_bb_, 0, sizeof(Bitboard) * NUM(PieceType::PIECE_TYPE_NUM));
     std::memset(by_color_bb_, 0, sizeof(Bitboard) * NUM(Color::COLOR_NUM));
     std::memset(piece_count_, 0, sizeof(int) * NUM(Piece::PIECE_NUM));
@@ -123,6 +152,7 @@ void Position::SetPosition(const std::string& fen)
             past_positions_.insert(key_);
         }
     }
+
 };
 
 std::string Position::GenerateFen() const
