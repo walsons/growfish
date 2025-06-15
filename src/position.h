@@ -11,6 +11,10 @@
 #include "function.h"
 #include "zobrist.h"
 
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+#include "pikafish_nnue_adapter/position.h"
+#endif
+
 const std::string kStartPos = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
 
 class Board
@@ -107,6 +111,11 @@ private:
     Bitboard by_type_bb_[NUM(PieceType::PIECE_TYPE_NUM)];
     Bitboard by_color_bb_[NUM(Color::COLOR_NUM)];
     int piece_count_[NUM(Piece::PIECE_NUM)];
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+public:
+    std::shared_ptr<Stockfish::Position> sp_;
+#endif
 };
 
 #endif

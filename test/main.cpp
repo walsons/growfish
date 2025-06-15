@@ -341,6 +341,12 @@ void Merge(const std::vector<std::string> &files)
 
 int main(int argc, char* argv[])
 {
+
+#ifndef DISABLE_PIKAFISH_NNUE_ADAPTER
+    Stockfish::Bitboards::init();
+    Stockfish::Eval::NNUE::init();
+#endif
+
     if (argc == 1)
     {
         Test();
